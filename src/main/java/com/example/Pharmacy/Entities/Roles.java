@@ -1,4 +1,4 @@
-package Entities;
+package com.example.Pharmacy.Entities;
 
 import jakarta.persistence.*;
 
