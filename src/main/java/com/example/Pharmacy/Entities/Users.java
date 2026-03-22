@@ -2,6 +2,8 @@ package com.example.Pharmacy.Entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import com.example.Pharmacy.Entities.Roles;
 
@@ -11,15 +13,19 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
+@Getter
+@Setter
 public class Users {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private int user_id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true, name = "user_name")
     private String user_name;
 
+    @JsonIgnore
     private String password;
 
     @CreationTimestamp
@@ -27,10 +33,10 @@ public class Users {
 
     @ManyToOne
     @JoinColumn(name = "role_id")
-    private Roles role;
+    private Roles roles;
 
     @OneToOne(mappedBy = "users")
-    private Carts cart;
+    private Carts carts;
 
     @OneToMany(mappedBy = "users")
     @JsonIgnore

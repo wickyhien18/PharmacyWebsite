@@ -2,6 +2,8 @@ package com.example.Pharmacy.Entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -9,15 +11,19 @@ import java.util.List;
 
 @Entity
 @Table(name = "medicines")
+@Getter
+@Setter
 public class Medicines {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "medicine_id")
     private int medicine_id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "medicine_name")
     private String medicine_name;
 
+    @Column(name = "medicine_image")
     private String medicine_image;
     private String description;
     private float price;
@@ -25,7 +31,7 @@ public class Medicines {
 
     @ManyToOne
     @JoinColumn(name = "manufacturer_id")
-    private Manufacturers manufacturer;
+    private Manufacturers manufacturers;
 
     @OneToMany(mappedBy = "medicines")
     @JsonIgnore
