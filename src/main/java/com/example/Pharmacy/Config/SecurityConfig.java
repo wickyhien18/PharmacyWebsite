@@ -16,6 +16,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->  auth
                         .requestMatchers(HttpMethod.GET,"/roles/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/users/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/medicines/**").permitAll()
                         .anyRequest().authenticated());
         return http.build();
     }
