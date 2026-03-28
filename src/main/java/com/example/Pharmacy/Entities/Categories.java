@@ -24,5 +24,5 @@ public class Categories {
 
     @OneToMany(mappedBy = "categories")
     @JsonIgnore
-    private List<MedicineCategories> medicineCategories;
+    private List<Medicines> medicines;
 }

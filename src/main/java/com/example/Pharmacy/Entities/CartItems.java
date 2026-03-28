@@ -10,16 +10,16 @@ import lombok.Setter;
 @Setter
 public class CartItems {
 
-    @EmbeddedId
-    private CartItemId cartItemId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "Id")
+    private int Id;
 
     @ManyToOne
-    @MapsId("cart_id")
     @JoinColumn(name = "cart_id")
     private Carts carts;
 
     @ManyToOne
-    @MapsId("medicine_id")
     @JoinColumn(name = "medicine_id")
     private Medicines medicines;
 

@@ -11,8 +11,10 @@ import lombok.Setter;
 @Setter
 public class OrderItems {
 
-    @EmbeddedId
-    private OrderItemId orderItemId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "Id")
+    private int Id;
 
     private int quantity;
     private float price;

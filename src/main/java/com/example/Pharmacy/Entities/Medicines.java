@@ -33,9 +33,9 @@ public class Medicines {
     @JoinColumn(name = "manufacturer_id")
     private Manufacturers manufacturers;
 
-    @OneToMany(mappedBy = "medicines")
-    @JsonIgnore
-    private List<MedicineCategories> medicineCategories;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Categories categories;
 
     @CreationTimestamp
     private LocalDateTime created_at;
