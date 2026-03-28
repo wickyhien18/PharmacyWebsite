@@ -18,7 +18,10 @@ public class Payments {
     @Column(name = "payment_id")
     private int payment_id;
 
-    private float amoint;
+    @Column(name = "payment_method")
+    private String payment_method;
+
+    private float amount;
     private String status;
 
     @CreationTimestamp

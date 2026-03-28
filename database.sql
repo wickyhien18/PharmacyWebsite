@@ -58,7 +58,7 @@ CREATE TABLE `carts` (
 )
 
 CREATE TABLE `cart_item` (
-  `Id` int NOT NULL,
+  `Id` int NOT NULL AUTO_INCREMENT,
   `cart_id` int DEFAULT NULL,
   `medicine_id` int DEFAULT NULL,
   `quantity` int DEFAULT NULL,
@@ -81,7 +81,7 @@ CREATE TABLE `orders` (
 )
 
 CREATE TABLE `order_item` (
-  `Id` int NOT NULL,
+  `Id` int NOT NULL AUTO_INCREMENT,
   `order_id` int DEFAULT NULL,
   `medicine_id` int DEFAULT NULL,
   `price` float DEFAULT NULL,
@@ -100,7 +100,6 @@ CREATE TABLE `payments` (
   `payment_method` varchar(20) DEFAULT NULL,
   `status` varchar(255) DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `amoint` float NOT NULL,
   PRIMARY KEY (`payment_id`),
   KEY `fk_payment_order` (`order_id`),
   CONSTRAINT `fk_payment_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE
