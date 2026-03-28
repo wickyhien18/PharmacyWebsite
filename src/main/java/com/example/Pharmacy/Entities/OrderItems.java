@@ -20,12 +20,10 @@ public class OrderItems {
     private float price;
 
     @ManyToOne
-    @MapsId("order_id")
     @JoinColumn(name = "order_id")
     private Orders orders;
 
     @ManyToOne
-    @MapsId("medicine_id")
     @JoinColumn(name = "medicine_id")
     private Medicines medicines;
 }
