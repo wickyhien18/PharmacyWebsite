@@ -17,6 +17,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/roles/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/users/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/medicines/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/categories/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated());
         return http.build();
     }

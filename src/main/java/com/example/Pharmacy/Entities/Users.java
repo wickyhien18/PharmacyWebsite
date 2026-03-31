@@ -36,6 +36,7 @@ public class Users {
     private Roles roles;
 
     @OneToOne(mappedBy = "users")
+    @JsonIgnore
     private Carts carts;
 
     @OneToMany(mappedBy = "users")
