@@ -2,6 +2,7 @@ package com.example.Pharmacy.Controllers;
 
 import com.example.Pharmacy.Entities.Roles;
 import com.example.Pharmacy.Repositories.RoleRepository;
+import com.example.Pharmacy.Services.RoleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +16,12 @@ import java.util.List;
 public class RoleController {
 
     @Autowired
-    private RoleRepository roleRepository;
+    private RoleService roleService;
 
     @GetMapping
     @Operation(summary = "Lấy danh sách vai trò")
     public List<Roles> getAllRoles() {
-        return roleRepository.findAll();
+        return roleService.getAll();
     }
 
 }
