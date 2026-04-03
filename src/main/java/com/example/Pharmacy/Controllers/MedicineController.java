@@ -5,9 +5,12 @@ import com.example.Pharmacy.Services.MedicineService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/medicines")
@@ -25,8 +28,15 @@ public class MedicineController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Lấy thông tin thuốc theo mã")
-    public Medicines getById(@PathVariable Integer id) {
-        return medicineService.getById(id);
+    public ResponseEntity<Medicines> getById(@PathVariable Integer id) {
+        System.out.println("=== API /api/medicines/" + id + " được gọi ===");
+        Medicines medicines = medicineService.getById(id);
+        if (medicines != null) {
+            System.out.println("Tìm thấy: ");
+            return ResponseEntity.ok(medicines);
+        }
+        System.out.println("Không tìm thấy ID: " + id);
+        return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/search")
