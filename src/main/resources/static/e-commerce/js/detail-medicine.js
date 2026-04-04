@@ -1,77 +1,57 @@
-const path = window.location.pathname;
-const medicineId = path.split('/').pop();
+let url = 'http://localhost:8080/medicines'
 
-function getMedicineImage(imageUrl) {
-    if (imageUrl && imageUrl.trim() !== '') {
-        return imageUrl;
-    }
-    // Ảnh mặc định khi không có đường dẫn
-    return '/e-commerce/images/product_07_large.png';
-}
+$(document).ready(function() {
+    getMedicines();
+});
 
-// Hàm format giá tiền
-function formatPrice(price) {
-    if (!price) return '0 ₫';
-    return price.toLocaleString('vi-VN') + ' ₫';
-}
+function getMedicines() {
+    $.ajax({
+        url: url + '/' + '1',
+        method: 'GET',
+        error: function (e) {
 
-function displayMedicine(medicine) {
-    const container = document.getElementById('medicine-detail');
+        },
+        success: function (res) {
+            let table = '';
+            table += '<div class="col-md-5 mr-auto">';
+            table += '<div class="border text-center">';
+            table += '<img src="/e-commerce/images/product_07_large.png" alt="Image" class="img-fluid p-5">';
+            table += '</div>';
+            table += '</div>';
+            table += '<div class="col-md-6">';
+            table += '<h2 class="text-black">' + res.medicines_name + '</h2>';
+            table += '<p>' + res.description+ '</p>';
+            table += '<p><strong class="text-primary h4">' + res.price + '</strong></p>';
+            table += '<div class="mb-5"> ' +
+                '<div class="input-group mb-3" style="max-width: 220px;">\n' +
+                '   <div class="input-group-prepend">\n' +
+                '       <button class="btn btn-outline-primary js-btn-minus" type="button">&minus;</button>\n' +
+                '    </div>\n' +
+                '    <input type="text" class="form-control text-center" value="1" placeholder="" aria-label="Example text with button addon" aria-describedby="button-addon1">\n' +
+                '    <div class="input-group-append">\n' +
+                '       <button class="btn btn-outline-primary js-btn-plus" type="button">&plus;</button>\n' +
+                '    </div>\n' +
+                '</div>\n'
+                '</div>\n';
+            table += '<p><a href="cart.html" class="buy-now btn btn-sm height-auto px-4 py-3 btn-primary">Add To Cart</a></p>\n' +
+                '            <div class="mt-5">\n' +
+                '              <ul class="nav nav-pills mb-3 custom-pill" id="pills-tab" role="tablist">\n' +
+                '                <li class="nav-item">\n' +
+                '                  <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#pills-home" role="tab"\n' +
+                '                    aria-controls="pills-home" aria-selected="true">Ordering Information</a>\n' +
+                '                </li>\n' +
+                '                <li class="nav-item">\n' +
+                '                  <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-profile" role="tab"\n' +
+                '                    aria-controls="pills-profile" aria-selected="false">Specifications</a>\n' +
+                '                </li>\n' +
+                '            \n' +
+                '              </ul>\n' +
 
-    if (!medicine) {
-        container.innerHTML = '<p class="error">Không tìm thấy thông tin thuốc</p>';
-        return;
-    }
-
-    const imageUrl = getMedicineImage(medicine.medicineImage);
-
-    container.innerHTML = `
-            <div class="col-md-5 mr-auto">
-                <div class="border text-center">
-                <img src="${imageUrl}" alt="${medicine.medicineName}" class="img-fluid p-5" onerror="this.src='/e-commerce/images/product_07_large.png'">
-                </div>
-            </div>
-            
-            <div class="col-md-6">
-            <h2 class="text-black">${medicine.medicineName}</h2>
-            <p>${medicine.description || 'Chưa có mô tả'}</p>
-
-            <p><strong class="text-primary h4">${formatPrice(medicine.price)}</strong></p>
-
-            <div class="mb-5">
-              <div class="input-group mb-3" style="max-width: 220px;">
-                <div class="input-group-prepend">
-                  <button class="btn btn-outline-primary js-btn-minus" type="button">&minus;</button>
-                </div>
-                <input type="text" class="form-control text-center" value="1" placeholder=""
-                  aria-label="Example text with button addon" aria-describedby="button-addon1">
-                <div class="input-group-append">
-                  <button class="btn btn-outline-primary js-btn-plus" type="button">&plus;</button>
-                </div>
-              </div>
-    
-            </div>
-    `;
-}
-
-// Gọi API lấy dữ liệu
-async function loadMedicineDetail() {
-    try {
-        const response = await fetch(`/medicines/${medicineId}`);
-
-        if (response.ok) {
-            const medicine = await response.json();
-            displayMedicine(medicine);
-        } else if (response.status === 404) {
-            document.getElementById('medicine-detail').innerHTML = '<p class="error">Không tìm thấy thuốc</p>';
-        } else {
-            document.getElementById('medicine-detail').innerHTML = '<p class="error">Lỗi tải dữ liệu</p>';
+                '            </div>\n' +
+                '\n' +
+                '    \n' +
+                '          </div>';
+            document.getElementById('medicine-detail').innerHTML = table;
         }
-    } catch (error) {
-        console.error('Lỗi:', error);
-        document.getElementById('medicine-detail').innerHTML = '<p class="error">Lỗi kết nối server</p>';
-    }
-}
-
-// Chạy khi trang load xong
-document.addEventListener('DOMContentLoaded', loadMedicineDetail);
+    })
+};
