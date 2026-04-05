@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/medicines")
+@RequestMapping("/api/medicines")
 @Tag(name = "Medicines API", description = "Quản lý danh sách thuốc")
 public class MedicineController {
 
@@ -29,7 +29,6 @@ public class MedicineController {
     @GetMapping("/{id}")
     @Operation(summary = "Lấy thông tin thuốc theo mã")
     public ResponseEntity<Medicines> getById(@PathVariable Integer id) {
-        System.out.println("=== API /api/medicines/" + id + " được gọi ===");
         Medicines medicines = medicineService.getById(id);
         if (medicines != null) {
             System.out.println("Tìm thấy: ");

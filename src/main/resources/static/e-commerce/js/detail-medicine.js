@@ -1,4 +1,4 @@
-let url = 'http://localhost:8080/medicines'
+apiUrl = 'http://localhost:8080/api/medicines';
 
 $(document).ready(function() {
     getMedicines();
@@ -6,20 +6,35 @@ $(document).ready(function() {
 
 function getMedicines() {
     $.ajax({
-        url: url + '/' + '1',
+        url: apiUrl + '/1',
         method: 'GET',
-        error: function (e) {
+        dataType: 'json',
+        error: function(xhr, status, error) {
+            console.log("XHR Status:", xhr.status);
+            console.log("Error:", error);
+            console.log("Response:", xhr.responseText);
 
+            if (xhr.status === 0) {
+                showError("Không thể kết nối server. Kiểm tra server đã chạy?");
+            } else if (xhr.status === 404) {
+                showError(`Không tìm thấy thuốc (404)`);
+            } else if (xhr.status === 403) {
+                showError(`Không có quyền truy cập (403)`);
+            } else if (xhr.status === 500) {
+                showError(`Lỗi server (500)`);
+            } else {
+                showError(`Lỗi ${xhr.status}: ${xhr.statusText}`);
+            }
         },
         success: function (res) {
             let table = '';
             table += '<div class="col-md-5 mr-auto">';
             table += '<div class="border text-center">';
-            table += '<img src="/e-commerce/images/product_07_large.png" alt="Image" class="img-fluid p-5">';
+            table += '<img src="../e-commerce/images/product_07_large.png" alt="Image" class="img-fluid p-5">';
             table += '</div>';
             table += '</div>';
             table += '<div class="col-md-6">';
-            table += '<h2 class="text-black">' + res.medicines_name + '</h2>';
+            table += '<h2 class="text-black">' + res.medicine_name + '</h2>';
             table += '<p>' + res.description+ '</p>';
             table += '<p><strong class="text-primary h4">' + res.price + '</strong></p>';
             table += '<div class="mb-5"> ' +
