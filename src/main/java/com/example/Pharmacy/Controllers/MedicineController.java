@@ -1,6 +1,8 @@
 package com.example.Pharmacy.Controllers;
 
 import com.example.Pharmacy.Entities.Medicines;
+import com.example.Pharmacy.Exceptions.BadRequestException;
+import com.example.Pharmacy.Exceptions.ResourceNotFoundException;
 import com.example.Pharmacy.Services.MedicineService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,27 +22,45 @@ public class MedicineController {
     @Autowired
     private MedicineService medicineService;
 
-    @GetMapping("/")
+    @GetMapping
     @Operation(summary = "Lấy danh sách thuốc")
-    public List<Medicines> getAll() {
-        return medicineService.getAll();
+    public ResponseEntity<List<Medicines>> getAll() {
+        List<Medicines> medicines = medicineService.getAll();
+        return ResponseEntity.ok(medicines);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Lấy thông tin thuốc theo mã")
     public ResponseEntity<Medicines> getById(@PathVariable Integer id) {
-        Medicines medicines = medicineService.getById(id);
-        if (medicines != null) {
-            System.out.println("Tìm thấy: ");
-            return ResponseEntity.ok(medicines);
+        if (id == null || id <= 0) {
+            throw new BadRequestException("ID không hợp lệ: " + id);
         }
-        System.out.println("Không tìm thấy ID: " + id);
-        return ResponseEntity.notFound().build();
+
+        Medicines medicines = medicineService.getById(id);
+
+        if (medicines == null) {
+            throw new ResourceNotFoundException("Không tìm thấy thuốc tương ứng với ID: " + id);
+        }
+        return  ResponseEntity.ok(medicines);
     }
 
     @GetMapping("/search")
     @Operation(summary = "Lấy danh sách thuốc có chứa tên tìm kiếm")
-    public List<Medicines> getByName(@RequestParam (required = false) String name) {
-        return medicineService.getByName(name);
+    public ResponseEntity<List<Medicines>> getByName(@RequestParam (required = false) String name) {
+        List<Medicines> medicines =  medicineService.getByName(name);
+
+        if (medicines == null) {
+            throw new ResourceNotFoundException("Không tìm thấy thông tin thuốc tương ứng với tên thuốc: " + name);
+        }
+
+        return ResponseEntity.ok(medicines);
     }
+//
+//    @PostMapping
+//    @Operation(summary = "Thêm thông tin thuốc")
+//    public ResponseEntity<Medicines> createMedicine(@RequestBody Medicines medicines) {
+//        if (medicines.getMedicine_name().trim().isEmpty() || medicines.ge) {
+//            throw new IllegalAccessException("Tên thuốc không được để ")
+//        }
+//    }
 }
