@@ -16,4 +16,19 @@ public class RoleService {
     public List<Roles> getAll() {
         return roleRepository.findAll();
     }
+
+    public Roles insert(Roles roles) {
+        return roleRepository.save(roles);
+    }
+
+    public Roles update(Integer id, Roles roles) {
+        Roles role1 = roleRepository.findByIdDetail(id);
+        role1.setRole_name(roles.getRole_name());
+        role1.setDescription(roles.getDescription());
+        return roleRepository.save(role1);
+    }
+
+    public void delete(Integer id) {
+        roleRepository.deleteById(Long.valueOf(id));
+    }
 }
