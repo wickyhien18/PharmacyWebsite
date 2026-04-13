@@ -28,6 +28,7 @@ public class PaymentService {
         return paymentRepository.save(Payments1);
     }
 
+
     public void delete(Integer id) {
         paymentRepository.deleteById(id.longValue());
     }
