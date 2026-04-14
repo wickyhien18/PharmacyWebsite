@@ -21,7 +21,7 @@ public class Orders {
     @Column(name = "order_id")
     private int order_id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private Users users;
 

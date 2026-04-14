@@ -19,7 +19,7 @@ public class CartItems {
     @JoinColumn(name = "cart_id")
     private Carts carts;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medicine_id")
     private Medicines medicines;
 

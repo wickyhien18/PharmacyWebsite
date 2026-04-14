@@ -61,7 +61,7 @@ public class MedicineController {
 
     @PostMapping
     @Operation(summary = "Thêm thông tin thuốc")
-    public ResponseEntity<Medicines> createMedicine(@Valid @RequestBody Medicines medicines) {
+    public ResponseEntity<Medicines> createMedicine(@RequestBody @Valid Medicines medicines) {
         if (medicines.getPrice() <= 0) {
             throw new IllegalAccessException("Giá thuốc không được thấp hơn  hoặc bằng 0");
         }
@@ -72,7 +72,7 @@ public class MedicineController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Sửa thông tin thuốc")
-    public ResponseEntity<Medicines> updateMedicine(@PathVariable Integer id ,@Valid @RequestBody Medicines medicines) {
+    public ResponseEntity<Medicines> updateMedicine(@PathVariable Integer id ,@RequestBody @Valid Medicines medicines) {
         Medicines exist = medicineService.getById(id);
         if (exist == null) {
             throw new ResourceNotFoundException("Không tìm thấy thông tin thuốc để sửa");

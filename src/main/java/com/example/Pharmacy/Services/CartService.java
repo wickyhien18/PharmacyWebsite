@@ -3,9 +3,11 @@ package com.example.Pharmacy.Services;
 import com.example.Pharmacy.Entities.Carts;
 import com.example.Pharmacy.Repositories.CartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class CartService {
 
     @Autowired

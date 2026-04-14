@@ -3,9 +3,11 @@ package com.example.Pharmacy.Services;
 import com.example.Pharmacy.Entities.Categories;
 import com.example.Pharmacy.Repositories.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class CategoryService {
     
     @Autowired
