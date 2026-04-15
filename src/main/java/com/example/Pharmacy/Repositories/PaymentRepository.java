@@ -11,6 +11,6 @@ public interface PaymentRepository extends JpaRepository<Payments,Long> {
     @Query(value = "SELECT * FROM payments WHERE payment_id = :id", nativeQuery = true)
     Payments findByIdDetail(@Param("id") Integer id);
 
-    @Query(value = " select * from payments join orders on payments.order_id = orders.order_id", nativeQuery = true)
+    @Query("SELECT p,o from Payments p join p.orders o")
     List<Payments> getAll();
 }
