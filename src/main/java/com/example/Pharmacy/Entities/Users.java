@@ -28,12 +28,15 @@ public class Users {
     @Column(nullable = false, unique = true, name = "user_name")
     private String user_name;
 
-    @JsonIgnore
     private String password;
 
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime created_at;
+
+    @OneToOne(mappedBy = "users")
+    @JsonIgnore
+    private RefreshToken refreshToken;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id")
