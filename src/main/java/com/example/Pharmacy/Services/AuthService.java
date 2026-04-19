@@ -24,7 +24,7 @@ public class AuthService {
     // ĐĂNG KÝ
     public String register(RegisterRequest req) {
 
-        if (usersRepository.existsByUser_name(req.getUserName()))
+        if (usersRepository.existsByUserName(req.getUserName()))
             return "Username đã tồn tại";
 
         Roles role = rolesRepository
@@ -32,7 +32,7 @@ public class AuthService {
                 .orElseThrow();
 
         Users user = new Users();
-        user.setUsername(req.getUserName());
+        user.setUserName(req.getUserName());
         user.setPassword(passwordEncoder.encode(req.getPassword()));
         user.setRoles(role);
 
