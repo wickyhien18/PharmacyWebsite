@@ -23,7 +23,7 @@ public class RoleService {
 
     public Roles update(Integer id, Roles roles) {
         Roles role1 = roleRepository.findByIdDetail(id);
-        role1.setRolename(roles.getRolename());
+        role1.setRoleName(roles.getRoleName());
         role1.setDescription(roles.getDescription());
         return roleRepository.save(role1);
     }
