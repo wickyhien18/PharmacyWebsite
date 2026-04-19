@@ -26,7 +26,7 @@ public class Users {
     private int user_id;
 
     @Column(nullable = false, unique = true, name = "user_name")
-    private String user_name;
+    private String username;
 
     private String password;
 

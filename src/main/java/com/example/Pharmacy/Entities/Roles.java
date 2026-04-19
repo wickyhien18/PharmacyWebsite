@@ -21,7 +21,7 @@ public class Roles {
     private int role_id;
 
     @Column(name = "role_name", nullable = false)
-    private String role_name;
+    private String rolename;
 
     @Column(name = "description")
     private String description;
