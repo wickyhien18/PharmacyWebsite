@@ -45,11 +45,11 @@ public class AuthService {
         try {
             authManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            req.getUsername(), req.getPassword()));
+                            req.getUserName(), req.getPassword()));
         } catch (Exception e) {
             return "Sai username hoặc mật khẩu";
         }
 
-        return jwtService.generateToken(req.getUsername());
+        return jwtService.generateToken(req.getUserName());
     }
 }

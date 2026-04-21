@@ -11,6 +11,6 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<Users,Long> {
 
     Optional<Users> findByUserName(String userName);
-
-    boolean existsByUserName(String userName);
+    @Query("SELECT COUNT(u) > 0 FROM Users u WHERE u.userName = :userName")
+    boolean existsByUserName(@Param("userName") String userName);
 }
