@@ -1,6 +1,6 @@
 package com.example.Pharmacy.Config;
 
-import com.example.Pharmacy.Exceptions.JWTAuthFilter;
+import com.example.Pharmacy.Services.JWTAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
