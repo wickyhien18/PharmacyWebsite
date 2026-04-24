@@ -4,8 +4,6 @@ import com.example.Pharmacy.DTO.LoginRequest;
 import com.example.Pharmacy.DTO.RegisterRequest;
 import com.example.Pharmacy.Entities.Roles;
 import com.example.Pharmacy.Entities.Users;
-import com.example.Pharmacy.Repositories.RoleRepository;
-import com.example.Pharmacy.Repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,8 +13,8 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    private final UserRepository usersRepository;
-    private final RoleRepository rolesRepository;
+    private final UserService userService;
+    private final RoleService roleService;
     private final PasswordEncoder passwordEncoder;
     private final JWTService      jwtService;
     private final AuthenticationManager authManager;
@@ -24,10 +22,10 @@ public class AuthService {
     // ĐĂNG KÝ
     public String register(RegisterRequest req) {
 
-        if (usersRepository.existsByUserName(req.getUserName()))
+        if (userService.existByUserName(req.getUserName()))
             return "Username đã tồn tại";
 
-        Roles role = rolesRepository
+        Roles role = roleService
                 .findByRoleName("CUSTOMER")
                 .orElseThrow();
 
@@ -36,7 +34,7 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(req.getPassword()));
         user.setRoles(role);
 
-        usersRepository.save(user);
+        userService.insert(user);
         return "Đăng ký thành công";
     }
 
