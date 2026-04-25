@@ -74,6 +74,9 @@ public class JWTService {
                     .parseSignedClaims(token)
                     .getPayload();
 
+            System.out.println("Token type: " + claims.get("type", String.class));
+            System.out.println("Token expiry: " + claims.getExpiration());
+
             String type = claims.get("type", String.class);
             return "access".equals(type) && !claims.getExpiration().before(new Date(System.currentTimeMillis()));
         } catch (ExpiredJwtException e) {

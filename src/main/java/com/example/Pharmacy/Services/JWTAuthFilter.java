@@ -51,7 +51,8 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 
         // Token không hợp lệ → bỏ qua
         if (!jwtService.validateAccessToken(token)) {
-            System.out.println("Token không phải access token hoặc không hợp lệ");
+            System.out.println("❌ Token không phải access token hoặc không hợp lệ");
+            System.out.println("Token bị lỗi: " + token);
             chain.doFilter(request, response);
             return;
         }
