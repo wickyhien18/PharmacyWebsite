@@ -37,7 +37,7 @@ public class Users {
     @JsonIgnore
     private RefreshToken refreshToken;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")
     private Roles roles;
 

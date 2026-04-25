@@ -26,44 +26,31 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             FilterChain chain)
             throws ServletException, IOException {
 
-        // Log URI để debug
-        System.out.println("=== JWTAuthFilter ===");
-        System.out.println("Request URI: " + request.getRequestURI());
-
         // Lấy header Authorization
         String header = request.getHeader("Authorization");
-        System.out.println("Authorization header: " + (header != null ? header.substring(0, Math.min(header.length(), 50)) : "null"));
 
-        // Kiểm tra header
+        // Không có token → bỏ qua, tiếp tục
         if (header == null || !header.startsWith("Bearer ")) {
-            System.out.println("Không có token hoặc sai format, bỏ qua filter");
             chain.doFilter(request, response);
             return;
         }
 
         // Cắt bỏ "Bearer " lấy token
         String token = header.substring(7);
-        System.out.println("Token: " + (token.length() > 50 ? token.substring(0, 50) + "..." : token));
 
-        // Kiểm tra token hợp lệ
-        boolean isValid = jwtService.isValid(token);
-        System.out.println("Token hợp lệ: " + isValid);
-
-        if (!isValid) {
-            System.out.println("Token không hợp lệ, bỏ qua filter");
+        // Token không hợp lệ → bỏ qua
+        if (!jwtService.isValid(token)) {
             chain.doFilter(request, response);
             return;
         }
 
         // Lấy username từ token
         String username = jwtService.getUsername(token);
-        System.out.println("Username từ token: " + username);
 
-        // Load user details
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        System.out.println("User roles: " + userDetails.getAuthorities());
+        // Set authentication vào SecurityContext
+        UserDetails userDetails =
+                userDetailsService.loadUserByUsername(username);
 
-        // Set authentication
         UsernamePasswordAuthenticationToken auth =
                 new UsernamePasswordAuthenticationToken(
                         userDetails,
@@ -71,7 +58,6 @@ public class JWTAuthFilter extends OncePerRequestFilter {
                         userDetails.getAuthorities());
 
         SecurityContextHolder.getContext().setAuthentication(auth);
-        System.out.println("Đã set authentication thành công cho: " + username);
 
         chain.doFilter(request, response);
     }
