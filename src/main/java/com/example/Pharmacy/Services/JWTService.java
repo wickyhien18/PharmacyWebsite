@@ -17,16 +17,32 @@ public class JWTService {
     @Value("${app.jwt.secret}")
     private String secret;
 
-    @Value("${app.jwt.expiration}")
-    private long expiration;
+    @Value("${app.jwt.expiration.access}")
+    private Long accessExpiration;
 
-    // Tạo token từ username
-    public String generateToken(String username) {
+    @Value("${app.jwt.expiration.refresh}")
+    private Long refreshExpiration;
+
+    // Tạo access token từ username
+    public String generateAccessToken(String username) {
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(
-                        System.currentTimeMillis() + expiration))
+                        System.currentTimeMillis() + accessExpiration))
+                .claim("type","access")
+                .signWith(getKey())
+                .compact();
+    }
+
+    //Tạo refresh token từ username
+    public String generateRefreshToken(String username) {
+        return Jwts.builder()
+                .subject(username)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(
+                        System.currentTimeMillis() + refreshExpiration))
+                .claim("type","refresh")
                 .signWith(getKey())
                 .compact();
     }
@@ -49,16 +65,17 @@ public class JWTService {
         }
     }
 
-    // Kiểm tra token còn hạn không
-    public boolean isValid(String token) {
+    // Kiểm tra access token hợp lệ
+    public boolean validateAccessToken(String token) {
         try {
-            Jwts.parser()
+            Claims claims = Jwts.parser()
                     .verifyWith(getKey())
                     .build()
-                    .parseSignedClaims(token);
+                    .parseSignedClaims(token)
+                    .getPayload();
 
-            System.out.println("Token hợp lệ");
-            return true;
+            String type = claims.get("type", String.class);
+            return "access".equals(type) && !claims.getExpiration().before(new Date(System.currentTimeMillis()));
         } catch (ExpiredJwtException e) {
             System.out.println("Token hết hạn: " + e.getMessage());
         } catch (JwtException e) {
@@ -67,6 +84,36 @@ public class JWTService {
             System.out.println("Lỗi khác: " + e.getMessage());
         }
         return false;
+    }
+
+    // Kiểm tra refresh token hợp lệ
+    public boolean validateRefreshToken(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(getKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+
+            String type = claims.get("type", String.class);
+            return "refresh".equals(type) && !claims.getExpiration().before(new Date(System.currentTimeMillis()));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    // Lấy loại token (access/refresh)
+    public String getTokenType(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(getKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+            return claims.get("type", String.class);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private SecretKey getKey() {

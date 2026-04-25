@@ -24,7 +24,7 @@ public class RefreshToken {
     private String token;
 
     @OneToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "userId")
     private Users users;
 
     private LocalDateTime expire_at;
@@ -32,4 +32,8 @@ public class RefreshToken {
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime created_at;
+
+    public boolean isExpired() {
+        return LocalDateTime.now().isAfter(expire_at);
+    }
 }

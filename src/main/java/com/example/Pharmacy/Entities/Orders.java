@@ -22,7 +22,7 @@ public class Orders {
     private int order_id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "userId")
     private Users users;
 
     private float total_price;

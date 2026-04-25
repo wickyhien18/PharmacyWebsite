@@ -21,7 +21,7 @@ public class Carts {
     private int cart_id;
 
     @OneToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "userId")
     private Users users;
 
     @CreationTimestamp

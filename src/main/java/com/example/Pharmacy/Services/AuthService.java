@@ -7,8 +7,12 @@ import com.example.Pharmacy.Entities.Users;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +22,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JWTService      jwtService;
     private final AuthenticationManager authManager;
+    private final RefreshTokenService refreshTokenService;
 
     // ĐĂNG KÝ
     public String register(RegisterRequest req) {
@@ -41,13 +46,40 @@ public class AuthService {
     // ĐĂNG NHẬP
     public String login(LoginRequest req) {
         try {
-            authManager.authenticate(
+            Authentication auth =  authManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             req.getUserName(), req.getPassword()));
+
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
+            Users users = userService.findByUserName(req.getUserName())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy User"));
+
+            String refreshToken = jwtService.generateRefreshToken(users.getUserName());
+
+            refreshTokenService.createRefreshToken(users.getUserId(), refreshToken);
+
+            return jwtService.generateAccessToken(users.getUserName());
         } catch (Exception e) {
             return "Sai username hoặc mật khẩu";
         }
-
-        return jwtService.generateToken(req.getUserName());
     }
+
+    // LÀM MỚI TOKEN
+    public String refreshToken(Map<String, String> request) {
+        String refreshToken = request.get("refreshToken");
+
+        // Lấy username từ token
+        String username = jwtService.getUsername(refreshToken);
+
+        // Tạo access token mới
+        String newAccessToken = jwtService.generateAccessToken(username);
+
+        // Gia hạn refresh token (tùy chọn)
+        refreshTokenService.extendExpiryDate(refreshToken);
+
+        return newAccessToken;
+    }
+
+
 }

@@ -6,12 +6,12 @@ CREATE TABLE `roles` (
 ) 
 
 CREATE TABLE `users` (
-  `user_id` int NOT NULL AUTO_INCREMENT,
+  `userId` int NOT NULL AUTO_INCREMENT,
   `user_name` varchar(255) NOT NULL,
   `password` varchar(255) DEFAULT NULL,
   `role_id` int DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`user_id`),
+  PRIMARY KEY (`userId`),
   UNIQUE KEY `uu_user_name` (`user_name`),
   KEY `fk_user_role` (`role_id`),
   CONSTRAINT `fk_user_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`) ON DELETE SET NULL
@@ -50,11 +50,11 @@ CREATE TABLE `medicines` (
 
 CREATE TABLE `carts` (
   `cart_id` int NOT NULL AUTO_INCREMENT,
-  `user_id` int DEFAULT NULL,
+  `userId` int DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`cart_id`),
-  KEY `fk_cart_user` (`user_id`),
-  CONSTRAINT `fk_cart_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
+  KEY `fk_cart_user` (`userId`),
+  CONSTRAINT `fk_cart_user` FOREIGN KEY (`userId`) REFERENCES `users` (`userId`) ON DELETE CASCADE
 )
 
 CREATE TABLE `cart_item` (
@@ -71,13 +71,13 @@ CREATE TABLE `cart_item` (
 
 CREATE TABLE `orders` (
   `order_id` int NOT NULL AUTO_INCREMENT,
-  `user_id` int DEFAULT NULL,
+  `userId` int DEFAULT NULL,
   `total_price` float NOT NULL,
   `status` varchar(255) DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`order_id`),
-  KEY `fk_order_user` (`user_id`),
-  CONSTRAINT `fk_order_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL
+  KEY `fk_order_user` (`userId`),
+  CONSTRAINT `fk_order_user` FOREIGN KEY (`userId`) REFERENCES `users` (`userId`) ON DELETE SET NULL
 )
 
 CREATE TABLE `order_item` (

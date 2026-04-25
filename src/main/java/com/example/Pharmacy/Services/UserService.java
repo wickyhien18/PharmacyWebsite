@@ -21,6 +21,10 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    public Users findByIdDetail(Integer id) {
+        return userRepository.findByIdDetail(id);
+    }
+
     public  boolean existByUserName(String name) {
         return userRepository.existsByUserName(name);
     }

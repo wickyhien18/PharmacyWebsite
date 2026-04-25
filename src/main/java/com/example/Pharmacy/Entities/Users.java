@@ -21,8 +21,8 @@ public class Users {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
-    private int user_id;
+    @Column(name = "userId")
+    private int userId;
 
     @Column(nullable = false, unique = true, name = "user_name")
     private String userName;
@@ -32,6 +32,11 @@ public class Users {
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime created_at;
+
+    @CreationTimestamp
+    private LocalDateTime last_activity;
+
+    private boolean is_active;
 
     @OneToOne(mappedBy = "users")
     @JsonIgnore
