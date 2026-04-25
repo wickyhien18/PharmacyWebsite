@@ -38,11 +38,7 @@ public class Users {
 
     private boolean is_active;
 
-    @OneToOne(mappedBy = "users")
-    @JsonIgnore
-    private RefreshToken refreshToken;
-
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id")
     private Roles roles;
 

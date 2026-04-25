@@ -40,32 +40,11 @@ public class AuthController {
     @Operation(summary = "Đăng nhập vào để nhận jwt token")
     public ResponseEntity<?> login(
             @RequestBody LoginRequest req) {
-        String token = authService.login(req);
 
-        System.out.println("=== ĐĂNG NHẬP ===");
+        System.out.println("=== LOGIN ===");
         System.out.println("Username: " + req.getUserName());
-        System.out.println("Password raw: " + req.getPassword());
 
-        if (token.startsWith("Sai"))
-            return ResponseEntity.status(401).body(token);
-
-        // Kiểm tra user có tồn tại không
-        Users user = userRepository.findByUserName(req.getUserName()).orElse(null);
-        if (user == null) {
-            System.out.println("❌ User không tồn tại: " + req.getUserName());
-            return ResponseEntity.status(401).body("Sai tên đăng nhập hoặc mật khẩu");
-        }
-
-        System.out.println("Password in DB: " + user.getPassword());
-
-        // Kiểm tra mật khẩu
-        boolean matches = passwordEncoder.matches(req.getPassword(), user.getPassword());
-        System.out.println("Password matches: " + matches);
-
-        if (!matches) {
-            System.out.println("❌ Mật khẩu không đúng");
-            return ResponseEntity.status(401).body("Sai tên đăng nhập hoặc mật khẩu");
-        }
+        String token = authService.login(req);
 
         return ResponseEntity.ok(token);
     }

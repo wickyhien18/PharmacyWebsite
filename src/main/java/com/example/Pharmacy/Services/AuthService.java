@@ -45,24 +45,29 @@ public class AuthService {
 
     // ĐĂNG NHẬP
     public String login(LoginRequest req) {
+        userService.findByUserName(req.getUserName())
+                .ifPresent(u ->
+                        refreshTokenService.deleteAllByUserId(u.getUserId()));
+
+        Authentication auth;
         try {
-            Authentication auth =  authManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            req.getUserName(), req.getPassword()));
-
-            SecurityContextHolder.getContext().setAuthentication(auth);
-
-            Users users = userService.findByUserName(req.getUserName())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy User"));
-
-            String refreshToken = jwtService.generateRefreshToken(users.getUserName());
-
-            refreshTokenService.createRefreshToken(users.getUserId(), refreshToken);
-
-            return jwtService.generateAccessToken(users.getUserName());
+            auth = authManager.authenticate(new UsernamePasswordAuthenticationToken(req.getUserName(), req.getPassword()));
         } catch (Exception e) {
             return "Sai username hoặc mật khẩu";
         }
+
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        Users users = userService.findByUserName(req.getUserName())
+                .orElseThrow(() ->
+                        new RuntimeException("Không tìm thấy User"));
+
+        String refreshToken = jwtService.generateRefreshToken(
+                users.getUserName());
+
+        refreshTokenService.createRefreshToken(
+                users.getUserId(), refreshToken);
+
+        return jwtService.generateAccessToken(users.getUserName());
     }
 
     // LÀM MỚI TOKEN

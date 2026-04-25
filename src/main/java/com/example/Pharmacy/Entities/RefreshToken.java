@@ -23,7 +23,7 @@ public class RefreshToken {
 
     private String token;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId")
     private Users users;
 

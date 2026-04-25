@@ -3,6 +3,8 @@ package com.example.Pharmacy.Services;
 import com.example.Pharmacy.Entities.RefreshToken;
 import com.example.Pharmacy.Entities.Users;
 import com.example.Pharmacy.Repositories.RefreshTokenRepository;
+import com.example.Pharmacy.Repositories.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,13 +13,14 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class RefreshTokenService {
 
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
 
     @Autowired
-    private UserService userService;
+    private UserRepository userRepository;
 
     @Autowired
     private JWTService jwtService;
@@ -26,9 +29,7 @@ public class RefreshTokenService {
     @Transactional
     public RefreshToken createRefreshToken(Integer userId, String token) {
 
-        refreshTokenRepository.deleteAllByUsers_UserId(userId);
-
-        Users user = userService.findByIdDetail(userId);
+        Users user = userRepository.getReferenceById(Long.valueOf(userId));
 
         RefreshToken refreshToken = RefreshToken.builder()
                 .token(token)
