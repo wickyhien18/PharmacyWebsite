@@ -1,6 +1,7 @@
 package com.example.Pharmacy.Controllers;
 
 import com.example.Pharmacy.DTO.LoginRequest;
+import com.example.Pharmacy.DTO.LoginResponse;
 import com.example.Pharmacy.DTO.RefreshTokenRequest;
 import com.example.Pharmacy.DTO.RegisterRequest;
 import com.example.Pharmacy.Entities.Users;
@@ -42,12 +43,13 @@ public class AuthController {
     public ResponseEntity<?> login(
             @RequestBody LoginRequest req) {
 
-        System.out.println("=== LOGIN ===");
-        System.out.println("Username: " + req.getUserName());
-
-        String token = authService.login(req);
-
-        return ResponseEntity.ok(token);
+        try {
+            LoginResponse response = authService.login(req);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(401)
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PostMapping("/refresh")

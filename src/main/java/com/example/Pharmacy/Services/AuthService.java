@@ -1,6 +1,7 @@
 package com.example.Pharmacy.Services;
 
 import com.example.Pharmacy.DTO.LoginRequest;
+import com.example.Pharmacy.DTO.LoginResponse;
 import com.example.Pharmacy.DTO.RefreshTokenRequest;
 import com.example.Pharmacy.DTO.RegisterRequest;
 import com.example.Pharmacy.Entities.Roles;
@@ -45,7 +46,7 @@ public class AuthService {
     }
 
     // ĐĂNG NHẬP
-    public String login(LoginRequest req) {
+    public LoginResponse login(LoginRequest req) {
         userService.findByUserName(req.getUserName())
                 .ifPresent(u ->
                         refreshTokenService.deleteAllByUserId(u.getUserId()));
@@ -54,7 +55,9 @@ public class AuthService {
         try {
             auth = authManager.authenticate(new UsernamePasswordAuthenticationToken(req.getUserName(), req.getPassword()));
         } catch (Exception e) {
-            return "Sai username hoặc mật khẩu";
+            return LoginResponse.builder()
+                    .accessToken("Sai mật khẩu hoặc sai tên đăng nhập")
+                    .build();
         }
 
         SecurityContextHolder.getContext().setAuthentication(auth);
@@ -62,13 +65,16 @@ public class AuthService {
                 .orElseThrow(() ->
                         new RuntimeException("Không tìm thấy User"));
 
-        String refreshToken = jwtService.generateRefreshToken(
-                users.getUserName());
+        String accessToken = jwtService.generateAccessToken(users.getUserName());
+        String refreshToken = jwtService.generateRefreshToken(users.getUserName());
 
         refreshTokenService.createRefreshToken(
                 users.getUserId(), refreshToken);
 
-        return jwtService.generateAccessToken(users.getUserName());
+        return LoginResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 
     // LÀM MỚI TOKEN
