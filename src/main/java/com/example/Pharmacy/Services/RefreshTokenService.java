@@ -25,8 +25,6 @@ public class RefreshTokenService {
     // Tạo refresh token mới
     @Transactional
     public RefreshToken createRefreshToken(Integer userId, String token) {
-        refreshTokenRepository.deleteAllByUsers_UserId(userId);
-
         Users user = userService.findByIdDetail(userId);
 
         RefreshToken refreshToken = RefreshToken.builder()

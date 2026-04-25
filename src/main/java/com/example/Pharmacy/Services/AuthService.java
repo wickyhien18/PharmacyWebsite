@@ -66,7 +66,9 @@ public class AuthService {
     }
 
     // LÀM MỚI TOKEN
-    public String refreshToken(String refreshToken) {
+    public String refreshToken(Map<String, String> request) {
+        String refreshToken = request.get("refreshToken");
+
         // Lấy username từ token
         String username = jwtService.getUsername(refreshToken);
 
