@@ -3,12 +3,15 @@ package com.example.Pharmacy.Controllers;
 import com.example.Pharmacy.DTO.LoginRequest;
 import com.example.Pharmacy.DTO.RegisterRequest;
 import com.example.Pharmacy.Services.AuthService;
+import org.hibernate.mapping.Map;
 import org.springframework.web.bind.annotation.RequestBody;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -30,6 +33,10 @@ public class AuthController {
         if (token.startsWith("Sai"))
             return ResponseEntity.status(401).body(token);
 
-        return ResponseEntity.ok(token);
+        HashMap<String, String> response = new HashMap<>();
+        response.put("accessToken", token);
+        response.put("tokenType", "Bearer");
+
+        return ResponseEntity.ok(response);
     }
 }

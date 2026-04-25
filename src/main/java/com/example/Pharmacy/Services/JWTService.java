@@ -1,6 +1,9 @@
 package com.example.Pharmacy.Services;
 
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,12 +33,20 @@ public class JWTService {
 
     // Lấy username từ token
     public String getUsername(String token) {
-        return Jwts.parser()
-                .verifyWith(getKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getSubject();
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(getKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+
+            String username = claims.getSubject();
+            System.out.println("Giải mã token thành công, username: " + username);
+            return username;
+        } catch (Exception e) {
+            System.out.println("Giải mã token thất bại: " + e.getMessage());
+            return null;
+        }
     }
 
     // Kiểm tra token còn hạn không
@@ -45,10 +56,17 @@ public class JWTService {
                     .verifyWith(getKey())
                     .build()
                     .parseSignedClaims(token);
+
+            System.out.println("Token hợp lệ");
             return true;
+        } catch (ExpiredJwtException e) {
+            System.out.println("Token hết hạn: " + e.getMessage());
+        } catch (JwtException e) {
+            System.out.println("Token không hợp lệ: " + e.getMessage());
         } catch (Exception e) {
-            return false;
+            System.out.println("Lỗi khác: " + e.getMessage());
         }
+        return false;
     }
 
     private SecretKey getKey() {

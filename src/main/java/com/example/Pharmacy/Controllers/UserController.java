@@ -1,11 +1,16 @@
 package com.example.Pharmacy.Controllers;
 
+import com.example.Pharmacy.DTO.UserProfile;
 import com.example.Pharmacy.Entities.Users;
-import com.example.Pharmacy.Repositories.UserRepository;
+import com.example.Pharmacy.Services.JWTService;
+import com.example.Pharmacy.Services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,11 +22,17 @@ import java.util.List;
 public class UserController {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @GetMapping
     @Operation(summary= "Lấy danh sách người dùng")
     public List<Users> getAllUsers() {
-        return userRepository.findAll();
+        return userService.getAll();
+    }
+
+    @GetMapping("/profile")
+    @Operation(summary = "Lấy thông tin người dùng đăng nhập dựa vào JWT token")
+    public ResponseEntity<?> getProfile() {
+        return ResponseEntity.ok(userService.getProfile());
     }
 }
