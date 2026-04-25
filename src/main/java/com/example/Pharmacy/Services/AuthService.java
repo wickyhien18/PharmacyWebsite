@@ -1,6 +1,7 @@
 package com.example.Pharmacy.Services;
 
 import com.example.Pharmacy.DTO.LoginRequest;
+import com.example.Pharmacy.DTO.RefreshTokenRequest;
 import com.example.Pharmacy.DTO.RegisterRequest;
 import com.example.Pharmacy.Entities.Roles;
 import com.example.Pharmacy.Entities.Users;
@@ -71,17 +72,15 @@ public class AuthService {
     }
 
     // LÀM MỚI TOKEN
-    public String refreshToken(Map<String, String> request) {
-        String refreshToken = request.get("refreshToken");
-
+    public String refreshToken(RefreshTokenRequest refreshToken) {
         // Lấy username từ token
-        String username = jwtService.getUsername(refreshToken);
+        String username = jwtService.getUsername(refreshToken.getRefreshToken());
 
         // Tạo access token mới
         String newAccessToken = jwtService.generateAccessToken(username);
 
         // Gia hạn refresh token (tùy chọn)
-        refreshTokenService.extendExpiryDate(refreshToken);
+        refreshTokenService.extendExpiryDate(refreshToken.getRefreshToken());
 
         return newAccessToken;
     }

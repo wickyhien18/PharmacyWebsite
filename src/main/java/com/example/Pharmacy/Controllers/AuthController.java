@@ -1,6 +1,7 @@
 package com.example.Pharmacy.Controllers;
 
 import com.example.Pharmacy.DTO.LoginRequest;
+import com.example.Pharmacy.DTO.RefreshTokenRequest;
 import com.example.Pharmacy.DTO.RegisterRequest;
 import com.example.Pharmacy.Entities.Users;
 import com.example.Pharmacy.Repositories.UserRepository;
@@ -51,27 +52,25 @@ public class AuthController {
 
     @PostMapping("/refresh")
     @Operation(summary = "Làm mới jwt token")
-    public ResponseEntity<?> refresh(@RequestBody Map<String, String> request) {
-        String refreshToken = request.get("refreshToken");
+    public ResponseEntity<?> refresh(@RequestBody RefreshTokenRequest refreshToken) {
 
-        if (refreshToken == null || refreshToken.isEmpty()) {
+        if (refreshToken == null || refreshToken.getRefreshToken().isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("error", "refreshToken là bắt buộc"));
         }
 
-        if (!refreshTokenService.validateRefreshToken(refreshToken)) {
+        if (!refreshTokenService.validateRefreshToken(refreshToken.getRefreshToken())) {
             return ResponseEntity.status(401).body(Map.of("error", "Refresh token không hợp lệ hoặc đã hết hạn"));
         }
 
-        return ResponseEntity.ok(authService.refreshToken(request));
+        return ResponseEntity.ok(authService.refreshToken(refreshToken));
     }
 
     @PostMapping("/logout")
     @Operation(summary = "Đăng xuất và xoá refreshToken")
-    public ResponseEntity<?> logout(@RequestBody Map<String, String> request) {
-        String refreshToken = request.get("refreshToken");
+    public ResponseEntity<?> logout(@RequestBody RefreshTokenRequest refreshToken) {
 
-        if (refreshToken != null && !refreshToken.isEmpty()) {
-            refreshTokenService.deleteRefreshToken(refreshToken);
+        if (refreshToken != null && !refreshToken.getRefreshToken().isEmpty()) {
+            refreshTokenService.deleteRefreshToken(refreshToken.getRefreshToken());
         }
 
         return ResponseEntity.ok(Map.of("message", "Đăng xuất thành công"));
