@@ -1,21 +1,29 @@
 package com.example.Pharmacy.Services;
 
-import com.example.Pharmacy.DTO.LoginRequest;
-import com.example.Pharmacy.DTO.LoginResponse;
-import com.example.Pharmacy.DTO.RefreshTokenRequest;
-import com.example.Pharmacy.DTO.RegisterRequest;
-import com.example.Pharmacy.Entities.Roles;
+import com.example.Pharmacy.DTO.Request.LoginRequest;
+import com.example.Pharmacy.DTO.Request.RefreshTokenRequest;
+import com.example.Pharmacy.DTO.Request.RegisterRequest;
+import com.example.Pharmacy.DTO.Response.AuthResponse;
+import com.example.Pharmacy.Entities.RefreshToken;
 import com.example.Pharmacy.Entities.Users;
+import com.example.Pharmacy.Entities.Roles;
+import javax.naming.AuthenticationException;
+import com.example.Pharmacy.Repositories.RefreshTokenRepository;
+import com.example.Pharmacy.Repositories.UserRepository;
+import com.example.Pharmacy.Services.JWTService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.AuthException;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -27,10 +35,11 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
 
     // ĐĂNG KÝ
-    public String register(RegisterRequest req) {
+    @Transactional
+    public AuthResponse register(RegisterRequest req) {
 
         if (userService.existByUserName(req.getUserName()))
-            return "Username đã tồn tại";
+            throw new AuthException("Tên đăng nhập đã tồn tại");
 
         Roles role = roleService
                 .findByRoleName("CUSTOMER")

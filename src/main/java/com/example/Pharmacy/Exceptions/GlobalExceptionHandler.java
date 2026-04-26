@@ -1,6 +1,6 @@
 package com.example.Pharmacy.Exceptions;
 
-import com.example.Pharmacy.DTO.ApiResponse;
+import com.example.Pharmacy.DTO.Response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.AuthException;
 import org.springframework.http.HttpStatus;
@@ -11,7 +11,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import javax.naming.AuthenticationException;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -39,7 +38,7 @@ public class GlobalExceptionHandler {
     }
 
     // ---- Auth lỗi → 401 ----
-    @ExceptionHandler(AuthenticationException.class)
+    @ExceptionHandler(AuthException.class)
     public ResponseEntity<ApiResponse<Void>> handleAuth(AuthException ex) {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)

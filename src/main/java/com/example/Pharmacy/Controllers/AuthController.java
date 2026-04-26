@@ -1,10 +1,10 @@
 package com.example.Pharmacy.Controllers;
 
-import com.example.Pharmacy.DTO.LoginRequest;
-import com.example.Pharmacy.DTO.LoginResponse;
-import com.example.Pharmacy.DTO.RefreshTokenRequest;
-import com.example.Pharmacy.DTO.RegisterRequest;
-import com.example.Pharmacy.Entities.Users;
+import com.example.Pharmacy.DTO.Request.LoginRequest;
+import com.example.Pharmacy.DTO.Request.RefreshTokenRequest;
+import com.example.Pharmacy.DTO.Request.RegisterRequest;
+import com.example.Pharmacy.DTO.Response.ApiResponse;
+import com.example.Pharmacy.DTO.Response.LoginResponse;
 import com.example.Pharmacy.Repositories.UserRepository;
 import com.example.Pharmacy.Services.AuthService;
 import com.example.Pharmacy.Services.RefreshTokenService;
@@ -35,21 +35,15 @@ public class AuthController {
     @Operation(summary = "Đăng ký tài khoản (vai trò khách hàng)")
     public ResponseEntity<?> register(
             @RequestBody RegisterRequest req) {
-        return ResponseEntity.ok(authService.register(req));
+        return ResponseEntity.ok(ApiResponse.ok(authService.register(req)));
     }
 
     @PostMapping("/login")
     @Operation(summary = "Đăng nhập vào để nhận jwt token")
     public ResponseEntity<?> login(
             @RequestBody LoginRequest req) {
-
-        try {
-            LoginResponse response = authService.login(req);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(401)
-                    .body(Map.of("error", e.getMessage()));
-        }
+        LoginResponse response = authService.login(req);
+        return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
     @PostMapping("/refresh")

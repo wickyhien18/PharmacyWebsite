@@ -1,4 +1,4 @@
-package com.example.Pharmacy.DTO;
+package com.example.Pharmacy.DTO.Response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
