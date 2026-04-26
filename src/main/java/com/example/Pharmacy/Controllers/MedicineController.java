@@ -1,9 +1,6 @@
 package com.example.Pharmacy.Controllers;
 
 import com.example.Pharmacy.Entities.Medicines;
-import com.example.Pharmacy.Exceptions.BadRequestException;
-import com.example.Pharmacy.Exceptions.ResourceNotFoundException;
-import com.example.Pharmacy.Exceptions.IllegalAccessException;
 import com.example.Pharmacy.Services.MedicineService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,9 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/medicines")
@@ -36,13 +31,13 @@ public class MedicineController {
     @Operation(summary = "Lấy thông tin thuốc theo mã")
     public ResponseEntity<Medicines> getById(@PathVariable Integer id) {
         if (id == null || id <= 0) {
-            throw new BadRequestException("ID không hợp lệ: " + id);
+            throw new RuntimeException("ID không hợp lệ: " + id);
         }
 
         Medicines medicines = medicineService.getById(id);
 
         if (medicines == null) {
-            throw new ResourceNotFoundException("Không tìm thấy thuốc tương ứng với ID: " + id);
+            throw new RuntimeException("Không tìm thấy thuốc tương ứng với ID: " + id);
         }
         return  ResponseEntity.ok(medicines);
     }
@@ -53,7 +48,7 @@ public class MedicineController {
         List<Medicines> medicines =  medicineService.getByName(name);
 
         if (medicines == null) {
-            throw new ResourceNotFoundException("Không tìm thấy thông tin thuốc tương ứng với tên thuốc: " + name);
+            throw new RuntimeException("Không tìm thấy thông tin thuốc tương ứng với tên thuốc: " + name);
         }
 
         return ResponseEntity.ok(medicines);
@@ -63,7 +58,7 @@ public class MedicineController {
     @Operation(summary = "Thêm thông tin thuốc")
     public ResponseEntity<Medicines> createMedicine(@RequestBody @Valid Medicines medicines) {
         if (medicines.getPrice() <= 0) {
-            throw new IllegalAccessException("Giá thuốc không được thấp hơn  hoặc bằng 0");
+            throw new RuntimeException("Giá thuốc không được thấp hơn  hoặc bằng 0");
         }
 
         Medicines saved = medicineService.insert(medicines);
@@ -75,7 +70,7 @@ public class MedicineController {
     public ResponseEntity<Medicines> updateMedicine(@PathVariable Integer id ,@RequestBody @Valid Medicines medicines) {
         Medicines exist = medicineService.getById(id);
         if (exist == null) {
-            throw new ResourceNotFoundException("Không tìm thấy thông tin thuốc để sửa");
+            throw new RuntimeException("Không tìm thấy thông tin thuốc để sửa");
         }
 
         Medicines update = medicineService.update(id,medicines);
@@ -88,7 +83,7 @@ public class MedicineController {
     public ResponseEntity<Void> deleteMedicine(@PathVariable Integer id) {
         Medicines exist = medicineService.getById(id);
         if (exist == null) {
-            throw new ResourceNotFoundException("Không tìm thấy thông tin thuốc để xoá");
+            throw new RuntimeException("Không tìm thấy thông tin thuốc để xoá");
         }
 
         medicineService.delete(id);
