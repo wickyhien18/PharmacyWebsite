@@ -26,18 +26,28 @@ import lombok.*;
 @Setter
 public class OrderItems {
 
+    //Primary key
     @Id
+
+    //Id auto_increment
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    //Mapping with column in table in database
     @Column(name = "Id")
     private int Id;
 
     private int quantity;
     private float price;
 
+    //N - 1 Relationship
+    //FetchType = LAZY: only load when using query, = EAGER: alway load
     @ManyToOne(fetch = FetchType.LAZY)
+
+    //Foreign Key
     @JoinColumn(name = "order_id")
     private Orders orders;
 
+    //1 - N Relationship
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medicine_id")
     private Medicines medicines;

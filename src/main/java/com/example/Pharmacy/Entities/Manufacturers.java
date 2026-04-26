@@ -27,8 +27,14 @@ import java.util.List;
 //Generate Setter method for all attributes
 @Setter
 public class Manufacturers {
+
+    //Primary key
     @Id
+
+    //Id auto_increment
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    //Mapping with column in table in database
     @Column(name = "manufacturer_id")
     private int manufacturer_id;
 
@@ -37,7 +43,11 @@ public class Manufacturers {
 
     private String country;
 
+    //1 - N Relationship
+    //Mapped by another Entities
     @OneToMany(mappedBy = "manufacturers")
+
+    //Avoid infinite loop
     @JsonIgnore
     private List<Medicines> medicines;
 }

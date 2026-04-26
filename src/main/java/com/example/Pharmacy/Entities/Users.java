@@ -32,8 +32,13 @@ import java.util.List;
 @Setter
 public class Users {
 
+    //Primary key
     @Id
+
+    //Id auto_increment
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    //Mapping with column in table in database
     @Column(name = "userId")
     private int userId;
 
@@ -42,6 +47,7 @@ public class Users {
 
     private String password;
 
+    //Default value is right now
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime created_at;
@@ -51,14 +57,23 @@ public class Users {
 
     private boolean is_active;
 
+    //N - 1 Relationship
+    //FetchType = LAZY: only load when using query, = EAGER: alway load
     @ManyToOne(fetch = FetchType.LAZY)
+
+    //Foreign Key
     @JoinColumn(name = "role_id")
     private Roles roles;
 
+    //1 - 1 Relationship
+    //Mapped by another entities
     @OneToOne(mappedBy = "users")
+
+    //Avoid infinite loop
     @JsonIgnore
     private Carts carts;
 
+    //1 - N Relationship
     @OneToMany(mappedBy = "users")
     @JsonIgnore
     private List<Orders> orders;

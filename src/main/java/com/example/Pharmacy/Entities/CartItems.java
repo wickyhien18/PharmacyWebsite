@@ -25,12 +25,21 @@ import lombok.*;
 @Setter
 public class CartItems {
 
+    //Primary key
     @Id
+
+    //Id auto_increment
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    //Mapping with column in table in database
     @Column(name = "Id")
     private int Id;
 
-    @ManyToOne
+    //N - 1 Relationship
+    //FetchType = LAZY: only load when using query, = EAGER: alway load
+    @ManyToOne(fetch = FetchType.LAZY)
+
+    //Foreign Key
     @JoinColumn(name = "cart_id")
     private Carts carts;
 

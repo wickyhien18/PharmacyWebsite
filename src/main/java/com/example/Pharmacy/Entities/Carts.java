@@ -30,19 +30,33 @@ import java.util.List;
 @Setter
 public class Carts {
 
+    //Primary key
     @Id
+
+    //Id auto_increment
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    //Mapping with column in table in database
     @Column(name = "cart_id")
     private int cart_id;
 
-    @OneToOne
+    //N - 1 Relationship
+    //FetchType = LAZY: only load when using query, = EAGER: alway load
+    @OneToOne(fetch = FetchType.LAZY)
+
+    //Foreign Key
     @JoinColumn(name = "userId")
     private Users users;
 
+    //Default value is right now
     @CreationTimestamp
     private LocalDateTime created_at;
 
+    //1 - N Relationship
+    //Mapped by another Entities
     @OneToMany(mappedBy = "carts")
+
+    //Avoid infinite loop
     @JsonIgnore
     private List<CartItems> cartItems;
 

@@ -31,11 +31,18 @@ import java.util.List;
 @Setter
 public class Orders {
 
+    //Primary key
     @Id
+
+    //Id auto_increment
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    //Mapping with column in table in database
     @Column(name = "order_id")
     private int order_id;
 
+    //N - 1 Relationship
+    //FetchType = LAZY: only load when using query, = EAGER: alway load
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId")
     private Users users;
@@ -43,13 +50,19 @@ public class Orders {
     private float total_price;
     private String status;
 
+    //Default value is right now
     @CreationTimestamp
     private LocalDateTime created_at;
 
+    //1 - N Relationship
+    //Mapped by another entities
     @OneToMany(mappedBy = "orders")
+
+    //Avoid infinite loop
     @JsonIgnore
     private List<OrderItems> orderItems;
 
+    //1- 1 Relationship
     @OneToOne(mappedBy = "orders")
     @JsonIgnore
     private Payments payments;

@@ -27,8 +27,13 @@ import java.util.List;
 //Generate Setter method for all attributes
 @Setter
 public class Roles {
+    //Primary key
     @Id
+
+    //Id auto_increment
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    //Mapping with column in table in database
     @Column(name = "role_id")
     private int role_id;
 
@@ -38,7 +43,11 @@ public class Roles {
     @Column(name = "description")
     private String description;
 
+    //1 - N Relationship
+    //Mapped by another Entities
     @OneToMany(mappedBy = "roles")
+
+    //Avoid infinite loop
     @JsonIgnore
     private List<Users> users;
 }

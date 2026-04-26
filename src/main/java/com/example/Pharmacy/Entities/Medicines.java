@@ -30,8 +30,13 @@ import java.util.List;
 @Setter
 public class Medicines {
 
+    //Primary key
     @Id
+
+    //Id auto_increment
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    //Mapping with column in table in database
     @Column(name = "medicine_id")
     private int medicine_id;
 
@@ -44,7 +49,11 @@ public class Medicines {
     private float price;
     private int quantity;
 
+    //N - 1 Relationship
+    //FetchType = LAZY: only load when using query, = EAGER: alway load
     @ManyToOne(fetch = FetchType.LAZY)
+
+    //Foreign Key
     @JoinColumn(name = "manufacturer_id")
     private Manufacturers manufacturers;
 
@@ -52,10 +61,15 @@ public class Medicines {
     @JoinColumn(name = "category_id")
     private Categories categories;
 
+    //Default value is right now
     @CreationTimestamp
     private LocalDateTime created_at;
 
+    //1 - N Relationship
+    //Mapped by another Entities
     @OneToMany(mappedBy = "medicines")
+
+    //Avoid infinite loop
     @JsonIgnore
     private List<CartItems> cartItems;
 

@@ -28,19 +28,29 @@ import java.time.LocalDateTime;
 @Setter
 public class RefreshToken {
 
+    //Primary key
     @Id
+
+    //Id auto_increment
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    //Mapping with column in table in database
     @Column(name = "id")
     private int id;
 
     private String token;
 
+    //1 - 1 Relationship
+    //FetchType = LAZY: only load when using query, = EAGER: alway load
     @OneToOne(fetch = FetchType.LAZY)
+
+    //Foreign Key
     @JoinColumn(name = "userId")
     private Users users;
 
     private LocalDateTime expire_at;
 
+    //Default value is right now
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime created_at;
