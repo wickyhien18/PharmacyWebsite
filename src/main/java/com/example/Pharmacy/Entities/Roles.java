@@ -6,13 +6,25 @@ import lombok.*;
 
 import java.util.List;
 
+//Mark this class is Entity in database
 @Entity
+
+//Specify table in database
 @Table(name = "roles")
-@Data
+
+//Create object easily
+// ClassName.builder().atribute1().attribute2.build()
 @Builder
+
+//Create constructor no args
 @NoArgsConstructor
+
+//Create constructor with all args
 @AllArgsConstructor
+
+//Generate Getter method for all attributes
 @Getter
+//Generate Setter method for all attributes
 @Setter
 public class Roles {
     @Id

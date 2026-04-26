@@ -10,12 +10,25 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
+//Mark this class is Entity in database
 @Entity
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+
+//Specify table in database
 @Table(name = "users")
+
+//Create object easily
+// ClassName.builder().atribute1().attribute2.build()
+@Builder
+
+//Create constructor no args
+@NoArgsConstructor
+
+//Create constructor with all args
+@AllArgsConstructor
+
+//Generate Getter method for all attributes
 @Getter
+//Generate Setter method for all attributes
 @Setter
 public class Users {
 
