@@ -40,6 +40,10 @@ public class RefreshTokenService {
         return refreshTokenRepository.save(refreshToken);
     }
 
+    public Optional<RefreshToken> findByToken(String token) {
+        return refreshTokenRepository.findByToken(token);
+    }
+
     public boolean validateRefreshToken(String token) {
         Optional<RefreshToken> storedToken = refreshTokenRepository.findByToken(token);
 

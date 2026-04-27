@@ -4,11 +4,14 @@ import com.example.Pharmacy.DTO.Request.LoginRequest;
 import com.example.Pharmacy.DTO.Request.RefreshTokenRequest;
 import com.example.Pharmacy.DTO.Request.RegisterRequest;
 import com.example.Pharmacy.DTO.Response.ApiResponse;
+import com.example.Pharmacy.DTO.Response.AuthResponse;
 import com.example.Pharmacy.DTO.Response.LoginResponse;
 import com.example.Pharmacy.Repositories.UserRepository;
 import com.example.Pharmacy.Services.AuthService;
 import com.example.Pharmacy.Services.RefreshTokenService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -34,42 +37,41 @@ public class AuthController {
     @PostMapping("/register")
     @Operation(summary = "Đăng ký tài khoản (vai trò khách hàng)")
     public ResponseEntity<?> register(
-            @RequestBody RegisterRequest req) {
-        return ResponseEntity.ok(ApiResponse.ok(authService.register(req)));
+            @Valid @RequestBody RegisterRequest req) {
+
+        AuthResponse data = authService.register(req);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.ok("Đăng ký thành công", data));
     }
 
     @PostMapping("/login")
     @Operation(summary = "Đăng nhập vào để nhận jwt token")
     public ResponseEntity<?> login(
-            @RequestBody LoginRequest req) {
-        LoginResponse response = authService.login(req);
-        return ResponseEntity.ok(ApiResponse.ok(response));
+            @Valid @RequestBody LoginRequest req) {
+
+        AuthResponse response = authService.login(req);
+
+        return ResponseEntity.ok(ApiResponse.ok("Đăng nhập thành công", response));
     }
 
     @PostMapping("/refresh")
     @Operation(summary = "Làm mới jwt token")
-    public ResponseEntity<?> refresh(@RequestBody RefreshTokenRequest refreshToken) {
+    public ResponseEntity<?> refresh(@Valid @RequestBody RefreshTokenRequest refreshToken) {
 
-        if (refreshToken == null || refreshToken.getRefreshToken().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "refreshToken là bắt buộc"));
-        }
+        AuthResponse data = authService.refreshToken(refreshToken);
 
-        if (!refreshTokenService.validateRefreshToken(refreshToken.getRefreshToken())) {
-            return ResponseEntity.status(401).body(Map.of("error", "Refresh token không hợp lệ hoặc đã hết hạn"));
-        }
-
-        return ResponseEntity.ok(authService.refreshToken(refreshToken));
+        return ResponseEntity.ok(ApiResponse.ok("Làm mới token thành công", data));
     }
 
     @PostMapping("/logout")
     @Operation(summary = "Đăng xuất và xoá refreshToken")
-    public ResponseEntity<?> logout(@RequestBody RefreshTokenRequest refreshToken) {
+    public ResponseEntity<?> logout(@Valid @RequestBody RefreshTokenRequest refreshToken) {
 
-        if (refreshToken != null && !refreshToken.getRefreshToken().isEmpty()) {
-            refreshTokenService.deleteRefreshToken(refreshToken.getRefreshToken());
-        }
+        authService.logout(refreshToken);
 
-        return ResponseEntity.ok(Map.of("message", "Đăng xuất thành công"));
+        return ResponseEntity.ok(ApiResponse.ok("Đăng xuất thành công"));
     }
 
 }

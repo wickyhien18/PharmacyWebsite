@@ -7,13 +7,10 @@ import com.example.Pharmacy.DTO.Response.AuthResponse;
 import com.example.Pharmacy.Entities.RefreshToken;
 import com.example.Pharmacy.Entities.Users;
 import com.example.Pharmacy.Entities.Roles;
-import javax.naming.AuthenticationException;
-import com.example.Pharmacy.Repositories.RefreshTokenRepository;
-import com.example.Pharmacy.Repositories.UserRepository;
-import com.example.Pharmacy.Services.JWTService;
+import com.example.Pharmacy.Exceptions.AuthException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.exception.AuthException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -21,6 +18,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Map;
 
 
 @Slf4j
@@ -48,56 +47,90 @@ public class AuthService {
         Users user = new Users();
         user.setUserName(req.getUserName());
         user.setPassword(passwordEncoder.encode(req.getPassword()));
+        user.setActive(true);
         user.setRoles(role);
 
         userService.insert(user);
-        return "Đăng ký thành công";
+        return issueTokenPair(user);
     }
 
     // ĐĂNG NHẬP
-    public LoginResponse login(LoginRequest req) {
+    @Transactional
+    public AuthResponse login(LoginRequest req) {
         userService.findByUserName(req.getUserName())
                 .ifPresent(u ->
                         refreshTokenService.deleteAllByUserId(u.getUserId()));
 
-        Authentication auth;
         try {
-            auth = authManager.authenticate(new UsernamePasswordAuthenticationToken(req.getUserName(), req.getPassword()));
-        } catch (Exception e) {
-            return LoginResponse.builder()
-                    .accessToken("Sai mật khẩu hoặc sai tên đăng nhập")
-                    .build();
+            // AuthenticationManager gọi UserDetailsService + PasswordEncoder nội bộ
+            authManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(req.getUserName(), req.getPassword())
+            );
+        } catch (DisabledException e) {
+            throw new AuthException("Tài khoản đã bị khoá. Vui lòng liên hệ hỗ trợ");
+        } catch (BadCredentialsException e) {
+            // Không tiết lộ usernam có tồn tại không → tránh user enumeration attack
+            throw new AuthException("Username hoặc mật khẩu không đúng");
         }
 
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        Users users = userService.findByUserName(req.getUserName())
-                .orElseThrow(() ->
-                        new RuntimeException("Không tìm thấy User"));
+        Users user = userService.findByUserName(req.getUserName())
+                .orElseThrow(() -> new AuthException("Tài khoản không tồn tại"));
 
-        String accessToken = jwtService.generateAccessToken(users.getUserName());
-        String refreshToken = jwtService.generateRefreshToken(users.getUserName());
+        return issueTokenPair(user);
 
-        refreshTokenService.createRefreshToken(
-                users.getUserId(), refreshToken);
-
-        return LoginResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
     }
 
     // LÀM MỚI TOKEN
-    public String refreshToken(RefreshTokenRequest refreshToken) {
-        // Lấy username từ token
-        String username = jwtService.getUsername(refreshToken.getRefreshToken());
+    @Transactional
+    public AuthResponse refreshToken(RefreshTokenRequest refreshToken) {
 
-        // Tạo access token mới
-        String newAccessToken = jwtService.generateAccessToken(username);
+        RefreshToken storedToken = refreshTokenService
+                .findByToken(jwtService.hashRefreshToken(refreshToken.getRefreshToken()))
+                .orElseThrow(() -> new AuthException("Token không hợp lệ"));
 
-        // Gia hạn refresh token (tùy chọn)
-        refreshTokenService.extendExpiryDate(refreshToken.getRefreshToken());
+        Users users = storedToken.getUsers();
 
-        return newAccessToken;
+        refreshTokenService.createRefreshToken(users.getUserId(), storedToken.getToken());
+
+        return issueTokenPair(users);
+    }
+
+    @Transactional
+    public void logout(RefreshTokenRequest refreshToken) {
+        if (refreshToken != null && !refreshToken.getRefreshToken().isEmpty()) {
+            refreshTokenService.deleteRefreshToken(jwtService.hashRefreshToken(refreshToken.getRefreshToken()));
+        }
+    }
+
+    /**
+     * Tạo cặp access token + refresh token, lưu hash vào DB.
+     * Gọi sau: register, login, refresh.
+     */
+    private AuthResponse issueTokenPair(Users user) {
+        String accessToken       = jwtService.generateAccessToken(user.getUserName());
+        String plainRefreshToken = jwtService.generateRefreshToken();
+
+        // Chỉ lưu HASH — plain token chỉ tồn tại trong bộ nhớ rồi trả về client
+        refreshTokenService.createRefreshToken(user.getUserId(), jwtService.hashRefreshToken(plainRefreshToken));
+
+        return new AuthResponse(
+                accessToken,
+                plainRefreshToken,
+                604800000 / 1000,
+                toUserInfo(user)
+        );
+    }
+
+    /**
+     * Map User entity → UserInfo DTO.
+     * Dùng lại ở register, login, refresh, getCurrentUserInfo.
+     */
+    private AuthResponse.UserInfo toUserInfo(Users user) {
+        return new AuthResponse.UserInfo(
+                user.getUserId(),
+                user.getUserName(),
+                user.getRoles()
+        );
     }
 
 

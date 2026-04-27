@@ -55,7 +55,7 @@ public class Users {
     @CreationTimestamp
     private LocalDateTime last_activity;
 
-    private boolean is_active;
+    private boolean active;
 
     //N - 1 Relationship
     //FetchType = LAZY: only load when using query, = EAGER: alway load

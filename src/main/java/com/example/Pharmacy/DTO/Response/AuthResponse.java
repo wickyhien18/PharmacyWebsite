@@ -9,11 +9,8 @@ public record AuthResponse(
         UserInfo user              // Thông tin user — hiển thị UI ngay, không cần gọi thêm /me
 ) {
     public record UserInfo(
-            Long   id,             // Dùng làm key cho các request sau: /users/{id}/...
-            String email,          // Hiển thị trên navbar / profile
-            String fullName,       // Hiển thị tên người dùng
-            String phone,          // Hiển thị trong trang profile
-            Roles   role,           // CUSTOMER / PHARMACIST / ADMIN — client dùng để ẩn/hiện menu
-            String avatarUrl       // URL ảnh đại diện — null nếu chưa upload
+            Integer   id,             // Dùng làm key cho các request sau: /users/{id}/...
+            String username,       // Hiển thị tên người dùng
+            Roles   role           // CUSTOMER / PHARMACIST / ADMIN — client dùng để ẩn/hiện menu
     ) {}
 }
