@@ -1,4 +1,4 @@
-package com.example.Pharmacy;
+package Pharmacy;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

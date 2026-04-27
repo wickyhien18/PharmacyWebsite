@@ -1,0 +1,33 @@
+package Pharmacy.Services;
+
+import Pharmacy.Entities.Carts;
+import Pharmacy.Repositories.CartRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class CartService {
+
+    @Autowired
+    private CartRepository cartRepository;
+
+    public List<Carts> getAll() {
+        return cartRepository.getAll();
+    }
+
+    public Carts insert(Carts Carts) {
+        return cartRepository.save(Carts);
+    }
+
+    public Carts update(Integer id, Carts carts) {
+        Carts carts1 = cartRepository.findByIdDetail(id);
+        carts1.setCartItems(carts.getCartItems());
+        return cartRepository.save(carts1);
+    }
+
+    public void delete(Integer id) {
+        cartRepository.deleteById(id.longValue());
+    }
+}
