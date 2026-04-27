@@ -10,6 +10,7 @@ import com.example.Pharmacy.Repositories.UserRepository;
 import com.example.Pharmacy.Services.AuthService;
 import com.example.Pharmacy.Services.RefreshTokenService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -67,11 +68,11 @@ public class AuthController {
 
     @PostMapping("/logout")
     @Operation(summary = "Đăng xuất và xoá refreshToken")
-    public ResponseEntity<?> logout(@Valid @RequestBody RefreshTokenRequest refreshToken) {
+    public ResponseEntity<?> logout(HttpServletRequest request) {
 
-        authService.logout(refreshToken);
+        String result = authService.logout(request);
 
-        return ResponseEntity.ok(ApiResponse.ok("Đăng xuất thành công"));
+        return ResponseEntity.ok(ApiResponse.ok(result));
     }
 
 }

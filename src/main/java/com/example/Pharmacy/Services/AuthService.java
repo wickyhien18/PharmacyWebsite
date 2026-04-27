@@ -1,5 +1,6 @@
 package com.example.Pharmacy.Services;
 
+import ch.qos.logback.classic.spi.IThrowableProxy;
 import com.example.Pharmacy.DTO.Request.LoginRequest;
 import com.example.Pharmacy.DTO.Request.RefreshTokenRequest;
 import com.example.Pharmacy.DTO.Request.RegisterRequest;
@@ -8,6 +9,8 @@ import com.example.Pharmacy.Entities.RefreshToken;
 import com.example.Pharmacy.Entities.Users;
 import com.example.Pharmacy.Entities.Roles;
 import com.example.Pharmacy.Exceptions.AuthException;
+import com.example.Pharmacy.Exceptions.ResourceNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +21,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Map;
 
 
 @Slf4j
@@ -96,10 +97,21 @@ public class AuthService {
     }
 
     @Transactional
-    public void logout(RefreshTokenRequest refreshToken) {
-        if (refreshToken != null && !refreshToken.getRefreshToken().isEmpty()) {
-            refreshTokenService.deleteRefreshToken(jwtService.hashRefreshToken(refreshToken.getRefreshToken()));
+    public String logout(HttpServletRequest request) {
+        String header = request.getHeader("Authorization");
+
+        if (header == null || !header.startsWith("Bearer ")) {
+            throw new ResourceNotFoundException("Không tìm thấy token");
         }
+
+        String accessToken = header.substring(7);
+
+        String username = jwtService.getUsername(accessToken);
+
+        userService.findByUserName(username)
+                .ifPresent(users -> refreshTokenService.deleteAllByUserId(users.getUserId()));
+
+        return "Đăng xuất thành công";
     }
 
     /**

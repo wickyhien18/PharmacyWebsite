@@ -7,18 +7,17 @@ import java.time.LocalDateTime;
 public record ApiResponse<T>(
         boolean success,
         String message,
-        T data,
-        LocalDateTime timestamp
+        T data
 ) {
     public static <T> ApiResponse<T> ok(T data) {
-        return new ApiResponse<>(true, "Thành công", data, LocalDateTime.now());
+        return new ApiResponse<>(true, "Thành công", data);
     }
 
     public static <T> ApiResponse<T> ok(String message, T data) {
-        return new ApiResponse<>(true, message, data, LocalDateTime.now());
+        return new ApiResponse<>(true, message, data);
     }
 
     public static <T> ApiResponse<T> fail(String message) {
-        return new ApiResponse<>(false, message, null, LocalDateTime.now());
+        return new ApiResponse<>(false, message, null);
     }
 }

@@ -33,7 +33,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.UNPROCESSABLE_ENTITY)
-                .body(new ApiResponse<>(false, "Dữ liệu không hợp lệ", errors, null));
+                .body(new ApiResponse<>(false, "Dữ liệu không hợp lệ", errors));
     }
 
     // ---- Auth lỗi → 401 ----
