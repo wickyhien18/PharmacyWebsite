@@ -55,6 +55,7 @@ public class Users {
     @CreationTimestamp
     private LocalDateTime last_activity;
 
+    @Column(name = "is_active")
     private boolean active;
 
     //N - 1 Relationship

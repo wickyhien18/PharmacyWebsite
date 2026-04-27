@@ -90,7 +90,7 @@ public class AuthService {
 
         Users users = storedToken.getUsers();
 
-        refreshTokenService.createRefreshToken(users.getUserId(), storedToken.getToken());
+        refreshTokenService.extendExpiryDate(storedToken.getToken());
 
         return issueTokenPair(users);
     }

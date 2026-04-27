@@ -36,7 +36,7 @@ public class RefreshToken {
 
     //Mapping with column in table in database
     @Column(name = "id")
-    private int id;
+    private long id;
 
     private String token;
 
