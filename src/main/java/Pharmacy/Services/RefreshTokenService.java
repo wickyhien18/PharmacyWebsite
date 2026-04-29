@@ -22,14 +22,14 @@ public class RefreshTokenService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private JWTService jwtService;
 
-    // Tạo refresh token mới
+    // Create new refresh token
     @Transactional
     public RefreshToken createRefreshToken(Integer userId, String token) {
 
         Users user = userRepository.getReferenceById(Long.valueOf(userId));
+
+        refreshTokenRepository.deleteAllByUsers_UserId(userId);
 
         RefreshToken refreshToken = RefreshToken.builder()
                 .token(token)
@@ -44,43 +44,23 @@ public class RefreshTokenService {
         return refreshTokenRepository.findByToken(token);
     }
 
-    public boolean validateRefreshToken(String token) {
-        Optional<RefreshToken> storedToken = refreshTokenRepository.findByToken(token);
-
-        if (storedToken.isEmpty()) {
-            return false;
-        }
-
-        RefreshToken rt = storedToken.get();
-
-        // Kiểm tra hết hạn
-        if (rt.isExpired()) {
-            return false;
-        }
-
-        // Kiểm tra JWT
-        return jwtService.validateRefreshToken(token);
-    }
-
-    // Xóa refresh token
     @Transactional
     public void deleteRefreshToken(String token) {
         refreshTokenRepository.deleteByToken(token);
     }
 
-    // Xóa tất cả token của user
+    // Delete all token from user
     @Transactional
     public void deleteAllByUserId(Integer userId) {
         refreshTokenRepository.deleteAllByUsers_UserId(userId);
     }
 
-    // Lấy user từ refresh token
+    // Get user from refresh token
     public Optional<Users> getUserByRefreshToken(String token) {
         return refreshTokenRepository.findByToken(token)
                 .map(RefreshToken::getUsers);
     }
 
-    // Gia hạn refresh token
     @Transactional
     public boolean extendExpiryDate(String token) {
         Optional<RefreshToken> optional = refreshTokenRepository.findByToken(token);

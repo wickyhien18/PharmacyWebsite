@@ -31,36 +31,33 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        // Bỏ qua filter cho API auth
+        // Skip filter for AUTH API
         if (path.startsWith("/api/auth/")) {
             chain.doFilter(request, response);
             return;
         }
 
-        // Lấy header Authorization
         String header = request.getHeader("Authorization");
 
-        // Không có token → bỏ qua, tiếp tục
+        // no token → skip, next
         if (header == null || !header.startsWith("Bearer ")) {
             chain.doFilter(request, response);
             return;
         }
 
-        // Cắt bỏ "Bearer " lấy token
+        // Get Token skip header Bearer
         String token = header.substring(7);
 
-        // Token không hợp lệ → bỏ qua
+        // Invalid Token → skip
         if (!jwtService.validateAccessToken(token)) {
-            System.out.println("❌ Token không phải access token hoặc không hợp lệ");
-            System.out.println("Token bị lỗi: " + token);
+            System.out.println("Token error: " + token);
             chain.doFilter(request, response);
             return;
         }
 
-        // Lấy username từ token
         String username = jwtService.getUsername(token);
 
-        // Set authentication vào SecurityContext
+        // Set authentication in SecurityContext
         if (username != null) {
             UserDetails userDetails =
                     userDetailsService.loadUserByUsername(username);

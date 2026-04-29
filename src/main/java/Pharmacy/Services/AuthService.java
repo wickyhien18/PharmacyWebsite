@@ -1,6 +1,5 @@
 package Pharmacy.Services;
 
-import ch.qos.logback.classic.spi.IThrowableProxy;
 import Pharmacy.DTO.Request.LoginRequest;
 import Pharmacy.DTO.Request.RefreshTokenRequest;
 import Pharmacy.DTO.Request.RegisterRequest;
@@ -12,8 +11,6 @@ import Pharmacy.Exceptions.AuthException;
 import Pharmacy.Exceptions.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -23,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -34,12 +30,11 @@ public class AuthService {
     private final AuthenticationManager authManager;
     private final RefreshTokenService refreshTokenService;
 
-    // ĐĂNG KÝ
     @Transactional
     public AuthResponse register(RegisterRequest req) {
 
         if (userService.existByUserName(req.getUserName()))
-            throw new AuthException("Tên đăng nhập đã tồn tại");
+            throw new AuthException("UserName is already exist");
 
         Roles role = roleService
                 .findByRoleName("CUSTOMER")
@@ -52,48 +47,47 @@ public class AuthService {
         user.setRoles(role);
 
         userService.insert(user);
-        return issueTokenPair(user);
+        return createTokenPair(user);
     }
 
     // ĐĂNG NHẬP
     @Transactional
     public AuthResponse login(LoginRequest req) {
+
         userService.findByUserName(req.getUserName())
                 .ifPresent(u ->
                         refreshTokenService.deleteAllByUserId(u.getUserId()));
 
         try {
-            // AuthenticationManager gọi UserDetailsService + PasswordEncoder nội bộ
+            // AuthenticationManager call local  UserDetailsService + PasswordEncoder
             authManager.authenticate(
                     new UsernamePasswordAuthenticationToken(req.getUserName(), req.getPassword())
             );
         } catch (DisabledException e) {
-            throw new AuthException("Tài khoản đã bị khoá. Vui lòng liên hệ hỗ trợ");
+            throw new AuthException("Account has been locked");
         } catch (BadCredentialsException e) {
-            // Không tiết lộ usernam có tồn tại không → tránh user enumeration attack
-            throw new AuthException("Username hoặc mật khẩu không đúng");
+            throw new AuthException("UserName or Password is incorrect");
         }
 
         Users user = userService.findByUserName(req.getUserName())
-                .orElseThrow(() -> new AuthException("Tài khoản không tồn tại"));
+                .orElseThrow(() -> new AuthException("Not found UserName"));
 
-        return issueTokenPair(user);
+        return createTokenPair(user);
 
     }
 
-    // LÀM MỚI TOKEN
     @Transactional
     public AuthResponse refreshToken(RefreshTokenRequest refreshToken) {
 
         RefreshToken storedToken = refreshTokenService
                 .findByToken(jwtService.hashRefreshToken(refreshToken.getRefreshToken()))
-                .orElseThrow(() -> new AuthException("Token không hợp lệ"));
+                .orElseThrow(() -> new AuthException("Invalid Token"));
 
         Users users = storedToken.getUsers();
 
         refreshTokenService.extendExpiryDate(storedToken.getToken());
 
-        return issueTokenPair(users);
+        return createTokenPair(users);
     }
 
     @Transactional
@@ -101,7 +95,7 @@ public class AuthService {
         String header = request.getHeader("Authorization");
 
         if (header == null || !header.startsWith("Bearer ")) {
-            throw new ResourceNotFoundException("Không tìm thấy token");
+            throw new ResourceNotFoundException("Not found Token");
         }
 
         String accessToken = header.substring(7);
@@ -111,32 +105,25 @@ public class AuthService {
         userService.findByUserName(username)
                 .ifPresent(users -> refreshTokenService.deleteAllByUserId(users.getUserId()));
 
-        return "Đăng xuất thành công";
+        return "Logout Success";
     }
 
-    /**
-     * Tạo cặp access token + refresh token, lưu hash vào DB.
-     * Gọi sau: register, login, refresh.
-     */
-    private AuthResponse issueTokenPair(Users user) {
+    
+    private AuthResponse createTokenPair(Users user) {
         String accessToken       = jwtService.generateAccessToken(user.getUserName());
         String plainRefreshToken = jwtService.generateRefreshToken();
 
-        // Chỉ lưu HASH — plain token chỉ tồn tại trong bộ nhớ rồi trả về client
+        // Only add hash refresh token
         refreshTokenService.createRefreshToken(user.getUserId(), jwtService.hashRefreshToken(plainRefreshToken));
 
         return new AuthResponse(
                 accessToken,
                 plainRefreshToken,
-                604800000 / 1000,
+                "1 hour",
                 toUserInfo(user)
         );
     }
 
-    /**
-     * Map User entity → UserInfo DTO.
-     * Dùng lại ở register, login, refresh, getCurrentUserInfo.
-     */
     private AuthResponse.UserInfo toUserInfo(Users user) {
         return new AuthResponse.UserInfo(
                 user.getUserId(),

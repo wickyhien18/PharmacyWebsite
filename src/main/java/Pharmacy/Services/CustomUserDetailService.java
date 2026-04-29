@@ -24,7 +24,7 @@ public class CustomUserDetailService implements UserDetailsService {
         Users user = usersRepository
                 .findByUserName(username)
                 .orElseThrow(() ->
-                        new UsernameNotFoundException("Không tìm thấy user: " + username));
+                        new UsernameNotFoundException("Not found: " + username));
 
         return new org.springframework.security.core.userdetails
                 .User(

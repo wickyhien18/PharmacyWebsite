@@ -46,7 +46,7 @@ public class UserService {
 
         System.out.println(username);
 
-        Users users = userRepository.findByUserName(username).orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
+        Users users = userRepository.findByUserName(username).orElseThrow(() -> new RuntimeException("Not found user"));
 
         UserProfile userProfile = UserProfile.builder()
                 .userName(users.getUserName())

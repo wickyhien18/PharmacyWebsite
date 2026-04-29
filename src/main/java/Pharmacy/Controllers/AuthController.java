@@ -10,6 +10,7 @@ import Pharmacy.Repositories.UserRepository;
 import Pharmacy.Services.AuthService;
 import Pharmacy.Services.RefreshTokenService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -28,12 +29,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Tag(name = "Auth API", description = "Đăng nhập bằng JWT")
 public class AuthController {
 
     private final AuthService authService;
-    private final RefreshTokenService refreshTokenService;
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
     @Operation(summary = "Đăng ký tài khoản (vai trò khách hàng)")
@@ -44,7 +43,7 @@ public class AuthController {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.ok("Đăng ký thành công", data));
+                .body(ApiResponse.ok("Register Successfully", data));
     }
 
     @PostMapping("/login")
@@ -54,7 +53,7 @@ public class AuthController {
 
         AuthResponse response = authService.login(req);
 
-        return ResponseEntity.ok(ApiResponse.ok("Đăng nhập thành công", response));
+        return ResponseEntity.ok(ApiResponse.ok("Login Successfully", response));
     }
 
     @PostMapping("/refresh")
@@ -63,7 +62,7 @@ public class AuthController {
 
         AuthResponse data = authService.refreshToken(refreshToken);
 
-        return ResponseEntity.ok(ApiResponse.ok("Làm mới token thành công", data));
+        return ResponseEntity.ok(ApiResponse.ok("Refresh Token Successfully", data));
     }
 
     @PostMapping("/logout")
