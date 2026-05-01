@@ -1,7 +1,11 @@
 package Pharmacy.Services;
 
+import Pharmacy.DTO.Request.CreateUpdateMedicineRequest;
 import Pharmacy.DTO.Response.MedicineResponse;
+import Pharmacy.Entities.Categories;
+import Pharmacy.Entities.Manufacturers;
 import Pharmacy.Entities.Medicines;
+import Pharmacy.Exceptions.ResourceNotFoundException;
 import Pharmacy.Repositories.MedicineRepository;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +22,12 @@ public class MedicineService {
 
     @Autowired
     private MedicineRepository medicineRepository;
+
+    @Autowired
+    private CategoryService categoryService;
+
+    @Autowired
+    private ManufactureService manufactureService;
 
     @Transactional(readOnly = true)
     public List<MedicineResponse> getAll() {
@@ -39,8 +49,26 @@ public class MedicineService {
         return medicineRepository.findByName(name);
     }
 
-    public Medicines insert(Medicines medicines) {
-        return medicineRepository.save(medicines);
+    public MedicineResponse insert(CreateUpdateMedicineRequest request) {
+        Categories categories = categoryService
+                .findById(request.categoryId())
+                .orElseThrow(() -> ResourceNotFoundException.of("Category",Long.valueOf(request.categoryId())));
+
+        Manufacturers manufacturers =  manufactureService
+                .findById(request.manufacturerId())
+                .orElseThrow(() -> ResourceNotFoundException.of("Manufacturer", Long.valueOf(request.manufacturerId())));
+
+        Medicines medicines = Medicines.builder()
+                .medicineName(request.medicineName())
+                .categories(categories)
+                .manufacturers(manufacturers)
+                .description(request.description())
+                .price(request.price())
+                .quantity(request.quantity())
+                .build();
+
+        medicineRepository.save(medicines);
+        return toResponse(medicines);
     }
 
     public Medicines update(Integer id, Medicines medicines) {

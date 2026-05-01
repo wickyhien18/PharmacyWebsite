@@ -1,5 +1,7 @@
 package Pharmacy.Controllers;
 
+import Pharmacy.DTO.Request.CreateUpdateMedicineRequest;
+import Pharmacy.DTO.Response.ApiResponse;
 import Pharmacy.DTO.Response.MedicineResponse;
 import Pharmacy.Entities.Medicines;
 import Pharmacy.Services.MedicineService;
@@ -23,9 +25,9 @@ public class MedicineController {
 
     @GetMapping
     @Operation(summary = "Lấy danh sách thuốc")
-    public ResponseEntity<List<MedicineResponse>> getAll() {
+    public ResponseEntity<?> getAll() {
         List<MedicineResponse> medicines = medicineService.getAll();
-        return ResponseEntity.ok(medicines);
+        return ResponseEntity.ok(ApiResponse.ok(medicines));
     }
 
     @GetMapping("/{id}")
@@ -57,13 +59,12 @@ public class MedicineController {
 
     @PostMapping
     @Operation(summary = "Thêm thông tin thuốc")
-    public ResponseEntity<Medicines> createMedicine(@RequestBody @Valid Medicines medicines) {
-        if (medicines.getPrice() <= 0) {
-            throw new RuntimeException("Giá thuốc không được thấp hơn  hoặc bằng 0");
-        }
+    public ResponseEntity<?> createMedicine(@Valid @RequestBody CreateUpdateMedicineRequest medicines) {
 
-        Medicines saved = medicineService.insert(medicines);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+        MedicineResponse saved = medicineService.insert(medicines);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.ok(saved));
     }
 
     @PutMapping("/{id}")
