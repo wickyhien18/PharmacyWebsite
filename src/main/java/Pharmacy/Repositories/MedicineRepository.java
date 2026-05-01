@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface MedicineRepository extends JpaRepository<Medicines,Long> {
 
-    @Query("Select m from Medicines m where LOWER(m.medicine_name) like LOWER(CONCAT('%',:name,'%'))")
+    @Query("Select m from Medicines m where LOWER(m.medicineName) like LOWER(CONCAT('%',:name,'%'))")
     List<Medicines> findByName(@Param("name") String name);
 
     @Query(value = "SELECT * FROM medicines WHERE medicine_id = :id", nativeQuery = true)

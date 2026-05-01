@@ -38,13 +38,13 @@ public class Medicines {
 
     //Mapping with column in table in database
     @Column(name = "medicine_id")
-    private int medicine_id;
+    private int medicineId;
 
     @Column(nullable = false, name = "medicine_name")
-    private String medicine_name;
+    private String medicineName;
 
     @Column(name = "medicine_image")
-    private String medicine_image;
+    private String medicineImage;
     private String description;
     private float price;
     private int quantity;
@@ -54,11 +54,11 @@ public class Medicines {
     @ManyToOne(fetch = FetchType.LAZY)
 
     //Foreign Key
-    @JoinColumn(name = "manufacturer_id")
+    @JoinColumn(name = "manufacturerId")
     private Manufacturers manufacturers;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "categoryId")
     private Categories categories;
 
     //Default value is right now

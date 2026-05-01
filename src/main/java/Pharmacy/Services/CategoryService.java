@@ -23,7 +23,7 @@ public class CategoryService {
 
     public Categories update(Integer id, Categories categories) {
         Categories categories1 = categoryRepository.findByIdDetail(id);
-        categories1.setCategory_name(categories.getCategory_name());
+        categories1.setCategoryName(categories.getCategoryName());
         categories1.setDescription(categories.getDescription());
         return categoryRepository.save(categories1);
     }

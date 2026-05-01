@@ -7,6 +7,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface ManufacturerRepository extends JpaRepository<Manufacturers, Long> {
 
-    @Query(value = "SELECT * FROM medicines WHERE medicine_id = :id", nativeQuery = true)
+    @Query(value = "SELECT * FROM manufacturers WHERE manufacturer_id = :id", nativeQuery = true)
     Manufacturers findByIdDetail(@Param("id") Integer id);
 }

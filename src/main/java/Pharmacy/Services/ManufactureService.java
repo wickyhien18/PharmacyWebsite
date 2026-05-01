@@ -23,7 +23,7 @@ public class ManufactureService {
 
     public Manufacturers update(Integer id, Manufacturers manufacturers) {
         Manufacturers manufacturers1 = manufacturerRepository.findByIdDetail(id);
-        manufacturers1.setManufacturer_name(manufacturers.getManufacturer_name());
+        manufacturers1.setmanufacturerName(manufacturers.getmanufacturerName());
         manufacturers1.setCountry(manufacturers.getCountry());
 
         return manufacturerRepository.save(manufacturers1);

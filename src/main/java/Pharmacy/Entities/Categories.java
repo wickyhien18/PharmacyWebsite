@@ -35,11 +35,11 @@ public class Categories {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
     //Mapping with column in table in database
-    @Column(name = "category_id")
-    private int category_id;
+    @Column(name = "categoryId")
+    private int categoryId;
 
-    @Column(nullable = false, name = "category_name")
-    private String category_name;
+    @Column(nullable = false, name = "categoryName")
+    private String categoryName;
 
     private String description;
 

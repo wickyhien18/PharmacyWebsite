@@ -35,11 +35,11 @@ public class Manufacturers {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
     //Mapping with column in table in database
-    @Column(name = "manufacturer_id")
-    private int manufacturer_id;
+    @Column(name = "manufacturerId")
+    private int manufacturerId;
 
-    @Column(nullable = false, name = "manufacturer_name")
-    private String manufacturer_name;
+    @Column(nullable = false, name = "manufacturerName")
+    private String manufacturerName;
 
     private String country;
 
