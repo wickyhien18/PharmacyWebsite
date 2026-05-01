@@ -1,5 +1,6 @@
 package Pharmacy.Controllers;
 
+import Pharmacy.DTO.Response.MedicineResponse;
 import Pharmacy.Entities.Medicines;
 import Pharmacy.Services.MedicineService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,8 +23,8 @@ public class MedicineController {
 
     @GetMapping
     @Operation(summary = "Lấy danh sách thuốc")
-    public ResponseEntity<List<Medicines>> getAll() {
-        List<Medicines> medicines = medicineService.getAll();
+    public ResponseEntity<List<MedicineResponse>> getAll() {
+        List<MedicineResponse> medicines = medicineService.getAll();
         return ResponseEntity.ok(medicines);
     }
 

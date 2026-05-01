@@ -22,7 +22,7 @@ public class MedicineService {
     @Transactional(readOnly = true)
     public List<MedicineResponse> getAll() {
         return medicineRepository
-                .findAll()
+                .getAll()
                 .stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());

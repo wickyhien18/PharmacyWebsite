@@ -11,6 +11,11 @@ import java.util.Optional;
 
 public interface MedicineRepository extends JpaRepository<Medicines,Long> {
 
+    @Query("SELECT m FROM Medicines m " +
+            "JOIN FETCH m.categories " +
+            "JOIN FETCH m.manufacturers")
+    List<Medicines> getAll();
+
     @Query("Select m from Medicines m where LOWER(m.medicineName) like LOWER(CONCAT('%',:name,'%'))")
     List<Medicines> findByName(@Param("name") String name);
 
