@@ -5,8 +5,12 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import Pharmacy.Entities.Roles;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -30,7 +34,7 @@ import java.util.List;
 @Getter
 //Generate Setter method for all attributes
 @Setter
-public class Users {
+public class Users implements UserDetails {
 
     //Primary key
     @Id
@@ -39,24 +43,38 @@ public class Users {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
     //Mapping with column in table in database
-    @Column(name = "userId")
-    private int userId;
+    @Column(name = "user_id")
+    private Long userId;
 
-    @Column(nullable = false, unique = true, name = "user_name")
+    @Column(nullable = false, unique = true, name = "user_name", length = 100)
     private String userName;
 
     private String password;
 
-    //Default value is right now
-    @CreationTimestamp
-    @Column(updatable = false)
-    private LocalDateTime created_at;
+    @Column(name = "full_name")
+    private String fullName;
 
-    @CreationTimestamp
-    private LocalDateTime last_activity;
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "phone")
+    private String phone;
+
+    @Column(name = "create_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "update_at")
+    private LocalDateTime updateAt;
+
+    @Column(name = "last_activity")
+    private LocalDateTime lastActivity;
+
+    @Column(name = "delete_at")
+    private LocalDateTime deletedAt;
 
     @Column(name = "is_active")
-    private boolean active;
+    @Builder.Default
+    private Boolean isActive = true;
 
     //N - 1 Relationship
     //FetchType = LAZY: only load when using query, = EAGER: alway load
@@ -78,4 +96,19 @@ public class Users {
     @OneToMany(mappedBy = "users")
     @JsonIgnore
     private List<Orders> orders;
+
+    @Override
+    public String getUsername() { return email; }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (roles == null) return List.of();
+        // roleName has been prefix "ROLE_" to Spring Security
+        return List.of(new SimpleGrantedAuthority(roles.getRoleName()));
+    }
+
+    @Override public boolean isAccountNonExpired()     { return true; }
+    @Override public boolean isAccountNonLocked()      { return deletedAt == null; }
+    @Override public boolean isCredentialsNonExpired() { return true; }
+    @Override public boolean isEnabled()               { return Boolean.TRUE.equals(isActive) && deletedAt == null; }
 }

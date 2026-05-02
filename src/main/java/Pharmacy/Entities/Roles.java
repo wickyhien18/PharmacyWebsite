@@ -35,19 +35,8 @@ public class Roles {
 
     //Mapping with column in table in database
     @Column(name = "role_id")
-    private int role_id;
+    private Long roleId;
 
     @Column(name = "role_name", nullable = false)
     private String roleName;
-
-    @Column(name = "description")
-    private String description;
-
-    //1 - N Relationship
-    //Mapped by another Entities
-    @OneToMany(mappedBy = "roles")
-
-    //Avoid infinite loop
-    @JsonIgnore
-    private List<Users> users;
 }
