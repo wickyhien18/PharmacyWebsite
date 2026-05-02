@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -30,6 +31,8 @@ import java.util.List;
 @Setter
 public class Medicines {
 
+    public enum Status{ACIVE, INACTIVE, OUT_OF_STOCK}
+
     //Primary key
     @Id
 
@@ -38,42 +41,64 @@ public class Medicines {
 
     //Mapping with column in table in database
     @Column(name = "medicine_id")
-    private int medicineId;
+    private Long medicineId;
 
-    @Column(nullable = false, name = "medicine_name")
+    @Column(nullable = false, name = "name", length = 500)
     private String medicineName;
 
-    @Column(name = "medicine_image")
+    @Column(unique = true, nullable = false, length = 500, name = "slug")
+    private String medicineSlug;
+
+    @Column(name = "image")
     private String medicineImage;
+
+    @Column(columnDefinition = "TEXT")
     private String description;
-    private float price;
-    private int quantity;
+
+    @Column(precision = 15, scale = 2)
+    private BigDecimal price;
+
+    @Builder.Default
+    private String unit = "Pillbox";
 
     //N - 1 Relationship
     //FetchType = LAZY: only load when using query, = EAGER: alway load
     @ManyToOne(fetch = FetchType.LAZY)
 
     //Foreign Key
-    @JoinColumn(name = "manufacturerId")
+    @JoinColumn(name = "manufacturer_id")
     private Manufacturers manufacturers;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "categoryId")
+    @JoinColumn(name = "category_id")
     private Categories categories;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private Status status = Status.ACIVE;
+
+    @Column(name = "expire_date")
+    private LocalDateTime expireDate;
+
     //Default value is right now
-    @CreationTimestamp
-    private LocalDateTime created_at;
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 
-    //1 - N Relationship
-    //Mapped by another Entities
-    @OneToMany(mappedBy = "medicines")
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
-    //Avoid infinite loop
-    @JsonIgnore
-    private List<CartItems> cartItems;
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
-    @OneToMany(mappedBy = "medicines")
-    @JsonIgnore
-    private List<OrderItems> orderItems;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

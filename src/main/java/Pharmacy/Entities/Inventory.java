@@ -1,16 +1,15 @@
 package Pharmacy.Entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 //Mark this class is Entity in database
 @Entity
 
 //Specify table in database
-@Table(name = "categories")
+@Table(name = "inventory")
 
 //Create object easily
 // ClassName.builder().atribute1().attribute2.build()
@@ -26,7 +25,7 @@ import java.util.List;
 @Getter
 //Generate Setter method for all attributes
 @Setter
-public class Categories {
+public class Inventory {
 
     //Primary key
     @Id
@@ -35,12 +34,16 @@ public class Categories {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
     //Mapping with column in table in database
-    @Column(name = "category_id")
-    private Long categoryId;
+    @Column(name = "inventory_id")
+    private Long inventoryId ;
 
-    @Column(nullable = false, name = "name")
-    private String categoryName;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "medicine_id")
+    private Medicines medicines;
 
-    @Column(unique = true, nullable = false, name = "slug", length = 255)
-    private String categorySlug;
+    @Builder.Default
+    private Integer quantity = 0;
+
+    @Column(name = "last_updated")
+    private LocalDateTime lastUpdated;
 }

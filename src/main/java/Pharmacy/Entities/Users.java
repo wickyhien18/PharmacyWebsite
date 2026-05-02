@@ -60,12 +60,15 @@ public class Users implements UserDetails {
     @Column(name = "phone")
     private String phone;
 
+    @CreationTimestamp
     @Column(name = "create_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @CreationTimestamp
     @Column(name = "update_at")
-    private LocalDateTime updateAt;
+    private LocalDateTime updatedAt;
 
+    @CreationTimestamp
     @Column(name = "last_activity")
     private LocalDateTime lastActivity;
 
@@ -84,18 +87,18 @@ public class Users implements UserDetails {
     @JoinColumn(name = "role_id")
     private Roles roles;
 
-    //1 - 1 Relationship
-    //Mapped by another entities
-    @OneToOne(mappedBy = "users")
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
 
-    //Avoid infinite loop
-    @JsonIgnore
-    private Carts carts;
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 
-    //1 - N Relationship
-    @OneToMany(mappedBy = "users")
-    @JsonIgnore
-    private List<Orders> orders;
+
 
     @Override
     public String getUsername() { return email; }

@@ -36,8 +36,9 @@ public class RefreshToken {
 
     //Mapping with column in table in database
     @Column(name = "id")
-    private long id;
+    private Long id;
 
+    @Column(length = 500)
     private String token;
 
     //1 - 1 Relationship
@@ -45,17 +46,18 @@ public class RefreshToken {
     @OneToOne(fetch = FetchType.LAZY)
 
     //Foreign Key
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "user_id")
     private Users users;
 
-    private LocalDateTime expire_at;
+    @Column(name = "expire_at")
+    private LocalDateTime expireAt;
 
     //Default value is right now
     @CreationTimestamp
-    @Column(updatable = false)
-    private LocalDateTime created_at;
+    @Column(updatable = false, name = "created_at")
+    private LocalDateTime createdAt;
 
     public boolean isExpired() {
-        return LocalDateTime.now().isAfter(expire_at);
+        return LocalDateTime.now().isAfter(expireAt);
     }
 }

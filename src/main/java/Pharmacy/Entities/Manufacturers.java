@@ -1,10 +1,8 @@
 package Pharmacy.Entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
 
 //Mark this class is Entity in database
 @Entity
@@ -35,19 +33,12 @@ public class Manufacturers {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
     //Mapping with column in table in database
-    @Column(name = "manufacturerId")
-    private int manufacturerId;
+    @Column(name = "manufacturer_id")
+    private Long manufacturerId;
 
-    @Column(nullable = false, name = "manufacturerName")
+    @Column(nullable = false, name = "name")
     private String manufacturerName;
 
     private String country;
 
-    //1 - N Relationship
-    //Mapped by another Entities
-    @OneToMany(mappedBy = "manufacturers")
-
-    //Avoid infinite loop
-    @JsonIgnore
-    private List<Medicines> medicines;
 }
