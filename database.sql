@@ -1,131 +1,211 @@
-CREATE TABLE `roles` (
-                         `role_id` BIGINT NOT NULL AUTO_INCREMENT,
-                         `role_name` varchar(255) DEFAULT NULL,
-                         `description` varchar(255) DEFAULT NULL,
-                         PRIMARY KEY (`role_id`)
-);
-CREATE TABLE `users` (
-                         `user_id` BIGINT NOT NULL AUTO_INCREMENT,
-                         `user_name` varchar(255) NOT NULL,
-                         `password` varchar(255) DEFAULT NULL,
-                         `role_id` BIGINT DEFAULT NULL,
-                         `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-                         `last_activity` datetime DEFAULT CURRENT_TIMESTAMP,
-                         `is_active` tinyint(1) DEFAULT 1,
-                         PRIMARY KEY (`user_id`),
-                         UNIQUE KEY `uu_user_name` (`user_name`),
-                         KEY `fk_user_role` (`role_id`),
-                         CONSTRAINT `fk_user_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`) ON DELETE SET NULL
+CREATE TABLE roles (
+                       role_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                       role_name VARCHAR(100) NOT NULL UNIQUE
 );
 
-CREATE TABLE `categories` (
-                              `category_id` BIGINT NOT NULL AUTO_INCREMENT,
-                              `category_name` varchar(255) NOT NULL,
-                              `description` varchar(255) DEFAULT NULL,
-                              PRIMARY KEY (`category_id`)
+CREATE TABLE users (
+                       user_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                       user_name VARCHAR(100) NOT NULL UNIQUE,
+                       password VARCHAR(255) NOT NULL,
+                       full_name VARCHAR(255) NOT NULL,
+                       email VARCHAR(255) NOT NULL UNIQUE,
+                       phone VARCHAR(20) NOT NULL UNIQUE,
+                       role_id BIGINT,
+
+                       is_active TINYINT(1) DEFAULT 1,
+
+                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                       last_activity TIMESTAMP NULL,
+                       deleted_at TIMESTAMP NULL,
+
+                       CONSTRAINT fk_user_role
+                           FOREIGN KEY (role_id) REFERENCES roles(role_id) ON DELETE SET NULL
 );
 
-CREATE TABLE `manufacturers` (
-                                 `manufacturer_id` BIGINT NOT NULL AUTO_INCREMENT,
-                                 `manufacturer_name` varchar(255) NOT NULL,
-                                 `country` varchar(255) DEFAULT NULL,
-                                 PRIMARY KEY (`manufacturer_id`)
+CREATE TABLE categories (
+                            category_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                            name VARCHAR(255) NOT NULL,
+                            slug VARCHAR(255) NOT NULL UNIQUE
 );
 
-CREATE TABLE `medicines` (
-                             `medicine_id` BIGINT NOT NULL AUTO_INCREMENT,
-                             `medicine_name` varchar(255) NOT NULL,
-                             `medicine_image` varchar(255) DEFAULT NULL,
-                             `description` TEXT DEFAULT NULL,
-                             `price` decimal(15,2) NOT NULL,
-                             `quantity` int DEFAULT NULL,
-                             `manufacturer_id` BIGINT DEFAULT NULL,
-                             `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-                             `category_id` BIGINT DEFAULT NULL,
-                             PRIMARY KEY (`medicine_id`),
-                             KEY `fk_medicine_manufacturer` (`manufacturer_id`),
-                             KEY `fk_medicines_category` (`category_id`),
-                             CONSTRAINT `fk_medicine_manufacturer` FOREIGN KEY (`manufacturer_id`)
-                                 REFERENCES `manufacturers` (`manufacturer_id`) ON DELETE SET NULL,
-                             CONSTRAINT `fk_medicines_category` FOREIGN KEY (`category_id`)
-                                 REFERENCES `categories` (`category_id`) ON DELETE SET NULL ON UPDATE RESTRICT
+CREATE TABLE manufacturers (
+                               manufacturer_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                               name VARCHAR(255) NOT NULL,
+                               country VARCHAR(255)
 );
 
-CREATE TABLE `carts` (
-                         `cart_id` BIGINT NOT NULL AUTO_INCREMENT,
-                         `user_id` BIGINT DEFAULT NULL,
-                         `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-                         PRIMARY KEY (`cart_id`),
-                         KEY `fk_cart_user` (`user_id`),
-                         CONSTRAINT `fk_cart_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
+CREATE TABLE medicines (
+                           medicine_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                           name VARCHAR(500) NOT NULL,
+                           slug VARCHAR(520) NOT NULL UNIQUE,
+                           image VARCHAR(500),
+                           description TEXT,
+
+                           price DECIMAL(15,2) NOT NULL,
+                           unit VARCHAR(50) DEFAULT 'Pillbox',
+
+                           category_id BIGINT,
+                           manufacturer_id BIGINT,
+
+                           status ENUM('ACTIVE','INACTIVE','OUT_OF_STOCK') DEFAULT 'ACTIVE',
+
+                           expire_date DATE,
+
+                           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                           deleted_at TIMESTAMP NULL,
+
+                           INDEX idx_category (category_id),
+                           INDEX idx_manufacturer (manufacturer_id),
+
+                           FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL,
+                           FOREIGN KEY (manufacturer_id) REFERENCES manufacturers(manufacturer_id) ON DELETE SET NULL
 );
 
-CREATE TABLE `cart_item` (
-                             `Id` BIGINT NOT NULL AUTO_INCREMENT,
-                             `cart_id` BIGINT DEFAULT NULL,
-                             `medicine_id` BIGINT DEFAULT NULL,
-                             `quantity` int DEFAULT NULL,
-                             PRIMARY KEY (`Id`),
-                             KEY `fk_cart_medicine` (`cart_id`),
-                             KEY `fk_medicine_cart` (`medicine_id`),
-                             CONSTRAINT `fk_cart_medicine` FOREIGN KEY (`cart_id`)
-                                 REFERENCES `carts` (`cart_id`) ON DELETE CASCADE ON UPDATE RESTRICT,
-                             CONSTRAINT `fk_medicine_cart` FOREIGN KEY (`medicine_id`)
-                                 REFERENCES `medicines` (`medicine_id`) ON DELETE CASCADE
+CREATE TABLE inventory (
+                           inventory_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                           medicine_id BIGINT NOT NULL,
+                           quantity INT NOT NULL DEFAULT 0,
+
+                           last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+                           UNIQUE KEY uk_inventory_medicine (medicine_id),
+
+                           FOREIGN KEY (medicine_id) REFERENCES medicines(medicine_id) ON DELETE CASCADE
 );
 
-CREATE TABLE `orders` (
-                          `order_id` BIGINT NOT NULL AUTO_INCREMENT,
-                          `user_id` BIGINT DEFAULT NULL,
-                          `total_price` decimal(15,2) NOT NULL,
-                          `status` varchar(255) DEFAULT NULL,
-                          `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-                          PRIMARY KEY (`order_id`),
-                          KEY `fk_order_user` (`user_id`),
-                          CONSTRAINT `fk_order_user` FOREIGN KEY (`user_id`)
-                              REFERENCES `users` (`user_id`) ON DELETE SET NULL
+CREATE TABLE carts (
+                       cart_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                       user_id BIGINT,
+
+                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+                       FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
-CREATE TABLE `order_item` (
-                              `Id` BIGINT NOT NULL AUTO_INCREMENT,
-                              `order_id` BIGINT DEFAULT NULL,
-                              `medicine_id` BIGINT DEFAULT NULL,
-                              `price` decimal(15,2) DEFAULT NULL,
-                              `quantity` int DEFAULT NULL,
-                              PRIMARY KEY (`Id`),
-                              KEY `fk_medicine_order` (`medicine_id`),
-                              KEY `fk_order_medicine` (`order_id`),
-                              CONSTRAINT `fk_medicine_order` FOREIGN KEY (`medicine_id`)
-                                  REFERENCES `medicines` (`medicine_id`) ON DELETE CASCADE ON UPDATE RESTRICT,
-                              CONSTRAINT `fk_order_medicine` FOREIGN KEY (`order_id`)
-                                  REFERENCES `orders` (`order_id`) ON DELETE CASCADE
+CREATE TABLE cart_items (
+                            cart_item_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                            cart_id BIGINT NOT NULL,
+                            medicine_id BIGINT NOT NULL,
+                            quantity INT NOT NULL DEFAULT 1,
+
+                            UNIQUE KEY uk_cart_medicine (cart_id, medicine_id),
+
+                            FOREIGN KEY (cart_id) REFERENCES carts(cart_id) ON DELETE CASCADE,
+                            FOREIGN KEY (medicine_id) REFERENCES medicines(medicine_id) ON DELETE CASCADE
 );
 
+CREATE TABLE orders (
+                        order_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                        user_id BIGINT,
 
-CREATE TABLE `payments` (
-                            `payment_id` BIGINT NOT NULL AUTO_INCREMENT,
-                            `order_id` BIGINT DEFAULT NULL,
-                            `amount` decimal(15,2) NOT NULL,
-                            `payment_method` varchar(255) DEFAULT NULL,
-                            `status` varchar(255) DEFAULT NULL,
-                            `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-                            PRIMARY KEY (`payment_id`),
-                            KEY `fk_payment_order` (`order_id`),
-                            CONSTRAINT `fk_payment_order` FOREIGN KEY (`order_id`)
-                                REFERENCES `orders` (`order_id`) ON DELETE CASCADE
+                        order_code VARCHAR(100) NOT NULL UNIQUE,
+
+                        total_price DECIMAL(15,2) NOT NULL,
+
+                        order_status ENUM('PENDING','CONFIRMED','SHIPPING','DELIVERED','CANCELLED')
+                                                                       DEFAULT 'PENDING',
+
+                        payment_status ENUM('PENDING','PAID','FAILED') DEFAULT 'PENDING',
+
+                        shipping_address VARCHAR(500),
+                        note TEXT,
+
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+                        FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL,
+                        INDEX idx_user (user_id),
+                        INDEX idx_status (order_status)
 );
 
+CREATE TABLE order_items (
+                             order_item_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                             order_id BIGINT NOT NULL,
+                             medicine_id BIGINT,
 
-CREATE TABLE `refresh_token` (
-                                 `id` BIGINT NOT NULL AUTO_INCREMENT,
-                                 `token` varchar(255) DEFAULT NULL,
-                                 `user_id` BIGINT NOT NULL,
-                                 `expire_at` datetime DEFAULT NULL,
-                                 `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-                                 PRIMARY KEY (`id`),
-                                 UNIQUE KEY `token` (`token`),
-                                 KEY `fk_refresh_token_user` (`user_id`),
-                                 CONSTRAINT `fk_refresh_token_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
+                             quantity INT NOT NULL,
+                             unit_price DECIMAL(15,2) NOT NULL,
+                             total_price DECIMAL(15,2) NOT NULL,
+
+                             FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
+                             FOREIGN KEY (medicine_id) REFERENCES medicines(medicine_id) ON DELETE SET NULL,
+
+                             INDEX idx_order (order_id)
 );
 
+CREATE TABLE shipments (
+                           shipment_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                           order_id BIGINT NOT NULL,
 
+                           tracking_code VARCHAR(100),
+                           carrier VARCHAR(100),
+
+                           status ENUM('PENDING','SHIPPING','DELIVERED','FAILED'),
+
+                           shipped_at TIMESTAMP NULL,
+                           delivered_at TIMESTAMP NULL,
+
+                           FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
+);
+
+CREATE TABLE refresh_tokens (
+                                id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                token VARCHAR(500) NOT NULL UNIQUE,
+                                user_id BIGINT NOT NULL,
+
+                                expire_at TIMESTAMP,
+                                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+                                FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE inventory_logs (
+                                log_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+
+                                medicine_id BIGINT NOT NULL,
+
+                                change_type ENUM('IMPORT','EXPORT','ADJUST') NOT NULL,
+
+                                quantity INT NOT NULL,
+                                previous_quantity INT NOT NULL,
+                                new_quantity INT NOT NULL,
+
+                                reference_id BIGINT NULL,
+    -- liên kết order_id nếu là bán hàng
+
+                                note VARCHAR(500),
+
+                                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+                                FOREIGN KEY (medicine_id) REFERENCES medicines(medicine_id) ON DELETE CASCADE,
+
+                                INDEX idx_medicine (medicine_id),
+                                INDEX idx_type (change_type)
+);
+
+CREATE TABLE payments (
+                          payment_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+
+                          order_id BIGINT NOT NULL,
+
+                          payment_method ENUM('COD','VNPAY','MOMO') NOT NULL,
+
+                          amount DECIMAL(15,2) NOT NULL,
+
+                          transaction_code VARCHAR(255),
+    -- mã từ cổng thanh toán
+
+                          status ENUM('PENDING','SUCCESS','FAILED') DEFAULT 'PENDING',
+
+                          paid_at TIMESTAMP NULL,
+
+                          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+                          FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
+
+                          INDEX idx_order (order_id),
+                          INDEX idx_status (status)
+);
