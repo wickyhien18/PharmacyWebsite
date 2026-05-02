@@ -7,7 +7,11 @@ import lombok.*;
 @Entity
 
 //Specify table in database
-@Table(name = "cart_item")
+@Table(name = "cart_item",
+    uniqueConstraints = @UniqueConstraint(
+            name = "uk_cart_medicine",
+            columnNames = {"cart_id", "medicine_id"}
+    ))
 
 //Create object easily
 // ClassName.builder().atribute1().attribute2.build()
@@ -32,8 +36,8 @@ public class CartItems {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
     //Mapping with column in table in database
-    @Column(name = "Id")
-    private int Id;
+    @Column(name = "cart_item_id")
+    private Long cartItemId;
 
     //N - 1 Relationship
     //FetchType = LAZY: only load when using query, = EAGER: alway load
@@ -47,5 +51,7 @@ public class CartItems {
     @JoinColumn(name = "medicine_id")
     private Medicines medicines;
 
-    private int quantity;
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer quantity = 1;
 }

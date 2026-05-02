@@ -69,11 +69,7 @@ public class MedicineController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Sửa thông tin thuốc")
-    public ResponseEntity<Medicines> updateMedicine(@PathVariable Integer id ,@RequestBody @Valid Medicines medicines) {
-        Medicines exist = medicineService.getById(id);
-        if (exist == null) {
-            throw new RuntimeException("Không tìm thấy thông tin thuốc để sửa");
-        }
+    public ResponseEntity<Medicines> updateMedicine(@PathVariable Integer id ,@Valid @RequestBody  Medicines medicines) {
 
         Medicines update = medicineService.update(id,medicines);
 

@@ -7,7 +7,6 @@ import Pharmacy.Entities.Manufacturers;
 import Pharmacy.Entities.Medicines;
 import Pharmacy.Exceptions.ResourceNotFoundException;
 import Pharmacy.Repositories.MedicineRepository;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,8 +38,13 @@ public class MedicineService {
                 .collect(Collectors.toList());
     }
 
-    public Medicines getById(@PathVariable Integer id) {
-        return medicineRepository.findByIdDetail(id);
+    public MedicineResponse getById(@PathVariable Integer id) {
+
+        Medicines medicines = medicineRepository
+                .findByIdDetail(id)
+                .orElseThrow(() -> ResourceNotFoundException.of("Medicine", Long.valueOf(id)));
+
+        return toResponse(medicines);
     }
 
     public List<Medicines> getByName(@RequestParam(required = false) String name) {
@@ -71,8 +76,16 @@ public class MedicineService {
         return toResponse(medicines);
     }
 
-    public Medicines update(Integer id, Medicines medicines) {
-        Medicines medicines1 = getById(id);
+    public MedicineResponse update(Integer id, CreateUpdateMedicineRequest request) {
+        Medicines medicines = medicineRepository
+                .findByIdDetail(id)
+                .orElseThrow(() -> ResourceNotFoundException.of("Medicine", Long.valueOf(id)));
+
+        Categories categories = categoryRepository
+                .findByIdDetail(request.categoryId())
+                .orElseThrow(() -> ResourceNotFoundException.of("Category", Long.valueOf(Long.valueOf(id))));
+
+
         medicines1.setMedicineName(medicines.getMedicineName());
         medicines1.setMedicineImage(medicines.getMedicineImage());
         medicines1.setDescription(medicines.getDescription());

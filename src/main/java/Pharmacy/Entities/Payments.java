@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 //Mark this class is Entity in database
@@ -28,6 +29,9 @@ import java.time.LocalDateTime;
 @Setter
 public class Payments {
 
+    public enum PaymentMethod { COD, VNPAY, MOMO }
+    public enum PaymentStatus { PENDING, SUCCESS, FAILED }
+
     //Primary key
     @Id
 
@@ -36,17 +40,22 @@ public class Payments {
 
     //Mapping with column in table in database
     @Column(name = "payment_id")
-    private int payment_id;
+    private Long paymentId;
 
-    @Column(name = "payment_method")
-    private String payment_method;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method", nullable = false)
+    private PaymentMethod paymentMethod;
 
-    private float amount;
-    private String status;
+    @Column(nullable = false, precision = 15, scale = 2)
+    private BigDecimal amount;
 
-    //Default value is right now
-    @CreationTimestamp
-    private LocalDateTime created_at;
+    // Mã giao dịch từ VNPay/Momo — null nếu là COD
+    @Column(name = "transaction_code", length = 255)
+    private String transactionCode;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private PaymentStatus status = PaymentStatus.PENDING;
 
     //1 - 1 Relationship
     //FetchType = LAZY: only load when using query, = EAGER: alway load
@@ -55,4 +64,22 @@ public class Payments {
     //Foreign Key
     @JoinColumn(name = "order_id")
     private Orders orders;
+
+    @Column(name = "paid_at")
+    private LocalDateTime paidAt;
+
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() { updatedAt = LocalDateTime.now(); }
 }

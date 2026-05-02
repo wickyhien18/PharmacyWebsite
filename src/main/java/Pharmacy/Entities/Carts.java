@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 //Mark this class is Entity in database
@@ -38,26 +39,30 @@ public class Carts {
 
     //Mapping with column in table in database
     @Column(name = "cart_id")
-    private int cart_id;
+    private Long cartId;
 
     //N - 1 Relationship
     //FetchType = LAZY: only load when using query, = EAGER: alway load
     @OneToOne(fetch = FetchType.LAZY)
 
     //Foreign Key
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "user_id")
     private Users users;
 
     //Default value is right now
-    @CreationTimestamp
-    private LocalDateTime created_at;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
     //1 - N Relationship
     //Mapped by another Entities
-    @OneToMany(mappedBy = "carts")
+    @OneToMany(mappedBy = "carts", cascade = CascadeType.ALL, orphanRemoval = true)
 
+    @Builder.Default
     //Avoid infinite loop
     @JsonIgnore
-    private List<CartItems> cartItems;
+    private List<CartItems> cartItems = new ArrayList<>();
+
+    @PrePersist
+    protected void onCreate() { createdAt = LocalDateTime.now(); }
 
 }

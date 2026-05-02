@@ -19,6 +19,7 @@ public interface MedicineRepository extends JpaRepository<Medicines,Long> {
     @Query("Select m from Medicines m where LOWER(m.medicineName) like LOWER(CONCAT('%',:name,'%'))")
     List<Medicines> findByName(@Param("name") String name);
 
-    @Query(value = "SELECT * FROM medicines WHERE medicine_id = :id", nativeQuery = true)
-    Medicines findByIdDetail(@Param("id") Integer id);
+    @Query("SELECT m FROM Medicines m WHERE m.medicineId = :id")
+    Optional<Medicines> findByIdDetail(@Param("id") Integer id);
+
 }

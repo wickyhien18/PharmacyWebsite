@@ -19,8 +19,12 @@ public class CategoryService {
         return categoryRepository.findAll();
     }
 
-    public Optional<Categories> findById(Integer id) {
-        return categoryRepository.findByIdDetail(id);
+    public Categories findById(Integer id) {
+
+        return categoryRepository
+                .findByIdDetail(id)
+                .orElseThrow(() -> ResourceNotFoundException.of("Category", Long.valueOf(Long.valueOf(id))));
+
     }
 
     public Categories insert(Categories categories) {
@@ -28,9 +32,7 @@ public class CategoryService {
     }
 
     public Categories update(Integer id, Categories categories) {
-        Categories categories1 = categoryRepository
-                .findByIdDetail(id)
-                .orElseThrow(() -> ResourceNotFoundException.of("Loại thuốc", Long.valueOf(Long.valueOf(id))));
+        Categories categories1 = categoryRepository.findById(id);
         categories1.setCategoryName(categories.getCategoryName());
         categories1.setDescription(categories.getDescription());
         return categoryRepository.save(categories1);

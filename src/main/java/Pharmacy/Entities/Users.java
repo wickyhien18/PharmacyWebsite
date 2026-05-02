@@ -46,18 +46,19 @@ public class Users implements UserDetails {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(nullable = false, unique = true, name = "user_name", length = 100)
+    @Column(name = "user_name", nullable = false, unique = true, length = 100)
     private String userName;
 
+    @Column(nullable = false, length = 255)
     private String password;
 
-    @Column(name = "full_name")
+    @Column(name = "full_name", nullable = false, length = 255)
     private String fullName;
 
-    @Column(name = "email")
+    @Column(nullable = false, unique = true, length = 255)
     private String email;
 
-    @Column(name = "phone")
+    @Column(nullable = false, unique = true, length = 20)
     private String phone;
 
     @CreationTimestamp
@@ -81,7 +82,7 @@ public class Users implements UserDetails {
 
     //N - 1 Relationship
     //FetchType = LAZY: only load when using query, = EAGER: alway load
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
 
     //Foreign Key
     @JoinColumn(name = "role_id")
@@ -97,8 +98,6 @@ public class Users implements UserDetails {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-
-
 
     @Override
     public String getUsername() { return email; }

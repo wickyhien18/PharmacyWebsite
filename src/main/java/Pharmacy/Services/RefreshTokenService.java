@@ -34,7 +34,7 @@ public class RefreshTokenService {
         RefreshToken refreshToken = RefreshToken.builder()
                 .token(token)
                 .users(user)
-                .expire_at(LocalDateTime.now().plusDays(7)) // 7 ngày
+                .expireAt(LocalDateTime.now().plusDays(7)) // 7 ngày
                 .build();
 
         return refreshTokenRepository.save(refreshToken);
@@ -69,7 +69,7 @@ public class RefreshTokenService {
         }
 
         RefreshToken rt = optional.get();
-        rt.setExpire_at(LocalDateTime.now().plusDays(7));
+        rt.setExpireAt(LocalDateTime.now().plusDays(7));
         refreshTokenRepository.save(rt);
         return true;
     }
