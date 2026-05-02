@@ -52,7 +52,7 @@ public class Orders {
     @JoinColumn(name = "user_id")
     private Users users;
 
-    @Column(name = "order_code")
+    @Column(name = "order_code", nullable = false, unique = true, length = 100)
     private String orderCode;
 
     @Column(name = "total_price", nullable = false, precision = 15, scale = 2)

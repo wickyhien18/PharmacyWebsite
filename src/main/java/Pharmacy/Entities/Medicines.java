@@ -49,15 +49,16 @@ public class Medicines {
     @Column(unique = true, nullable = false, length = 500, name = "slug")
     private String medicineSlug;
 
-    @Column(name = "image")
+    @Column(name = "image", length = 500)
     private String medicineImage;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(precision = 15, scale = 2)
+    @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal price;
 
+    @Column(length = 50)
     @Builder.Default
     private String unit = "Pillbox";
 
@@ -81,7 +82,6 @@ public class Medicines {
     @Column(name = "expire_date")
     private LocalDateTime expireDate;
 
-    //Default value is right now
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

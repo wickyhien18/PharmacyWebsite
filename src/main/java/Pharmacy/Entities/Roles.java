@@ -37,6 +37,6 @@ public class Roles {
     @Column(name = "role_id")
     private Long roleId;
 
-    @Column(name = "role_name", nullable = false)
+    @Column(name = "role_name", nullable = false, unique = true, length = 100)
     private String roleName;
 }

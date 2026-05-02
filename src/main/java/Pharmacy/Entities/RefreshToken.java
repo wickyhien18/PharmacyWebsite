@@ -34,11 +34,11 @@ public class RefreshToken {
     //Id auto_increment
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
-    //Mapping with column in table in database
-    @Column(name = "id")
+
     private Long id;
 
-    @Column(length = 500)
+    //Mapping with column in table in database
+    @Column(nullable = false, unique = true, length = 500)
     private String token;
 
     //1 - 1 Relationship
@@ -46,7 +46,7 @@ public class RefreshToken {
     @OneToOne(fetch = FetchType.LAZY)
 
     //Foreign Key
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private Users users;
 
     @Column(name = "expire_at")
@@ -56,6 +56,11 @@ public class RefreshToken {
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
     private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 
     public boolean isExpired() {
         return LocalDateTime.now().isAfter(expireAt);

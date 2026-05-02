@@ -41,23 +41,23 @@ public class OrderItems {
     @Column(nullable = false)
     private Integer quantity;
 
-    // Snapshot giá lúc đặt — giá sau có thể thay đổi
-    @Column(name = "unit_price", nullable = false, precision = 15, scale = 2)
-    private BigDecimal unitPrice;
-
-    @Column(name = "total_price", nullable = false, precision = 15, scale = 2)
-    private BigDecimal totalPrice;
-
     //N - 1 Relationship
     //FetchType = LAZY: only load when using query, = EAGER: alway load
     @ManyToOne(fetch = FetchType.LAZY)
 
     //Foreign Key
-    @JoinColumn(name = "order_id")
+    @JoinColumn(name = "order_id", nullable = false)
     private Orders orders;
 
     //1 - N Relationship
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medicine_id")
     private Medicines medicines;
+
+    // Snapshot giá lúc đặt — giá sau có thể thay đổi
+    @Column(name = "unit_price", nullable = false, precision = 15, scale = 2)
+    private BigDecimal unitPrice;
+
+    @Column(name = "total_price", nullable = false, precision = 15, scale = 2)
+    private BigDecimal totalPrice;
 }

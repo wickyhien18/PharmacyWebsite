@@ -44,11 +44,11 @@ public class CartItems {
     @ManyToOne(fetch = FetchType.LAZY)
 
     //Foreign Key
-    @JoinColumn(name = "cart_id")
+    @JoinColumn(name = "cart_id", nullable = false)
     private Carts carts;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "medicine_id")
+    @JoinColumn(name = "medicine_id", nullable = false)
     private Medicines medicines;
 
     @Column(nullable = false)

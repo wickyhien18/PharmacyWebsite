@@ -36,9 +36,10 @@ public class Manufacturers {
     @Column(name = "manufacturer_id")
     private Long manufacturerId;
 
-    @Column(nullable = false, name = "name")
+    @Column(nullable = false, name = "name", length = 255)
     private String manufacturerName;
 
+    @Column(length = 255)
     private String country;
 
 }

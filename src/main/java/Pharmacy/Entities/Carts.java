@@ -50,16 +50,13 @@ public class Carts {
     private Users users;
 
     //Default value is right now
-    @Column(name = "created_at")
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     //1 - N Relationship
     //Mapped by another Entities
     @OneToMany(mappedBy = "carts", cascade = CascadeType.ALL, orphanRemoval = true)
-
     @Builder.Default
-    //Avoid infinite loop
-    @JsonIgnore
     private List<CartItems> cartItems = new ArrayList<>();
 
     @PrePersist

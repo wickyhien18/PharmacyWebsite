@@ -62,7 +62,7 @@ public class Payments {
     @OneToOne(fetch = FetchType.LAZY)
 
     //Foreign Key
-    @JoinColumn(name = "order_id")
+    @JoinColumn(name = "order_id", nullable = false)
     private Orders orders;
 
     @Column(name = "paid_at")

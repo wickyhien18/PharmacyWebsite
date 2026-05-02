@@ -38,9 +38,10 @@ public class Inventory {
     private Long inventoryId ;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "medicine_id")
+    @JoinColumn(name = "medicine_id", nullable = false, unique = true)
     private Medicines medicines;
 
+    @Column(nullable = false)
     @Builder.Default
     private Integer quantity = 0;
 

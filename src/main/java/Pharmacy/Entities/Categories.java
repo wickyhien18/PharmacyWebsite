@@ -38,7 +38,7 @@ public class Categories {
     @Column(name = "category_id")
     private Long categoryId;
 
-    @Column(nullable = false, name = "name")
+    @Column(nullable = false, name = "name", length = 255)
     private String categoryName;
 
     @Column(unique = true, nullable = false, name = "slug", length = 255)
