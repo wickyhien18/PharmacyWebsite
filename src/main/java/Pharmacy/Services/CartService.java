@@ -14,18 +14,13 @@ public class CartService {
     private CartRepository cartRepository;
 
     public List<Carts> getAll() {
-        return cartRepository.getAll();
+        return cartRepository.findAll();
     }
 
     public Carts insert(Carts Carts) {
         return cartRepository.save(Carts);
     }
 
-    public Carts update(Integer id, Carts carts) {
-        Carts carts1 = cartRepository.findByIdDetail(id);
-        carts1.setCartItems(carts.getCartItems());
-        return cartRepository.save(carts1);
-    }
 
     public void delete(Integer id) {
         cartRepository.deleteById(id.longValue());

@@ -27,9 +27,9 @@ public interface UserRepository extends JpaRepository<Users,Long> {
 
     @Modifying
     @Transactional
-    @Query("UPDATE Users u set u.last_activity = :time where u.userName = :userName")
+    @Query("UPDATE Users u set u.lastActivity = :time where u.userName = :userName")
     void updateLastActivity(@Param("userName") String userName, @Param("time") LocalDateTime time);
 
-    @Query("SELECT u from Users u where u.last_activity < :time")
+    @Query("SELECT u from Users u where u.lastActivity < :time")
     List<Users> findByLastActivityBefore(@Param("time") LocalDateTime time);
 }

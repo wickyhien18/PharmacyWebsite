@@ -1,5 +1,6 @@
 package Pharmacy.DTO.Request;
 
+import Pharmacy.Entities.Medicines;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
@@ -13,6 +14,6 @@ public record CreateUpdateMedicineRequest(
         Long categoryId,
         Long manufacturerId,
         LocalDate expireDate,
-        String status
+        Medicines.Status status
 ) {
 }

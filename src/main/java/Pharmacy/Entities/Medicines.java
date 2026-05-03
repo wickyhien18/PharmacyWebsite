@@ -1,12 +1,11 @@
 package Pharmacy.Entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 //Mark this class is Entity in database
@@ -80,7 +79,7 @@ public class Medicines {
     private Status status = Status.ACTIVE;
 
     @Column(name = "expire_date")
-    private LocalDateTime expireDate;
+    private LocalDate expireDate;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

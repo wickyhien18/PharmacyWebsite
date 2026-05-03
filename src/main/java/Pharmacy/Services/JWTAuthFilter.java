@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -49,29 +50,21 @@ public class JWTAuthFilter extends OncePerRequestFilter {
         String token = header.substring(7);
 
         // Invalid Token → skip
-        if (!jwtService.validateAccessToken(token)) {
+        if (!jwtService.isValid(token)) {
             System.out.println("Token error: " + token);
             chain.doFilter(request, response);
             return;
         }
 
-        String username = jwtService.getUsername(token);
+        String email = jwtService.extractEmail(token);
 
         // Set authentication in SecurityContext
-        if (username != null) {
-            UserDetails userDetails =
-                    userDetailsService.loadUserByUsername(username);
-
-            UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities());
-
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            var auth = new UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.getAuthorities());
+            auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(auth);
-            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
-                userRepository.updateLastActivity(username, LocalDateTime.now());
-            }
         }
 
         chain.doFilter(request, response);

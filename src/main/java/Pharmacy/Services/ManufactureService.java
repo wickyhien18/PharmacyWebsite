@@ -19,23 +19,10 @@ public class ManufactureService {
         return manufacturerRepository.findAll();
     }
 
-    public Optional<Manufacturers> findById(Integer id) {
-        return manufacturerRepository.findByIdDetail(id);
-    }
-
     public Manufacturers insert(Manufacturers manufacturers) {
         return manufacturerRepository.save(manufacturers);
     }
 
-    public Manufacturers update(Integer id, Manufacturers manufacturers) {
-        Manufacturers manufacturers1 = manufacturerRepository
-                .findByIdDetail(id)
-                .orElseThrow(() -> ResourceNotFoundException.of("Nhà sản xuất", Long.valueOf(id)));
-        manufacturers1.setManufacturerName(manufacturers.getManufacturerName());
-        manufacturers1.setCountry(manufacturers.getCountry());
-
-        return manufacturerRepository.save(manufacturers1);
-    }
 
     public void delete(Integer id) {
         manufacturerRepository.deleteById(id.longValue());
