@@ -1,6 +1,7 @@
 package Pharmacy.Services;
 
 import Pharmacy.Entities.Payments;
+import Pharmacy.Exceptions.ResourceNotFoundException;
 import Pharmacy.Repositories.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,19 +15,22 @@ public class PaymentService {
     private PaymentRepository paymentRepository;
 
     public List<Payments> getAll() {
-        return paymentRepository.getAll();
+        return paymentRepository.findAll();
     }
 
     public Payments insert(Payments Payments) {
         return paymentRepository.save(Payments);
     }
 
-    public Payments update(Integer id, Payments Payments) {
-        Payments Payments1 = paymentRepository.findByIdDetail(id);
-        Payments1.setStatus(Payments.getStatus());
-        Payments1.setPayment_method(Payments.getPayment_method());
-        Payments1.setAmount(Payments.getAmount());
+    public Payments update(Long id, Payments Payments) {
+        Payments Payments1 = paymentRepository.findById(id)
+                .orElseThrow(() -> ResourceNotFoundException.of("Payment",id));
         Payments1.setOrders(Payments.getOrders());
+        Payments1.setPaymentMethod(Payments.getPaymentMethod());
+        Payments1.setAmount(Payments.getAmount());
+        Payments1.setTransactionCode(Payments.getTransactionCode());
+        Payments1.setStatus(Payments.getStatus());
+        Payments1.setPaidAt(Payments.getPaidAt());
         return paymentRepository.save(Payments1);
     }
 

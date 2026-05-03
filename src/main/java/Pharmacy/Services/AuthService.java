@@ -9,6 +9,9 @@ import Pharmacy.Entities.Users;
 import Pharmacy.Entities.Roles;
 import Pharmacy.Exceptions.AuthException;
 import Pharmacy.Exceptions.ResourceNotFoundException;
+import Pharmacy.Repositories.RefreshTokenRepository;
+import Pharmacy.Repositories.RoleRepository;
+import Pharmacy.Repositories.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,73 +22,87 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    private final UserService userService;
-    private final RoleService roleService;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JWTService      jwtService;
     private final AuthenticationManager authManager;
-    private final RefreshTokenService refreshTokenService;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Transactional
     public AuthResponse register(RegisterRequest req) {
 
-        if (userService.existByUserName(req.getUserName()))
+        if (userRepository.existsByEmail(req.email()))
+            throw new AuthException("This email has been registered");
+
+        if (userRepository.existsByPhone(req.phone()))
+            throw new AuthException("This phone has been registered");
+
+        if (userRepository.existsByUserName(req.userName()))
             throw new AuthException("UserName is already exist");
 
-        Roles role = roleService
-                .findByRoleName("CUSTOMER")
-                .orElseThrow();
+        Roles role = roleRepository
+                .findByRoleName("ROLE_CUSTOMER")
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found"));
 
-        Users user = new Users();
-        user.setUserName(req.getUserName());
-        user.setPassword(passwordEncoder.encode(req.getPassword()));
-        user.setActive(true);
-        user.setRoles(role);
+        Users users = Users.builder()
+                .userName(req.userName())
+                .password(passwordEncoder.encode(req.password()))
+                .fullName(req.fullName())
+                .email(req.email())
+                .phone(req.phone())
+                .roles(role)
+                .isActive(true)
+                .build();
 
-        userService.insert(user);
-        return createTokenPair(user);
+        userRepository.save(users);
+        return createTokenPair(users);
     }
 
     // ĐĂNG NHẬP
     @Transactional
     public AuthResponse login(LoginRequest req) {
 
-        userService.findByUserName(req.getUserName())
-                .ifPresent(u ->
-                        refreshTokenService.deleteAllByUserId(u.getUserId()));
-
         try {
-            // AuthenticationManager call local  UserDetailsService + PasswordEncoder
             authManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(req.getUserName(), req.getPassword())
+                    new UsernamePasswordAuthenticationToken(req.email(), req.password())
             );
-        } catch (DisabledException e) {
-            throw new AuthException("Account has been locked");
         } catch (BadCredentialsException e) {
-            throw new AuthException("UserName or Password is incorrect");
+            // Không tiết lộ email có tồn tại không
+            throw new AuthException("Email or password is incorrect");
         }
 
-        Users user = userService.findByUserName(req.getUserName())
-                .orElseThrow(() -> new AuthException("Not found UserName"));
+        Users user = userRepository.findByEmail(req.email())
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+
+        if (!user.isEnabled())
+            throw new AuthException("Account has been locked");
 
         return createTokenPair(user);
 
     }
 
+
     @Transactional
     public AuthResponse refreshToken(RefreshTokenRequest refreshToken) {
 
-        RefreshToken storedToken = refreshTokenService
-                .findByToken(jwtService.hashRefreshToken(refreshToken.getRefreshToken()))
+        RefreshToken storedToken = refreshTokenRepository
+                .findByToken(refreshToken.refreshToken())
                 .orElseThrow(() -> new AuthException("Invalid Token"));
+
+        if (storedToken.isExpired()) {
+            throw new AuthException("Refresh Token is expired. Please login again");
+        }
 
         Users users = storedToken.getUsers();
 
-        refreshTokenService.extendExpiryDate(storedToken.getToken());
+        refreshTokenRepository.delete(storedToken);
 
         return createTokenPair(users);
     }
@@ -100,37 +117,39 @@ public class AuthService {
 
         String accessToken = header.substring(7);
 
-        String username = jwtService.getUsername(accessToken);
+        String username = jwtService.extractEmail(accessToken);
 
-        userService.findByUserName(username)
-                .ifPresent(users -> refreshTokenService.deleteAllByUserId(users.getUserId()));
+        userRepository.findByUserName(username)
+                .ifPresent(users -> refreshTokenRepository.deleteAllByUsers_UserId(users.getUserId()));
 
-        return "Logout Success";
+        return "Logout Successfully";
     }
 
     
     private AuthResponse createTokenPair(Users user) {
-        String accessToken       = jwtService.generateAccessToken(user.getUserName());
-        String plainRefreshToken = jwtService.generateRefreshToken();
+        String accessToken       = jwtService.generateAccessToken(user);
+        String refreshToken = jwtService.generateRefreshToken();
 
-        // Only add hash refresh token
-        refreshTokenService.createRefreshToken(user.getUserId(), jwtService.hashRefreshToken(plainRefreshToken));
+        RefreshToken tokenEntity = RefreshToken.builder()
+                .token(refreshToken)
+                .users(user)
+                .expireAt(LocalDateTime.now().plusDays(7))
+                .build();
+        refreshTokenRepository.save(tokenEntity);
 
         return new AuthResponse(
                 accessToken,
-                plainRefreshToken,
-                "1 hour",
-                toUserInfo(user)
+                refreshToken,
+                3600L,
+                new AuthResponse.UserInfo(
+                        user.getUserId(),
+                        user.getUsername(),
+                        user.getFullName(),
+                        user.getEmail(),
+                        user.getPhone(),
+                        user.getRoles() != null ? user.getRoles().getRoleName() : ""
+                )
         );
     }
-
-    private AuthResponse.UserInfo toUserInfo(Users user) {
-        return new AuthResponse.UserInfo(
-                user.getUserId(),
-                user.getUserName(),
-                user.getRoles()
-        );
-    }
-
 
 }

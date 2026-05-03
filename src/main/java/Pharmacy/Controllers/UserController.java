@@ -13,22 +13,16 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/users")
-@Tag(name = "Users API", description = "Quản lý danh sách người dùng")
+@RequestMapping("/api/users")
+@Tag(name = "Users API", description = "Users Management")
 public class UserController {
 
     @Autowired
     private UserService userService;
 
     @GetMapping
-    @Operation(summary= "Lấy danh sách người dùng")
+    @Operation(summary= "Get user list")
     public List<Users> getAllUsers() {
         return userService.getAll();
-    }
-
-    @GetMapping("/profile")
-    @Operation(summary = "Lấy thông tin người dùng đăng nhập dựa vào JWT token")
-    public ResponseEntity<?> getProfile() {
-        return ResponseEntity.ok(userService.getProfile());
     }
 }

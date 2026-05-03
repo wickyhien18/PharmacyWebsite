@@ -27,13 +27,13 @@ public class GlobalExceptionHandler {
                 .stream()
                 .collect(Collectors.toMap(
                         FieldError::getField,
-                        e -> e.getDefaultMessage() != null ? e.getDefaultMessage() : "Không hợp lệ",
+                        e -> e.getDefaultMessage() != null ? e.getDefaultMessage() : "Invalid",
                         (a, b) -> a  // Giữ lỗi đầu tiên nếu 1 field có nhiều lỗi
                 ));
 
         return ResponseEntity
                 .status(HttpStatus.UNPROCESSABLE_ENTITY)
-                .body(new ApiResponse<>(false, "Dữ liệu không hợp lệ", errors));
+                .body(new ApiResponse<>(false, "Invalid Data", errors));
     }
 
     // ---- Auth lỗi → 401 ----
@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException ex) {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body(ApiResponse.fail("Bạn không có quyền thực hiện thao tác này"));
+                .body(ApiResponse.fail("You don't have permission"));
     }
 
     // ---- Resource không tìm thấy → 404 ----
@@ -74,6 +74,6 @@ public class GlobalExceptionHandler {
         log.error("Unhandled exception: ", ex);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.fail("Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau"));
+                .body(ApiResponse.fail("Error from database. Please retry"));
     }
 }

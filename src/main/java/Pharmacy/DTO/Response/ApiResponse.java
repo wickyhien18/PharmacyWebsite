@@ -10,7 +10,7 @@ public record ApiResponse<T>(
         T data
 ) {
     public static <T> ApiResponse<T> ok(T data) {
-        return new ApiResponse<>(true, "Thành công", data);
+        return new ApiResponse<>(true, null, data);
     }
 
     public static <T> ApiResponse<T> ok(String message, T data) {

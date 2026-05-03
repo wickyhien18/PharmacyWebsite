@@ -19,27 +19,6 @@ public class RefreshTokenService {
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-
-
-    // Create new refresh token
-    @Transactional
-    public RefreshToken createRefreshToken(Integer userId, String token) {
-
-        Users user = userRepository.getReferenceById(Long.valueOf(userId));
-
-        refreshTokenRepository.deleteAllByUsers_UserId(userId);
-
-        RefreshToken refreshToken = RefreshToken.builder()
-                .token(token)
-                .users(user)
-                .expireAt(LocalDateTime.now().plusDays(7)) // 7 ngày
-                .build();
-
-        return refreshTokenRepository.save(refreshToken);
-    }
-
     public Optional<RefreshToken> findByToken(String token) {
         return refreshTokenRepository.findByToken(token);
     }
@@ -47,12 +26,6 @@ public class RefreshTokenService {
     @Transactional
     public void deleteRefreshToken(String token) {
         refreshTokenRepository.deleteByToken(token);
-    }
-
-    // Delete all token from user
-    @Transactional
-    public void deleteAllByUserId(Integer userId) {
-        refreshTokenRepository.deleteAllByUsers_UserId(userId);
     }
 
     // Get user from refresh token

@@ -1,21 +1,16 @@
 package Pharmacy.Services;
 
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
+import Pharmacy.Entities.Users;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.sql.Date;
 import java.util.Base64;
+import java.util.Date;
 
 @Service
 public class JWTService {
@@ -27,77 +22,50 @@ public class JWTService {
     @Value("${app.jwt.expiration.access}")
     private Long accessExpiration;
 
-    //Expiration of Refresh Token
-    @Value("${app.jwt.expiration.refresh}")
-    private Long refreshExpiration;
-
-    public String generateAccessToken(String username) {
+    public String generateAccessToken(Users users) {
         return Jwts.builder()
-                .subject(username)
-                .issuedAt(new Date(System.currentTimeMillis()))
+                .subject(users.getEmail())
+                .claim("userId", users.getUserId())
+                .claim("role", users.getRoles() != null ? users.getRoles().getRoleName() : "")
+                .issuedAt(new Date())
                 .expiration(new Date(
                         System.currentTimeMillis() + accessExpiration))
-                .claim("type","access")
                 .signWith(getKey())
                 .compact();
     }
 
+    public String extractEmail(String token) {
+        return parseClaims(token).getSubject();
+    }
 
     public String generateRefreshToken() {
-        // SecureRandom guarantee unpredictable
-        byte[] randomBytes = new byte[32];
+        // SecureRandom đảm bảo không đoán được (khác với Random thông thường)
+        byte[] randomBytes = new byte[32];       // 256 bits
         new SecureRandom().nextBytes(randomBytes);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+        return Base64.getUrlEncoder()
+                .withoutPadding()           // Bỏ dấu = cuối cho gọn
+                .encodeToString(randomBytes);
+        // Kết quả: chuỗi ~43 ký tự, ví dụ: "xK9mP2qR8vL4nJ6wT0yU3oI5hF7cB1eD"
     }
 
-    // Hash before adding to database — SHA-256 is enough for refresh token
-    public String hashRefreshToken(String plainToken) {
+    public boolean isValid(String token) {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(plainToken.getBytes(StandardCharsets.UTF_8));
-            return Base64.getEncoder().encodeToString(hash);
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 not available", e);
-        }
-    }
-
-    // Get username from token
-    public String getUsername(String token) {
-        try {
-            Claims claims = Jwts.parser()
-                    .verifyWith(getKey())
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
-
-            String username = claims.getSubject();
-            System.out.println("Giải mã token thành công, username: " + username);
-            return username;
-        } catch (Exception e) {
-            System.out.println("Giải mã token thất bại: " + e.getMessage());
-            return null;
-        }
-    }
-
-    // Check validate access token
-    public boolean validateAccessToken(String token) {
-        try {
-            Claims claims = Jwts.parser()
-                    .verifyWith(getKey())
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
-
-            String type = claims.get("type", String.class);
-            return "access".equals(type) && claims.getExpiration().after(new Date(System.currentTimeMillis()));
+            parseClaims(token);
+            return true;
         } catch (ExpiredJwtException e) {
-            System.out.println("Token hết hạn: " + e.getMessage());
+            System.out.println("Access token hết hạn");
         } catch (JwtException e) {
-            System.out.println("Token không hợp lệ: " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("Lỗi khác: " + e.getMessage());
+            System.out.println("Access token không hợp lệ: " + e.getMessage());
         }
         return false;
+    }
+
+    private Claims parseClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(getKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     //Get HashKey

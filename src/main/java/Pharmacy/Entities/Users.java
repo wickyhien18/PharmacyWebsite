@@ -92,6 +92,7 @@ public class Users implements UserDetails {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        lastActivity = LocalDateTime.now();
     }
 
     @PreUpdate

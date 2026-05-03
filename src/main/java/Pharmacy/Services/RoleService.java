@@ -1,6 +1,7 @@
 package Pharmacy.Services;
 
 import Pharmacy.Entities.Roles;
+import Pharmacy.Exceptions.ResourceNotFoundException;
 import Pharmacy.Repositories.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,10 +27,10 @@ public class RoleService {
         return roleRepository.save(roles);
     }
 
-    public Roles update(Integer id, Roles roles) {
-        Roles role1 = roleRepository.findByIdDetail(id);
+    public Roles update(Long id, Roles roles) {
+        Roles role1 = roleRepository.findById(id)
+                .orElseThrow(() -> ResourceNotFoundException.of("Role", id));
         role1.setRoleName(roles.getRoleName());
-        role1.setDescription(roles.getDescription());
         return roleRepository.save(role1);
     }
 
