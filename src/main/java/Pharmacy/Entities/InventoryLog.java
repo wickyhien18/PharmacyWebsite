@@ -41,7 +41,7 @@ public class InventoryLog {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medicine_id", nullable = false)
-    private Medicines medicine;
+    private Medicines medicines;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "change_type", nullable = false)

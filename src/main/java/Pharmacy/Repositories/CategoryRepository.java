@@ -10,8 +10,8 @@ import java.util.Optional;
 @Repository
 public interface CategoryRepository extends JpaRepository<Categories, Long> {
 
-    List<Categories> findAllByOrderByNameAsc();
-    Optional<Categories> findBySlug(String slug);
-    boolean existsBySlug(String slug);
-    boolean existsBySlugAndCategoryIdNot(String slug, Long id);
+    List<Categories> findAllByOrderByCategoryNameAsc();
+    Optional<Categories> findByCategorySlug(String slug);
+    boolean existsByCategorySlug(String slug);
+    boolean existsByCategorySlugAndCategoryIdNot(String slug, Long id);
 }

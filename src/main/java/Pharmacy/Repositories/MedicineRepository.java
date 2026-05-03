@@ -13,8 +13,8 @@ import java.util.Optional;
 @Repository
 public interface MedicineRepository extends JpaRepository<Medicines,Long> {
 
-    Optional<Medicines> findBySlugAndDeletedAtIsNull(String slug);
-    boolean existsBySlug(String slug);
+    Optional<Medicines> findByMedicineSlugAndDeletedAtIsNull(String slug);
+    boolean existsByMedicineSlug(String slug);
 
     // Tìm kiếm + filter — JPQL đơn giản, dễ giải thích trong phỏng vấn
     @Query("""
