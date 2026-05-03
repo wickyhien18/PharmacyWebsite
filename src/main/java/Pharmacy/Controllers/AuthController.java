@@ -15,7 +15,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +35,7 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserRepository userRepository;
 
     @PostMapping("/register")
     @Operation(summary = "Register Account")
@@ -75,8 +79,20 @@ public class AuthController {
 
     @GetMapping("/me")
     @Operation(summary = "Account info")
-    public ResponseEntity<ApiResponse<AuthResponse.UserInfo>> me(
-            @AuthenticationPrincipal Users currentUser) {
+    public ResponseEntity<?> me() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).body(ApiResponse.fail("Unauthorized"));
+        }
+
+        String email = authentication.getName();
+
+        System.out.println("Email: " + email);
+
+        Users currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         var info = new AuthResponse.UserInfo(
                 currentUser.getUserId(),
                 currentUser.getUsername(),
