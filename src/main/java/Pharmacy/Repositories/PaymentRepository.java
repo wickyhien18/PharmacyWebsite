@@ -2,15 +2,12 @@ package Pharmacy.Repositories;
 
 import Pharmacy.Entities.Payments;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.util.Optional;
 
+@Repository
 public interface PaymentRepository extends JpaRepository<Payments,Long> {
-    @Query(value = "SELECT * FROM payments WHERE payment_id = :id", nativeQuery = true)
-    Payments findByIdDetail(@Param("id") Integer id);
-
-    @Query("SELECT p,o from Payments p join p.orders o")
-    List<Payments> getAll();
+    Optional<Payments> findByOrderOrderId(Long orderId);
+    Optional<Payments> findByTransactionCode(String transactionCode);
 }

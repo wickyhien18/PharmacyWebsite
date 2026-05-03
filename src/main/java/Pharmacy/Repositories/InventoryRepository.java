@@ -1,12 +1,12 @@
 package Pharmacy.Repositories;
 
-import Pharmacy.Entities.Carts;
+import Pharmacy.Entities.Inventory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface CartRepository extends JpaRepository<Carts,Long> {
-    Optional<Carts> findByUserUserId(Long userId);
+public interface InventoryRepository extends JpaRepository<Inventory, Long> {
+    Optional<Inventory> findByMedicineMedicineId(Long medicineId);
 }
