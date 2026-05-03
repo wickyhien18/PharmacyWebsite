@@ -2,22 +2,17 @@ package Pharmacy.DTO.Request;
 
 import jakarta.validation.constraints.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 public record CreateUpdateMedicineRequest(
-        @NotBlank(message = "Medicines name can't be null")
-        String medicineName,
-
-        @NotNull(message = "Category can't be null")
-        Integer categoryId,
-
-        @NotNull(message = "Manufacturer can't' be null")
-        Integer manufacturerId,
-
+        @NotBlank(message = "Medicine Name can't be left null") @Size(max = 500) String medicinesName,
         String description,
-
-        @DecimalMin(value = "1000.0", message = "Price must be greater than 1000.0")
-        Float price,
-
-        @Min(value = 10, message = "Quantity must be greater than 10")
-        Integer quantity
+        @NotNull @DecimalMin("0.01") BigDecimal price,
+        String unit,
+        Long categoryId,
+        Long manufacturerId,
+        LocalDate expireDate,
+        String status
 ) {
 }

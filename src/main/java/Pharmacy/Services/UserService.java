@@ -1,6 +1,5 @@
 package Pharmacy.Services;
 
-import Pharmacy.DTO.UserProfile;
 import Pharmacy.Entities.Users;
 import Pharmacy.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

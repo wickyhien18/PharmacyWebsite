@@ -4,14 +4,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
-@Data
-public class LoginRequest {
 
-    @JsonProperty("userName")
-    @NotBlank
-    private String userName;
+public record LoginRequest (
 
-    @JsonProperty("password")
+    @JsonProperty("UserName or Email")
     @NotBlank
-    private String password;
-}
+    String userName,
+
+    @NotBlank
+    String password
+){}

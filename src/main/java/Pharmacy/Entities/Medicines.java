@@ -31,7 +31,7 @@ import java.util.List;
 @Setter
 public class Medicines {
 
-    public enum Status{ACIVE, INACTIVE, OUT_OF_STOCK}
+    public enum Status{ACTIVE, INACTIVE, OUT_OF_STOCK}
 
     //Primary key
     @Id
@@ -77,7 +77,7 @@ public class Medicines {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private Status status = Status.ACIVE;
+    private Status status = Status.ACTIVE;
 
     @Column(name = "expire_date")
     private LocalDateTime expireDate;

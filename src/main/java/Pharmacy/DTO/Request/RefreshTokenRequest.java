@@ -1,11 +1,12 @@
 package Pharmacy.DTO.Request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
-@Data
-public class RefreshTokenRequest {
 
-    @JsonProperty("refreshToken")
-    private String refreshToken;
-}
+public record RefreshTokenRequest (
+
+        @NotBlank
+        String refreshToken
+){}
