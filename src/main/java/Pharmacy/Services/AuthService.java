@@ -38,11 +38,9 @@ public class AuthService {
     @Transactional
     public AuthResponse register(RegisterRequest req) {
 
-        if (userRepository.existsByEmail(req.email()))
-            throw new AuthException("This email has been registered");
+        if (userRepository.existsByEmailOrPhone(req.email(), req.phone()))
+            throw new AuthException("This email or phone has been registered");
 
-        if (userRepository.existsByPhone(req.phone()))
-            throw new AuthException("This phone has been registered");
 
         if (userRepository.existsByUserName(req.userName()))
             throw new AuthException("UserName is already exist");
@@ -127,6 +125,9 @@ public class AuthService {
 
     
     private AuthResponse createTokenPair(Users user) {
+
+        refreshTokenRepository.deleteAllByUsers_UserId(user.getUserId());
+
         String accessToken       = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken();
 

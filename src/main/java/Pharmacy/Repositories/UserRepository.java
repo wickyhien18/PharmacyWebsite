@@ -18,12 +18,13 @@ public interface UserRepository extends JpaRepository<Users,Long> {
     @Query("SELECT u FROM Users u JOIN FETCH u.roles WHERE u.userName = :username")
     Optional<Users> findByUserName(@Param("username") String userName);
 
-    Optional<Users> findByEmail(String email);
+    @Query("SELECT u FROM Users u JOIN FETCH u.roles WHERE u.email = :email")
+    Optional<Users> findByEmail(@Param("email") String email);
     @Query("SELECT COUNT(u) > 0 FROM Users u WHERE u.userName = :userName")
     boolean existsByUserName(@Param("userName") String userName);
 
-    boolean existsByPhone(String phone);
-    boolean existsByEmail(String email);
+    @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM Users u WHERE u.email = :email OR u.phone = :phone")
+    boolean existsByEmailOrPhone(@Param("email") String email, @Param("phone") String phone);
 
     @Modifying
     @Transactional

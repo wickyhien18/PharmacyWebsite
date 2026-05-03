@@ -72,6 +72,7 @@ public class AuthController {
 
         return ResponseEntity.ok(ApiResponse.ok(result));
     }
+
     @GetMapping("/me")
     @Operation(summary = "Account info")
     public ResponseEntity<ApiResponse<AuthResponse.UserInfo>> me(
