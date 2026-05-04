@@ -81,26 +81,8 @@ public class AuthController {
     @Operation(summary = "Account info")
     public ResponseEntity<?> me(HttpServletRequest request) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(401).body(ApiResponse.fail("Unauthorized"));
-        }
+        var info = authService.me(request);
 
-        String email = authentication.getName();
-
-        System.out.println("Email: " + email);
-
-        Users currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        var info = new AuthResponse.UserInfo(
-                currentUser.getUserId(),
-                currentUser.getUsername(),
-                currentUser.getFullName(),
-                currentUser.getEmail(),
-                currentUser.getPhone(),
-                currentUser.getRoles() != null ? currentUser.getRoles().getRoleName() : ""
-        );
         return ResponseEntity.ok(ApiResponse.ok(info));
     }
 }

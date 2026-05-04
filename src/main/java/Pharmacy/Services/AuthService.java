@@ -3,6 +3,7 @@ package Pharmacy.Services;
 import Pharmacy.DTO.Request.LoginRequest;
 import Pharmacy.DTO.Request.RefreshTokenRequest;
 import Pharmacy.DTO.Request.RegisterRequest;
+import Pharmacy.DTO.Response.ApiResponse;
 import Pharmacy.DTO.Response.AuthResponse;
 import Pharmacy.Entities.RefreshToken;
 import Pharmacy.Entities.Users;
@@ -14,10 +15,13 @@ import Pharmacy.Repositories.RoleRepository;
 import Pharmacy.Repositories.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -118,15 +122,42 @@ public class AuthService {
         String username = jwtService.extractEmail(accessToken);
 
         userRepository.findByUserName(username)
-                .ifPresent(users -> refreshTokenRepository.deleteAllByUsers_UserId(users.getUserId()));
+                .ifPresent(users -> refreshTokenRepository.deleteAllByUserId(users.getUserId()));
 
         return "Logout Successfully";
     }
 
+    @Transactional
+    public AuthResponse.UserInfo me(HttpServletRequest request) {
+        String header = request.getHeader("Authorization");
+
+        if (header == null || !header.startsWith("Bearer ")) {
+            throw new ResourceNotFoundException("Not found Token");
+        }
+
+        String accessToken = header.substring(7);
+
+        String email = jwtService.extractEmail(accessToken);
+
+        System.out.println("Email: " + email);
+
+        Users currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        var info = new AuthResponse.UserInfo(
+                currentUser.getUserId(),
+                currentUser.getUsername(),
+                currentUser.getFullName(),
+                currentUser.getEmail(),
+                currentUser.getPhone(),
+                currentUser.getRoles() != null ? currentUser.getRoles().getRoleName() : ""
+        );
+        return info;
+    }
     
     private AuthResponse createTokenPair(Users user) {
 
-        refreshTokenRepository.deleteAllByUsers_UserId(user.getUserId());
+        refreshTokenRepository.deleteAllByUserId(user.getUserId());
 
         String accessToken       = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken();
