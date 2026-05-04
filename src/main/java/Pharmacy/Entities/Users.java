@@ -62,18 +62,18 @@ public class Users implements UserDetails {
     private String phone;
 
     @CreationTimestamp
-    @Column(name = "create_at", updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @CreationTimestamp
-    @Column(name = "update_at")
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @CreationTimestamp
     @Column(name = "last_activity")
     private LocalDateTime lastActivity;
 
-    @Column(name = "delete_at")
+    @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
     @Column(name = "is_active")

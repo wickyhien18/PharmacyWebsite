@@ -121,7 +121,7 @@ public class AuthService {
 
         String username = jwtService.extractEmail(accessToken);
 
-        userRepository.findByUserName(username)
+        userRepository.findByEmail(username)
                 .ifPresent(users -> refreshTokenRepository.deleteAllByUserId(users.getUserId()));
 
         return "Logout Successfully";

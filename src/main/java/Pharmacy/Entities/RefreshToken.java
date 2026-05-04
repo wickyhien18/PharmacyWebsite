@@ -41,9 +41,9 @@ public class RefreshToken {
     @Column(nullable = false, unique = true, length = 500)
     private String token;
 
-    //1 - 1 Relationship
+    //N - 1 Relationship
     //FetchType = LAZY: only load when using query, = EAGER: alway load
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
 
     //Foreign Key
     @JoinColumn(name = "user_id", nullable = false)
