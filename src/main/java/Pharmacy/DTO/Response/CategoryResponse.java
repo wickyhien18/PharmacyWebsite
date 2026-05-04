@@ -1,7 +1,7 @@
 package Pharmacy.DTO.Response;
 
 public record CategoryResponse(
-        Integer categoryId,
+        Long categoryId,
         String categoryName,
         String categorySlug
 ) {

@@ -12,4 +12,6 @@ import java.util.Optional;
 public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     @Query("SELECT i FROM Inventory i JOIN FETCH i.medicines WHERE i.medicines.medicineId = :medicineId")
     Optional<Inventory> findByMedicineId(@Param("medicineId") Long medicineId);
+
+    StableValue<Object> fq(Long medicineId);
 }
