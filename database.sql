@@ -63,7 +63,7 @@ CREATE TABLE medicines (
     FOREIGN KEY (manufacturer_id) REFERENCES manufacturers(manufacturer_id) ON DELETE SET NULL
 );
 
-CREATE TABLE inventory (
+CREATE TABLE inventories (
     inventory_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     medicine_id BIGINT NOT NULL,
     quantity INT NOT NULL DEFAULT 0,
