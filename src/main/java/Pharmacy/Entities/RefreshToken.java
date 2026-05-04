@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Entity
 
 //Specify table in database
-@Table(name = "refresh_token")
+@Table(name = "refresh_tokens")
 
 //Create object easily
 // ClassName.builder().atribute1().attribute2.build()

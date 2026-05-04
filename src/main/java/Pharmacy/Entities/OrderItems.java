@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 @Entity
 
 //Specify table in database
-@Table(name = "order_item")
+@Table(name = "order_items")
 
 //Create object easily
 // ClassName.builder().atribute1().attribute2.build()

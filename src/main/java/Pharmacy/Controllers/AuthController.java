@@ -79,7 +79,7 @@ public class AuthController {
 
     @GetMapping("/me")
     @Operation(summary = "Account info")
-    public ResponseEntity<?> me() {
+    public ResponseEntity<?> me(HttpServletRequest request) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {

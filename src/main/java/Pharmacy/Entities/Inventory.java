@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Entity
 
 //Specify table in database
-@Table(name = "inventory")
+@Table(name = "inventories")
 
 //Create object easily
 // ClassName.builder().atribute1().attribute2.build()

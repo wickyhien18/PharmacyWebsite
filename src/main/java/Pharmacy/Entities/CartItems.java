@@ -7,7 +7,7 @@ import lombok.*;
 @Entity
 
 //Specify table in database
-@Table(name = "cart_item",
+@Table(name = "cart_items",
     uniqueConstraints = @UniqueConstraint(
             name = "uk_cart_medicine",
             columnNames = {"cart_id", "medicine_id"}
