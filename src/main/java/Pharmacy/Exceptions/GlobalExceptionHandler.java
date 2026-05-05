@@ -68,6 +68,13 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail(ex.getMessage()));
     }
 
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ApiResponse<Void>> handleConflict(AccessDeniedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.fail(ex.getMessage()));
+    }
+
     // ---- Catch-all → 500 (không lộ stack trace ra client) ----
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneral(Exception ex) {
