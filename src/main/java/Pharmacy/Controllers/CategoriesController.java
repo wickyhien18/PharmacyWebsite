@@ -1,27 +1,57 @@
 package Pharmacy.Controllers;
 
-import Pharmacy.Entities.Categories;
-import Pharmacy.Repositories.CategoryRepository;
+import Pharmacy.DTO.Request.CreateCategoryRequest;
+import Pharmacy.DTO.Response.ApiResponse;
+import Pharmacy.DTO.Response.CategoryResponse;
+import Pharmacy.Services.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/categories")
-@Tag(name="Categories API" ,description="Quản lý loại thuốc")
+@RequestMapping("/api/categories")
+@Tag(name="Categories API")
+@RequiredArgsConstructor
 public class CategoriesController {
 
-    @Autowired
-    private CategoryRepository categoryRepository;
+    private CategoryService categoryService;
 
     @GetMapping("/")
-    @Operation(summary = "Lấy danh sách loại thuốc")
-    public List<Categories> getAll() {
-        return categoryRepository.findAll();
+    @Operation(summary = "List of categories")
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAll() {
+        return ResponseEntity.ok(ApiResponse.ok(categoryService.getAll()));
+    }
+
+    @GetMapping("/{slug}")
+    @Operation(summary = "List of Categories by Slug")
+    public ResponseEntity<ApiResponse<CategoryResponse>> getBySlug(@PathVariable String slug) {
+        return ResponseEntity.ok(ApiResponse.ok(categoryService.getBySlug(slug)));
+    }
+
+    @PostMapping("/")
+    @Operation(summary = "Create Category")
+    public ResponseEntity<ApiResponse<CategoryResponse>> create(
+            @Valid @RequestBody CreateCategoryRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok(categoryService.create(request)));
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update Category")
+    public ResponseEntity<ApiResponse<CategoryResponse>> update(
+            @PathVariable Long id,
+            @Valid @RequestBody CreateCategoryRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok(categoryService.update(id, request)));
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete Category")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        categoryService.delete(id);
+        return ResponseEntity.ok(ApiResponse.ok("Delete Successfully"));
     }
 }
