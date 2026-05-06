@@ -9,38 +9,41 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/categories")
+@RequestMapping("/api")
 @Tag(name="Categories API")
 @RequiredArgsConstructor
 public class CategoriesController {
 
-    private CategoryService categoryService;
+    private final CategoryService categoryService;
 
-    @GetMapping("/")
+    @GetMapping("/categories/")
     @Operation(summary = "List of categories")
     public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAll() {
         return ResponseEntity.ok(ApiResponse.ok(categoryService.getAll()));
     }
 
-    @GetMapping("/{slug}")
+    @GetMapping("/categories/{slug}")
     @Operation(summary = "List of Categories by Slug")
     public ResponseEntity<ApiResponse<CategoryResponse>> getBySlug(@PathVariable String slug) {
         return ResponseEntity.ok(ApiResponse.ok(categoryService.getBySlug(slug)));
     }
 
-    @PostMapping("/")
+    @PostMapping("/admin/categories/")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Create Category")
     public ResponseEntity<ApiResponse<CategoryResponse>> create(
             @Valid @RequestBody CreateCategoryRequest request) {
         return ResponseEntity.ok(ApiResponse.ok(categoryService.create(request)));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/admin/categories/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Update Category")
     public ResponseEntity<ApiResponse<CategoryResponse>> update(
             @PathVariable Long id,
@@ -48,10 +51,11 @@ public class CategoriesController {
         return ResponseEntity.ok(ApiResponse.ok(categoryService.update(id, request)));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/categories/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Delete Category")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         categoryService.delete(id);
-        return ResponseEntity.ok(ApiResponse.ok("Delete Successfully"));
+        return ResponseEntity.ok(ApiResponse.ok("Delete Category Successfully"));
     }
 }

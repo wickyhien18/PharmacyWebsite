@@ -28,7 +28,7 @@ public class CustomUserDetailService implements UserDetailsService {
         return new UserDetails() {
             @Override
             public Collection<? extends GrantedAuthority> getAuthorities() {
-                return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + users.getRoles().getRoleName()));
+                return Collections.singletonList(new SimpleGrantedAuthority(users.getRoles().getRoleName()));
             }
 
             @Override

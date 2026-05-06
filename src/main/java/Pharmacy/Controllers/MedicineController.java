@@ -14,17 +14,18 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/medicines")
+@RequestMapping("/api")
 @Tag(name = "Medicines API")
 @RequiredArgsConstructor
 public class MedicineController {
 
     private final MedicineService medicineService;
 
-    @GetMapping
+    @GetMapping("/medicines/")
     @Operation(summary = "List of Medicines")
     public ResponseEntity<?> search(
             @RequestParam(required = false) String  keyword,
@@ -38,14 +39,15 @@ public class MedicineController {
                 medicineService.search(keyword, categoryId, manufacturerId, status, pageable)));
     }
 
-    @GetMapping("/{slug}")
+    @GetMapping("/medicines/{slug}")
     @Operation(summary = "Get medicine's information from Slug")
     public ResponseEntity<ApiResponse<MedicineResponse>> getBySlug(@PathVariable String slug) {
         return ResponseEntity.ok(ApiResponse.ok(medicineService.getBySlug(slug)));
     }
 
 
-    @PostMapping
+    @PostMapping("/admin/medicines")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Add medicine's information")
     public ResponseEntity<ApiResponse<MedicineResponse>> create(
             @Valid @RequestBody CreateUpdateMedicineRequest request) {
@@ -53,7 +55,8 @@ public class MedicineController {
                 .body(ApiResponse.ok(medicineService.create(request)));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/admin/medicines/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Update medicine's information")
     public ResponseEntity<ApiResponse<MedicineResponse>> update(
             @PathVariable Long id,
@@ -61,7 +64,8 @@ public class MedicineController {
         return ResponseEntity.ok(ApiResponse.ok(medicineService.update(id, request)));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/medicines/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Delete medicine's information")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         medicineService.delete(id);

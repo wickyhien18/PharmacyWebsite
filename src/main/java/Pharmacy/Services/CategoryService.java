@@ -4,6 +4,7 @@ import Pharmacy.DTO.Request.CreateCategoryRequest;
 import Pharmacy.DTO.Response.CategoryResponse;
 import Pharmacy.Entities.Categories;
 import Pharmacy.Exceptions.BusinessException;
+import Pharmacy.Exceptions.ConflictException;
 import Pharmacy.Exceptions.ResourceNotFoundException;
 import Pharmacy.Repositories.CategoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +39,7 @@ public class CategoryService {
     @Transactional
     public CategoryResponse create(CreateCategoryRequest req) {
         if (categoryRepository.existsByCategorySlug(req.slug()))
-            throw new BusinessException("Slug '" + req.slug() + "' has been existed");
+            throw new ConflictException("Slug '" + req.slug() + "' has been existed");
 
         Categories saved = categoryRepository.save(
                 Categories.builder()
@@ -53,7 +54,7 @@ public class CategoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Category isn't exist"));
 
         if (categoryRepository.existsByCategorySlugAndCategoryIdNot(req.slug(), id))
-            throw new BusinessException("Slug '" + req.slug() + "' has been used");
+            throw new ConflictException("Slug '" + req.slug() + "' has been used");
 
         category.setCategoryName(req.categoryName());
         category.setCategorySlug(req.slug());
