@@ -4,6 +4,7 @@ import Pharmacy.DTO.Request.CreateManufacturerRequest;
 import Pharmacy.DTO.Response.ManufacturerResponse;
 import Pharmacy.Entities.Manufacturers;
 import Pharmacy.Exceptions.BusinessException;
+import Pharmacy.Exceptions.ConflictException;
 import Pharmacy.Exceptions.ResourceNotFoundException;
 import Pharmacy.Repositories.ManufacturerRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class ManufacturerService {
     @Transactional
     public ManufacturerResponse create(CreateManufacturerRequest req) {
         if (manufacturerRepository.existsByName(req.manufacturerName()))
-            throw new BusinessException("Manufacturer '" + req.manufacturerName() + "' has been existed");
+            throw new ConflictException("Manufacturer '" + req.manufacturerName() + "' has been existed");
 
         Manufacturers saved = manufacturerRepository.save(
                 Manufacturers.builder()

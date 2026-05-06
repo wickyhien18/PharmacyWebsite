@@ -20,7 +20,6 @@ public record OrderResponse(
     public record OrderItemResponse(
             Long       medicineId,
             String     medicineName,
-            String     image,
             Integer    quantity,
             BigDecimal unitPrice,
             BigDecimal totalPrice
