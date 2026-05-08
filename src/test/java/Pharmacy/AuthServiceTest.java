@@ -26,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
@@ -188,15 +189,19 @@ class AuthServiceTest {
             assertThat(response.accessToken()).isEqualTo("access-token");
             assertThat(response.user().email()).isEqualTo("a@gmail.com");
             assertThat(response.user().role()).isEqualTo("ROLE_CUSTOMER");
+
+            verify(authManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+            verify(userRepository).findByEmail("a@gmail.com");
+            verify(refreshTokenRepository).save(any(RefreshToken.class));
         }
 
         @Test
         @DisplayName("Sai mật khẩu → AppException 401, không tiết lộ email có tồn tại không")
         void login_wrongPassword_throws401() {
-            LoginRequest req = new LoginRequest("a@gmail.com", "SaiMat@123");
+            LoginRequest req = new LoginRequest("a@gmail.com", "SaiMK@123");
 
             // AuthenticationManager throw BadCredentialsException = sai mật khẩu
-            when(authManager.authenticate(any()))
+            when(authManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                     .thenThrow(new BadCredentialsException("Bad credentials"));
 
             assertThatThrownBy(() -> authService.login(req))
@@ -205,6 +210,8 @@ class AuthServiceTest {
                     // → tránh user enumeration attack
                     .hasMessageContaining("Email hoặc mật khẩu không đúng")
                     .extracting("status").isEqualTo(401);
+            verify(userRepository, never()).findByEmail(anyString());
+
         }
 
         @Test
