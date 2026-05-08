@@ -113,56 +113,54 @@ class AuthServiceTest {
         }
 
         @Test
-        @DisplayName("Email đã tồn tại → AppException 409")
-        void register_duplicateEmail_throwsConflict() {
-            when(userRepository.existsByEmail("a@gmail.com")).thenReturn(true);
+        @DisplayName("Email hoặc phone đã tồn tại → throw AuthException")
+        void register_duplicateEmailOrPhone_throwsException() {
+            // Arrange
+            RegisterRequest request = validRequest();
 
-            assertThatThrownBy(() -> authService.register(validRequest()))
-                    .isInstanceOf(ConflictException.class)
-                    .hasMessageContaining("Email đã được đăng ký")
-                    .extracting("status").isEqualTo(409);
+            when(userRepository.existsByEmailOrPhone(request.email(), request.phone()))
+                    .thenReturn(true);  // ← Mock method gộp
 
-            // Verify: không được lưu user vào DB
+            // Act & Assert
+            assertThatThrownBy(() -> authService.register(request))
+                    .isInstanceOf(AuthException.class)
+                    .hasMessageContaining("This email or phone has been registered");
+
             verify(userRepository, never()).save(any());
         }
 
         @Test
-        @DisplayName("Số điện thoại đã tồn tại → AppException 409")
-        void register_duplicatePhone_throwsConflict() {
-            when(userRepository.existsByEmail(anyString())).thenReturn(false);
-            when(userRepository.existsByPhone("0912345678")).thenReturn(true);
+        @DisplayName("Username đã tồn tại → throw AuthException")
+        void register_duplicateUserName_throwsException() {
+            // Arrange
+            RegisterRequest request = validRequest();
 
-            assertThatThrownBy(() -> authService.register(validRequest()))
-                    .isInstanceOf(ConflictException.class)
-                    .hasMessageContaining("Số điện thoại đã được đăng ký")
-                    .extracting("status").isEqualTo(409);
-        }
+            when(userRepository.existsByEmailOrPhone(anyString(), anyString()))
+                    .thenReturn(false);  // Email/phone đều chưa tồn tại
+            when(userRepository.existsByUserName(request.userName()))
+                    .thenReturn(true);   // Username đã tồn tại
 
-        @Test
-        @DisplayName("Tên đăng nhập đã tồn tại → AppException 409")
-        void register_duplicateUserName_throwsConflict() {
-            when(userRepository.existsByEmail(anyString())).thenReturn(false);
-            when(userRepository.existsByPhone(anyString())).thenReturn(false);
-            when(userRepository.existsByUserName("nguyenvana")).thenReturn(true);
+            // Act & Assert
+            assertThatThrownBy(() -> authService.register(request))
+                    .isInstanceOf(AuthException.class)
+                    .hasMessageContaining("UserName is already exist");
 
-            assertThatThrownBy(() -> authService.register(validRequest()))
-                    .isInstanceOf(ConflictException.class)
-                    .hasMessageContaining("Tên đăng nhập đã tồn tại")
-                    .extracting("status").isEqualTo(409);
+            verify(userRepository, never()).save(any());
         }
 
         @Test
         @DisplayName("Role CUSTOMER không tồn tại trong DB → AppException 404")
         void register_roleNotFound_throws() {
-            when(userRepository.existsByEmail(anyString())).thenReturn(false);
-            when(userRepository.existsByPhone(anyString())).thenReturn(false);
+            when(userRepository.existsByEmailOrPhone(anyString(), anyString()))
+                    .thenReturn(false);  // Email/phone đều chưa tồn tại
             when(userRepository.existsByUserName(anyString())).thenReturn(false);
             when(roleRepository.findByRoleName("ROLE_CUSTOMER"))
                     .thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> authService.register(validRequest()))
                     .isInstanceOf(ResourceNotFoundException.class)
-                    .extracting("status").isEqualTo(404);
+                    .hasMessageContaining("Role not found");
+            verify(userRepository, never()).save(any());
         }
     }
 
