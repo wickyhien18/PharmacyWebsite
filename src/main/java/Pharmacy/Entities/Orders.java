@@ -33,8 +33,8 @@ import java.util.List;
 @Setter
 public class Orders {
 
-    public enum OrderStatus  { PENDING, CONFIRMED, SHIPPING, DELIVERED, CANCELLED }
-    public enum PaymentStatus { PENDING, PAID, FAILED }
+    public enum OrderStatus  { PENDING, CONFIRMED, SHIPPING, DELIVERED, CANCELLED, CANCEL_REQUESTED, RETURN_REQUESTED, RETURNED }
+    public enum PaymentStatus { PENDING, PAID, FAILED, REFUNDED }
 
     //Primary key
     @Id
@@ -74,6 +74,15 @@ public class Orders {
     @Column(columnDefinition = "TEXT")
     private String note;
 
+    @Column(name = "cancelled_by", length = 20)
+    private String cancelledBy;          // USER / ADMIN
+
+    @Column(name = "cancelled_reason", length = 500)
+    private String cancelledReason;      // Lý do huỷ / hoàn
+
+    @Column(name = "cancelled_at")
+    private LocalDateTime cancelledAt;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -84,18 +93,56 @@ public class Orders {
     //Mapped by another entities
     @OneToMany(mappedBy = "orders", cascade = CascadeType.ALL)
     @Builder.Default
-
-    //Avoid infinite loop
-    @JsonIgnore
     private List<OrderItems> orderItems = new ArrayList<>();
 
-    // Kiểm tra có thể chuyển trạng thái không
+    // ================================================================
+    // BUSINESS RULES
+    // ================================================================
+
+    // User tự huỷ ngay — chỉ khi PENDING
+    public boolean canUserCancelDirectly() {
+        return this.orderStatus == OrderStatus.PENDING;
+    }
+
+    // User gửi yêu cầu huỷ — chỉ khi CONFIRMED
+    // Admin sẽ duyệt sau
+    public boolean canUserRequestCancel() {
+        return this.orderStatus == OrderStatus.CONFIRMED;
+    }
+
+    // User gửi yêu cầu hoàn hàng — chỉ khi SHIPPING
+    public boolean canUserRequestReturn() {
+        return this.orderStatus == OrderStatus.SHIPPING;
+    }
+
+    // Admin duyệt yêu cầu huỷ — chỉ khi CANCEL_REQUESTED
+    public boolean canAdminApproveCancel() {
+        return this.orderStatus == OrderStatus.CANCEL_REQUESTED;
+    }
+
+    // Admin từ chối yêu cầu huỷ — quay về CONFIRMED
+    public boolean canAdminRejectCancel() {
+        return this.orderStatus == OrderStatus.CANCEL_REQUESTED;
+    }
+
+    // Admin xác nhận hàng đã về kho
+    public boolean canAdminConfirmReturn() {
+        return this.orderStatus == OrderStatus.RETURN_REQUESTED;
+    }
+
+    // State machine chuyển trạng thái thông thường
     public boolean canTransitionTo(OrderStatus next) {
         return switch (this.orderStatus) {
-            case PENDING   -> next == OrderStatus.CONFIRMED || next == OrderStatus.CANCELLED;
-            case CONFIRMED -> next == OrderStatus.SHIPPING  || next == OrderStatus.CANCELLED;
-            case SHIPPING  -> next == OrderStatus.DELIVERED;
-            default        -> false;
+            case PENDING           -> next == OrderStatus.CONFIRMED
+                    || next == OrderStatus.CANCELLED;
+            case CONFIRMED         -> next == OrderStatus.SHIPPING
+                    || next == OrderStatus.CANCEL_REQUESTED;
+            case SHIPPING          -> next == OrderStatus.DELIVERED
+                    || next == OrderStatus.RETURN_REQUESTED;
+            case CANCEL_REQUESTED  -> next == OrderStatus.CANCELLED    // Admin duyệt
+                    || next == OrderStatus.CONFIRMED;   // Admin từ chối
+            case RETURN_REQUESTED  -> next == OrderStatus.RETURNED;
+            default                -> false;
         };
     }
 
