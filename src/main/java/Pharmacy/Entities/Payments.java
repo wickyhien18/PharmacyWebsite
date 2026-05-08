@@ -30,7 +30,7 @@ import java.time.LocalDateTime;
 public class Payments {
 
     public enum PaymentMethod { COD, VNPAY, MOMO }
-    public enum PaymentStatus { PENDING, SUCCESS, FAILED }
+    public enum PaymentStatus { PENDING, SUCCESS, FAILED, REFUNDED }
 
     //Primary key
     @Id
@@ -67,6 +67,19 @@ public class Payments {
 
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
+
+    // Link thanh toán hết hạn sau 15 phút — phải tạo link mới
+    @Column(name = "expired_at")
+    private LocalDateTime expiredAt;
+
+    // Lưu nguyên payload VNPay trả về — debug tranh chấp với ngân hàng
+    @Column(name = "raw_callback", columnDefinition = "JSON")
+    private String rawCallback;
+
+    // Đếm số lần user thử thanh toán lại
+    @Column(name = "attempt_count")
+    @Builder.Default
+    private Integer attemptCount = 0;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

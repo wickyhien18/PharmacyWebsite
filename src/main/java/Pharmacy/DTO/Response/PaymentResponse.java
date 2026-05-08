@@ -9,6 +9,8 @@ public record PaymentResponse(
         BigDecimal amount,
         String    status,
         String    transactionCode,
-        LocalDateTime paidAt
+        LocalDateTime paidAt,
+        LocalDateTime expiredAt,    // Thêm: link hết hạn lúc nào
+        Integer   attemptCount      // Thêm: đã thử mấy lần
 ) {
 }

@@ -1,9 +1,6 @@
 package Pharmacy.Controllers;
 
-import Pharmacy.DTO.Request.AddToCartRequest;
-import Pharmacy.DTO.Request.PlaceOrderRequest;
-import Pharmacy.DTO.Request.UpdateCartItemRequest;
-import Pharmacy.DTO.Request.UpdateOrderStatusRequest;
+import Pharmacy.DTO.Request.*;
 import Pharmacy.DTO.Response.ApiResponse;
 import Pharmacy.DTO.Response.CartResponse;
 import Pharmacy.DTO.Response.OrderResponse;
@@ -117,24 +114,112 @@ class OrderController {
         return ResponseEntity.ok(ApiResponse.ok(orderService.getDetail(user, id)));
     }
 
-    /** POST /api/orders/{id}/cancel — huỷ đơn */
+    // ================================================================
+    // USER — Các hành động huỷ / hoàn
+    // ================================================================
+
+    /**
+     * POST /api/orders/{id}/cancel
+     * Tình huống 1: User tự huỷ khi PENDING — không cần admin duyệt
+     */
     @PostMapping("/api/orders/{id}/cancel")
-    @Operation(summary = "Huỷ đơn hàng (chỉ được khi PENDING)")
-    public ResponseEntity<ApiResponse<OrderResponse>> cancel(
+    @Operation(summary = "Tự huỷ đơn khi đang PENDING")
+    public ResponseEntity<ApiResponse<OrderResponse>> cancelDirectly(
             @AuthenticationPrincipal Users user,
-            @PathVariable Long id) {
+            @PathVariable Long id,
+            @Valid @RequestBody CancelOrderRequest request) {
         return ResponseEntity.ok(ApiResponse.ok("Huỷ đơn thành công",
-                orderService.cancelOrder(user, id)));
+                orderService.cancelDirectly(user, id, request)));
     }
 
-    /** PATCH /api/admin/orders/{id}/status — admin cập nhật trạng thái */
+    /**
+     * POST /api/orders/{id}/request-cancel
+     * Tình huống 2A: User gửi yêu cầu huỷ khi CONFIRMED — admin sẽ xét duyệt
+     */
+    @PostMapping("/api/orders/{id}/request-cancel")
+    @Operation(summary = "Gửi yêu cầu huỷ khi đang CONFIRMED — chờ admin duyệt")
+    public ResponseEntity<ApiResponse<OrderResponse>> requestCancel(
+            @AuthenticationPrincipal Users user,
+            @PathVariable Long id,
+            @Valid @RequestBody RequestCancelRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                "Đã gửi yêu cầu huỷ. Vui lòng chờ admin xét duyệt",
+                orderService.requestCancel(user, id, request)));
+    }
+
+    /**
+     * POST /api/orders/{id}/request-return
+     * Tình huống 3A: User gửi yêu cầu hoàn hàng khi SHIPPING
+     */
+    @PostMapping("/api/orders/{id}/request-return")
+    @Operation(summary = "Gửi yêu cầu hoàn hàng khi đang SHIPPING — chờ admin xử lý")
+    public ResponseEntity<ApiResponse<OrderResponse>> requestReturn(
+            @AuthenticationPrincipal Users user,
+            @PathVariable Long id,
+            @Valid @RequestBody ReturnRequestRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                "Đã gửi yêu cầu hoàn hàng. Admin sẽ liên hệ với bạn sớm",
+                orderService.requestReturn(user, id, request)));
+    }
+
+    // ================================================================
+    // ADMIN — Các hành động quản trị đơn hàng
+    // ================================================================
+
+    /**
+     * PATCH /api/admin/orders/{id}/status
+     * Cập nhật trạng thái thông thường: PENDING→CONFIRMED→SHIPPING→DELIVERED
+     */
     @PatchMapping("/api/admin/orders/{id}/status")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    @Operation(summary = "Cập nhật trạng thái đơn [ADMIN]")
+    @Operation(summary = "Cập nhật trạng thái thông thường [ADMIN]")
     public ResponseEntity<ApiResponse<OrderResponse>> updateStatus(
             @PathVariable Long id,
             @Valid @RequestBody UpdateOrderStatusRequest request) {
         return ResponseEntity.ok(ApiResponse.ok("Cập nhật thành công",
                 orderService.updateStatus(id, request)));
+    }
+
+    /**
+     * POST /api/admin/orders/{id}/approve-cancel
+     * Tình huống 2B: Admin duyệt yêu cầu huỷ → CANCELLED
+     * Hoàn kho + xử lý refund nếu đã thanh toán
+     */
+    @PostMapping("/api/admin/orders/{id}/approve-cancel")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Operation(summary = "Duyệt yêu cầu huỷ đơn [ADMIN] → CANCELLED")
+    public ResponseEntity<ApiResponse<OrderResponse>> approveCancel(
+            @PathVariable Long id,
+            @Valid @RequestBody CancelOrderRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok("Đã duyệt huỷ đơn hàng",
+                orderService.approveCancel(id, request)));
+    }
+
+    /**
+     * POST /api/admin/orders/{id}/reject-cancel
+     * Tình huống 2C: Admin từ chối yêu cầu huỷ → quay về CONFIRMED
+     */
+    @PostMapping("/api/admin/orders/{id}/reject-cancel")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Operation(summary = "Từ chối yêu cầu huỷ đơn [ADMIN] → quay về CONFIRMED")
+    public ResponseEntity<ApiResponse<OrderResponse>> rejectCancel(
+            @PathVariable Long id,
+            @Valid @RequestBody RejectCancelRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok("Đã từ chối yêu cầu huỷ",
+                orderService.rejectCancel(id, request)));
+    }
+
+    /**
+     * POST /api/admin/orders/{id}/confirm-return
+     * Tình huống 3B: Admin xác nhận hàng đã về kho → RETURNED
+     * Hoàn kho + refund nếu đã thanh toán VNPay
+     */
+    @PostMapping("/api/admin/orders/{id}/confirm-return")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Operation(summary = "Xác nhận hàng đã về kho [ADMIN] → RETURNED + hoàn kho")
+    public ResponseEntity<ApiResponse<OrderResponse>> confirmReturn(
+            @PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.ok("Xác nhận hoàn hàng thành công",
+                orderService.confirmReturn(id)));
     }
 }
