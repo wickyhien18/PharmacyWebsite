@@ -1,9 +1,9 @@
 package Pharmacy.Services;
 
+import Pharmacy.Config.JWTUtil;
 import Pharmacy.DTO.Request.LoginRequest;
 import Pharmacy.DTO.Request.RefreshTokenRequest;
 import Pharmacy.DTO.Request.RegisterRequest;
-import Pharmacy.DTO.Response.ApiResponse;
 import Pharmacy.DTO.Response.AuthResponse;
 import Pharmacy.Entities.RefreshToken;
 import Pharmacy.Entities.Users;
@@ -15,13 +15,9 @@ import Pharmacy.Repositories.RoleRepository;
 import Pharmacy.Repositories.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +31,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JWTService      jwtService;
+    private final JWTUtil jwtService;
     private final AuthenticationManager authManager;
     private final RefreshTokenRepository refreshTokenRepository;
 

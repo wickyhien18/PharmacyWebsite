@@ -1,4 +1,4 @@
-package Pharmacy.Services;
+package Pharmacy.Config;
 
 import Pharmacy.Entities.Users;
 import Pharmacy.Repositories.UserRepository;

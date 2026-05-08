@@ -1,4 +1,4 @@
-package Pharmacy.Services;
+package Pharmacy.Config;
 
 import Pharmacy.Repositories.UserRepository;
 import jakarta.servlet.FilterChain;
@@ -14,12 +14,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
 public class JWTAuthFilter extends OncePerRequestFilter {
-    private final JWTService jwtService;
+    private final JWTUtil jwtService;
     private final CustomUserDetailService userDetailsService;
     private final UserRepository userRepository;
 

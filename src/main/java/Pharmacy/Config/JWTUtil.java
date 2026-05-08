@@ -1,19 +1,19 @@
-package Pharmacy.Services;
+package Pharmacy.Config;
 
 
 import Pharmacy.Entities.Users;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Date;
 
-@Service
-public class JWTService {
+@Component
+public class JWTUtil {
     //Secret key
     @Value("${app.jwt.secret}")
     private String secret;
