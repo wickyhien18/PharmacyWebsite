@@ -1,6 +1,5 @@
 package Pharmacy.Config;
 
-import Pharmacy.Repositories.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,7 +19,6 @@ import java.io.IOException;
 public class JWTAuthFilter extends OncePerRequestFilter {
     private final JWTUtil jwtService;
     private final CustomUserDetailService userDetailsService;
-    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(
