@@ -17,20 +17,26 @@ public class JWTUtil {
     //Secret key
     @Value("${app.jwt.secret}")
     private String secret;
+    //Secret Key for register Token
+    //The Length  > 32 characters
+    //Use for HMAC-SH256 aka Hash-based Message Authentication Code - Hashing with result 256 bits
 
     //Expiration of Access Token
     @Value("${app.jwt.expiration.access}")
     private Long accessExpiration;
+    //3600000 mls - 1h
 
     public String generateAccessToken(Users users) {
         return Jwts.builder()
                 .subject(users.getEmail())
+                //Register Token with Email
                 .claim("userId", users.getUserId())
                 .claim("role", users.getRoles() != null ? users.getRoles().getRoleName() : "")
+                //Add role into Token -> frontend know Role
                 .issuedAt(new Date())
                 .expiration(new Date(
                         System.currentTimeMillis() + accessExpiration))
-                .signWith(getKey())
+                .signWith(getSecretKey())
                 .compact();
     }
 
@@ -39,13 +45,16 @@ public class JWTUtil {
     }
 
     public String generateRefreshToken() {
-        // SecureRandom đảm bảo không đoán được (khác với Random thông thường)
-        byte[] randomBytes = new byte[32];       // 256 bits
+
+        //Create Random 256-bit String
+        //SecureRandom() > Math.random() and more security
+        byte[] randomBytes = new byte[32];
         new SecureRandom().nextBytes(randomBytes);
+
         return Base64.getUrlEncoder()
-                .withoutPadding()           // Bỏ dấu = cuối cho gọn
+                .withoutPadding()
                 .encodeToString(randomBytes);
-        // Kết quả: chuỗi ~43 ký tự, ví dụ: "xK9mP2qR8vL4nJ6wT0yU3oI5hF7cB1eD"
+        // Result String ~43 characters, example: "xK9mP2qR8vL4nJ6wT0yU3oI5hF7cB1eD"
     }
 
     public boolean isValid(String token) {
@@ -62,14 +71,14 @@ public class JWTUtil {
 
     private Claims parseClaims(String token) {
         return Jwts.parser()
-                .verifyWith(getKey())
+                .verifyWith(getSecretKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
     }
 
     //Get HashKey
-    private SecretKey getKey() {
+    private SecretKey getSecretKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 }

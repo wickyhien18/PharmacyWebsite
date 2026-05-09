@@ -39,8 +39,9 @@ public class CustomUserDetailService implements UserDetailsService {
             @Override
             public String getPassword() {
                 return users.getPassword();
-                //Spring Security automatically compare with password in database
-                //                  with password user receive
+                //Spring Security automatically compare with password in database with password user receive
+                //If password isn't equal to password in database, Spring Security will throw BadCredentialsException
+
             }
 
             @Override
