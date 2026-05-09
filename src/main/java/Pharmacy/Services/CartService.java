@@ -11,7 +11,6 @@ import Pharmacy.Repositories.CartRepository;
 import Pharmacy.Repositories.InventoryRepository;
 import Pharmacy.Repositories.MedicineRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -157,13 +156,16 @@ public class CartService {
 
     public CartResponse toResponse(Carts cart) {
         List<CartResponse.CartItemResponse> items = cart.getCartItems().stream()
+                //Get CartItem from Cart and transfer into Stream to solve each elements
                 .map(item -> {
+                    //Solve each cartItems in 1 stream
                     Medicines m = item.getMedicines();
                     int stock = inventoryRepository
                             .findByMedicineId(m.getMedicineId())
                             .map(Inventory::getQuantity).orElse(0);
                     BigDecimal subtotal = m.getPrice()
                             .multiply(BigDecimal.valueOf(item.getQuantity()));
+                    //Price x Quantity = SubTotal
                     return new CartResponse.CartItemResponse(
                             item.getCartItemId(),
                             m.getMedicineId(),
@@ -178,6 +180,7 @@ public class CartService {
 
         BigDecimal total = items.stream()
                 .map(CartResponse.CartItemResponse::subtotal)
+                //T = BigDecimal.ZERO -> T += subTotal
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return new CartResponse(cart.getCartId(), items, total);

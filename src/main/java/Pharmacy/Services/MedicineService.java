@@ -99,7 +99,7 @@ public class MedicineService {
                 .medicineSlug(slug)
                 .description(req.description())
                 .price(req.price())
-                .unit(req.unit() != null ? req.unit() : "Hộp")
+                .unit(req.unit() != null ? req.unit() : "Pillbox")
                 .categories(category)
                 .manufacturers(manufacturer)
                 .expireDate(req.expireDate())
@@ -202,9 +202,12 @@ public class MedicineService {
 
     // Chuyển tiếng Việt sang slug: "Vitamin C 1000mg" → "vitamin-c-1000mg"
     private String generateSlug(String input) {
+        //Split Signed character into 2 characters
+        // á -> a + '
         String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
         String slug = Pattern.compile("\\p{InCombiningDiacriticalMarks}+")
                 .matcher(normalized).replaceAll("")
+                //Delete sign from signed character
                 .toLowerCase()
                 .replaceAll("đ", "d")
                 .replaceAll("[^a-z0-9\\s-]", "")
