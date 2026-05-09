@@ -17,6 +17,8 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 public class JWTAuthFilter extends OncePerRequestFilter {
+    // 1 Filter / 1 Request
+
     private final JWTUtil jwtService;
     private final CustomUserDetailService userDetailsService;
 
@@ -41,6 +43,9 @@ public class JWTAuthFilter extends OncePerRequestFilter {
         if (header == null || !header.startsWith("Bearer ")) {
             chain.doFilter(request, response);
             return;
+
+            //SecurityConfig decide from here
+            //Auth Endpoint  -> blocked by SecurityConfig, return 401
         }
 
         // Get Token skip header Bearer
@@ -51,6 +56,8 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             System.out.println("Token error: " + token);
             chain.doFilter(request, response);
             return;
+
+            //SecurityContext don't have token -> Auth Endpoint -> 401
         }
 
         String email = jwtService.extractEmail(token);
