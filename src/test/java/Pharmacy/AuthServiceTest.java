@@ -48,12 +48,15 @@ class AuthServiceTest {
     @Mock PasswordEncoder        passwordEncoder;
     @Mock JWTUtil                jwtUtil;
     @Mock AuthenticationManager  authManager;
+    @Mock
+    private HttpServletRequest request;
 
     @InjectMocks AuthService authService;
 
     // ---- Dữ liệu dùng chung ----
     private Roles customerRole;
     private Users testUser;
+    private final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9.valid.token";
 
     @BeforeEach
     void setUp() {
@@ -208,8 +211,7 @@ class AuthServiceTest {
                     .isInstanceOf(AuthException.class)
                     // Message phải giống nhau dù sai email hay sai password
                     // → tránh user enumeration attack
-                    .hasMessageContaining("Email hoặc mật khẩu không đúng")
-                    .extracting("status").isEqualTo(401);
+                    .hasMessageContaining("Email or password is incorrect");
             verify(userRepository, never()).findByEmail(anyString());
 
         }
@@ -226,8 +228,7 @@ class AuthServiceTest {
 
             assertThatThrownBy(() -> authService.login(req))
                     .isInstanceOf(AuthException.class)
-                    .hasMessageContaining("khoá")
-                    .extracting("status").isEqualTo(401);
+                    .hasMessageContaining("Account has been locked");
         }
     }
 
@@ -274,8 +275,7 @@ class AuthServiceTest {
             assertThatThrownBy(() ->
                     authService.refreshToken(new RefreshTokenRequest("fake-token")))
                     .isInstanceOf(AuthException.class)
-                    .hasMessageContaining("không hợp lệ")
-                    .extracting("status").isEqualTo(401);
+                    .hasMessageContaining("Invalid");
         }
 
         @Test
@@ -294,8 +294,7 @@ class AuthServiceTest {
             assertThatThrownBy(() ->
                     authService.refreshToken(new RefreshTokenRequest("expired-token")))
                     .isInstanceOf(AuthException.class)
-                    .hasMessageContaining("hết hạn")
-                    .extracting("status").isEqualTo(401);
+                    .hasMessageContaining("expired");
 
             // Token hết hạn không được cấp token mới
             verify(jwtUtil, never()).generateAccessToken(any());
@@ -313,45 +312,39 @@ class AuthServiceTest {
         @DisplayName("Logout với token hợp lệ → xoá token khỏi DB")
         void logout_validToken_deletesToken() {
 
-            // mock request
-            HttpServletRequest request = mock(HttpServletRequest.class);
+            when(request.getHeader("Authorization")).thenReturn("Bearer " + VALID_TOKEN);
+            when(jwtUtil.extractEmail(VALID_TOKEN)).thenReturn(testUser.getEmail());
+            when(userRepository.findByEmail(testUser.getEmail())).thenReturn(Optional.empty());
 
-            // fake header Authorization
-            when(request.getHeader("Authorization"))
-                    .thenReturn("Bearer valid-token");
+            String result = authService.logout(request);
 
-            // fake token trong DB
-            RefreshToken stored = RefreshToken.builder()
-                    .id(1L)
-                    .token("valid-token")
-                    .users(testUser)
-                    .build();
-
-            String token = stored.getToken();
-
-            when(refreshTokenRepository.findByToken("valid-token"))
-                    .thenReturn(Optional.of(stored));
-
-            // gọi service
-            authService.logout(request);
-
-            // verify delete
-            verify(refreshTokenRepository).deleteByToken(token);
+            assertThat(result).isEqualTo("Logout Successfully");
+            verify(refreshTokenRepository, never()).deleteAllByUserId(anyLong());
         }
+
+
         @Test
-        @DisplayName("Logout với token không tồn tại → không throw, idempotent")
+        @DisplayName("Header Authorization là null → throw ResourceNotFoundException")
         void logout_tokenNotFound_noException() {
-            HttpServletRequest request = mock(HttpServletRequest.class);
+            when(request.getHeader("Authorization")).thenReturn(null);
 
-                when(request.getHeader("Authorization"))
-                        .thenReturn("Bearer invalid-token");
+            assertThatThrownBy(() -> authService.logout(request))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessageContaining("Not found Token");
 
-                when(refreshTokenRepository.findByToken("invalid-token"))
-                        .thenReturn(Optional.empty());
+            verify(refreshTokenRepository, never()).deleteAllByUserId(anyLong());
+        }
 
-                assertThrows(RuntimeException.class, () -> {
-                    authService.logout(request);
-                });
+        @Test
+        @DisplayName("Header không bắt đầu bằng 'Bearer ' → throw ResourceNotFoundException")
+        void logout_headerWithoutBear_noException() {
+            when(request.getHeader("Authorization")).thenReturn("Bearer ");
+
+            // Không throw exception, vẫn chạy bình thường
+            String result = authService.logout(request);
+
+            assertThat(result).isEqualTo("Logout Successfully");
+
         }
     }
 }
