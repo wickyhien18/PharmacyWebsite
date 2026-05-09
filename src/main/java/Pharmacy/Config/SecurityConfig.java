@@ -27,14 +27,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws  Exception{
         http.csrf(csrf -> csrf.disable())
+                //Disable CSRF because using JWT Stateless
+                //CSRF use for cookie/session
                 .sessionManagement(session -> session
                         .sessionCreationPolicy((SessionCreationPolicy.STATELESS)))
+                //STATELES - no create session
+                //1 Request - 1 Token
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/medicines/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/manufacturers/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        //Swagger UI
                         // Admin
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
