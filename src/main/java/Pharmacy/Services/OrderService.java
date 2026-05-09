@@ -192,7 +192,7 @@ public class OrderService {
         Orders order = findOrder(orderId);
 
         if (!order.getUsers().getUserId().equals(user.getUserId()))
-            throw new AccessDeniedException("Bạn không có quyền huỷ đơn này");
+            throw new AccessDeniedException("You can't access this order");
 
         if (!order.canUserCancelDirectly())
             throw new BusinessException(
@@ -526,7 +526,7 @@ public class OrderService {
 
     private Orders findOrder(Long orderId) {
         return orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng không tồn tại"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order isn't existed"));
     }
 
     private String generateOrderCode() {
@@ -546,7 +546,7 @@ public class OrderService {
         List<OrderResponse.OrderItemResponse> items = order.getOrderItems().stream()
                 .map(i -> new OrderResponse.OrderItemResponse(
                         i.getMedicines() != null ? i.getMedicines().getMedicineId() : null,
-                        i.getMedicines() != null ? i.getMedicines().getMedicineName() : "Đã xoá",
+                        i.getMedicines() != null ? i.getMedicines().getMedicineName() : "Deleted",
                         i.getQuantity(), i.getUnitPrice(), i.getTotalPrice()))
                 .toList();
 

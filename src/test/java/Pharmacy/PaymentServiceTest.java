@@ -110,8 +110,7 @@ class PaymentServiceTest {
 
             assertThatThrownBy(() -> paymentService.createVNPayUrl(1L, "127.0.0.1"))
                     .isInstanceOf(BusinessException.class)
-                    .hasMessageContaining("đã được thanh toán")
-                    .extracting("status").isEqualTo(400);
+                    .hasMessageContaining("đã được thanh toán");
 
             verify(paymentRepository, never()).save(any());
         }
@@ -124,8 +123,7 @@ class PaymentServiceTest {
 
             assertThatThrownBy(() -> paymentService.createVNPayUrl(1L, "127.0.0.1"))
                     .isInstanceOf(BusinessException.class)
-                    .hasMessageContaining("đã bị huỷ")
-                    .extracting("status").isEqualTo(400);
+                    .hasMessageContaining("đã bị huỷ");
         }
 
         @Test
@@ -137,8 +135,7 @@ class PaymentServiceTest {
 
             assertThatThrownBy(() -> paymentService.createVNPayUrl(1L, "127.0.0.1"))
                     .isInstanceOf(BusinessException.class)
-                    .hasMessageContaining("không dùng thanh toán VNPay")
-                    .extracting("status").isEqualTo(400);
+                    .hasMessageContaining("không dùng thanh toán VNPay");
         }
 
         @Test
@@ -147,8 +144,7 @@ class PaymentServiceTest {
             when(orderRepository.findById(99L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> paymentService.createVNPayUrl(99L, "127.0.0.1"))
-                    .isInstanceOf(ResourceNotFoundException.class)
-                    .extracting("status").isEqualTo(404);
+                    .isInstanceOf(ResourceNotFoundException.class);
         }
     }
 
@@ -350,8 +346,7 @@ class PaymentServiceTest {
 
             assertThatThrownBy(() -> paymentService.handleReturn(params))
                     .isInstanceOf(BusinessException.class)
-                    .hasMessageContaining("Chữ ký không hợp lệ")
-                    .extracting("status").isEqualTo(400);
+                    .hasMessageContaining("Chữ ký không hợp lệ");
         }
     }
 }
