@@ -338,12 +338,13 @@ class AuthServiceTest {
         @Test
         @DisplayName("Header không bắt đầu bằng 'Bearer ' → throw ResourceNotFoundException")
         void logout_headerWithoutBear_noException() {
-            when(request.getHeader("Authorization")).thenReturn("Bearer ");
+            when(request.getHeader("Authorization")).thenReturn("Basic abc123");
 
-            // Không throw exception, vẫn chạy bình thường
-            String result = authService.logout(request);
+            assertThatThrownBy(() -> authService.logout(request))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessage("Not found Token");
 
-            assertThat(result).isEqualTo("Logout Successfully");
+            verify(refreshTokenRepository, never()).deleteAllByUserId(anyLong());
 
         }
     }
