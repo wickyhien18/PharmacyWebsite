@@ -35,6 +35,7 @@ public class SecurityConfig {
                 //1 Request - 1 Token
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/health").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/medicines/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/manufacturers/**").permitAll()
