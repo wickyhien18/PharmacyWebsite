@@ -1,3 +1,9 @@
+CREATE DATABASE IF NOT EXISTS pharmacy_db
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
+
+USE pharmacy_db;
+
 CREATE TABLE roles (
                        role_id   BIGINT       NOT NULL AUTO_INCREMENT,
                        role_name VARCHAR(100) NOT NULL UNIQUE,
