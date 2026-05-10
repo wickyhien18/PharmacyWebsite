@@ -1,10 +1,8 @@
 package Pharmacy.Entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.orm.jpa.persistenceunit.SpringPersistenceUnitInfo;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

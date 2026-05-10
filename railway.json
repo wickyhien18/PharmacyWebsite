@@ -1,0 +1,10 @@
+{
+    "build": {
+        "buildCommand": "mvn clean package -DskipTests"
+    },
+    "deploy": {
+        "startCommand": "java -jar target/*.jar",
+        "healthcheckPath": "/api/health",
+        "restartPolicyType": "ON_FAILURE"
+    }
+}
