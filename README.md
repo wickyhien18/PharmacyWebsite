@@ -2,8 +2,8 @@
 
 Web ứng dụng nhà thuốc trực tuyến tương tự **NhathuocLongChau.com.vn** — được xây dựng bằng Spring Boot, MySQL và tích hợp thanh toán VNPay.
 
-🔗 **Demo:** https://pharmacy-app.up.railway.app  
-📖 **Swagger UI:** https://pharmacy-app.up.railway.app/swagger-ui.html
+🔗 **Demo:** https://pharmacywebsite.up.railway.app/  
+📖 **Swagger UI:** https://pharmacywebsite.up.railway.app/swagger-ui.html
 
 ---
 
