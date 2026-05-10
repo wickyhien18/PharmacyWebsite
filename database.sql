@@ -269,6 +269,18 @@ SELECT 'admin',
        'Quản trị viên', 'admin@pharmacy.vn', '0900000000', role_id
 FROM roles WHERE role_name = 'ROLE_ADMIN';
 
+INSERT INTO users (user_name, password, full_name, email, phone, role_id)
+SELECT 'wicky',
+       '$2a$10$s8XCruq912V8s9qDmswh0uCBkaKyKa6c84svh753usl1ysqh/6CvW',
+       'Wicky White', 'wicky@gmail.com', '0812099286', role_id
+FROM roles WHERE role_name = 'ROLE_ADMIN';
+
+INSERT INTO users (user_name, password, full_name, email, phone, role_id)
+SELECT 'giaphien',
+       '$2a$10$OJT.ies8HZksnB28yS5lduxCddwTIO.4QVLVBNR2oBj5F.G4JMNk.',
+       'Giáp Minh Hiển', 'hien@gmail.com', '0977711418', role_id
+FROM roles WHERE role_name = 'ROLE_CUSTOMER';
+
 -- Manufacturers
 INSERT INTO manufacturers (name, country) VALUES
                                               ('Ipsen Pharma',     'Pháp'),
