@@ -33,16 +33,11 @@ public class JWTAuthFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
 
         // Skip filter for AUTH API
-        if (path.startsWith("/api/auth/")) {
+        if (path.startsWith("/api/auth/") || (path.startsWith("/api/health"))) {
             chain.doFilter(request, response);
             return;
         }
 
-        // Bypass health endpoint
-        if (path.equals("/api/health")) {
-            chain.doFilter(request, response);
-            return;
-        }
 
         String header = request.getHeader("Authorization");
 
