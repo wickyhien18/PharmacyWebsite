@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -33,6 +34,12 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 
         // Skip filter for AUTH API
         if (path.startsWith("/api/auth/")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        // Bypass health endpoint
+        if (path.equals("/api/health")) {
             chain.doFilter(request, response);
             return;
         }
