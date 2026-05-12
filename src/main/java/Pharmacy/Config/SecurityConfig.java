@@ -34,25 +34,25 @@ public class SecurityConfig {
                 //STATELES - no create session
                 //1 Request - 1 Token
                 .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers(
-//                                "/",
-//                                "/api/health",
-//                                "/api/auth/**",
-//                                "/swagger-ui/**",
-//                                "/v3/api-docs/**",
-//                                "/e-commerce/**",
-//                                "/css/**",
-//                                "/js/**",
-//                                "/images/**"
-//                        ).permitAll()
-//                        .requestMatchers(HttpMethod.GET, "/api/medicines/**").permitAll()
-//                        .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
-//                        .requestMatchers(HttpMethod.GET, "/api/manufacturers/**").permitAll()
-//                        // Admin
-//                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(
+                                "/",
+                                "/api/health",
+                                "/api/auth/**",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/e-commerce/**",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**"
+                        ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/medicines/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/manufacturers/**").permitAll()
+                        // Admin
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
-                );
-//                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                )
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
