@@ -16,6 +16,8 @@ WORKDIR /app
 
 COPY --from=build /app/target/*.jar app.jar
 
+RUN java -Djarmode=layertools -jar app.jar extract
+
 EXPOSE 8080
 
-ENTRYPOINT ["java","-XX:+UseSerialGC","-Xmx256m","-jar","app.jar"]
+ENTRYPOINT ["java","-XX:+UseContainerSupport","-XX:MaxRAMPercentage=75.0","-jar","app.jar"]
