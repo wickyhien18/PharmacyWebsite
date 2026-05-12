@@ -1,9 +1,0 @@
-{
-    "build": {
-        "buildCommand": "mvn package -DskipTests"
-    },
-    "deploy": {
-        "healthcheckPath": "/api/health",
-        "restartPolicyType": "ON_FAILURE"
-    }
-}
