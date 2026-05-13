@@ -48,7 +48,7 @@ public class CartController {
             @Valid @RequestBody AddToCartRequest request) {
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.ok("Đã thêm vào giỏ hàng", cartService.addItem(user, request)));
+                .body(ApiResponse.ok("Added into Cart", cartService.addItem(user, request)));
     }
 
     /** PATCH /api/cart/items/{medicineId} */
@@ -92,7 +92,7 @@ class OrderController {
         // @Transactional: trừ kho + tạo đơn + xoá giỏ trong 1 transaction
         // Thiếu hàng → AppException → rollback toàn bộ → 400
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.ok("Đặt hàng thành công",
+                .body(ApiResponse.ok("Successful",
                         orderService.placeOrder(user, request)));
     }
 
@@ -127,7 +127,7 @@ class OrderController {
             @AuthenticationPrincipal Users user,
             @PathVariable Long id,
             @Valid @RequestBody CancelOrderRequest request) {
-        return ResponseEntity.ok(ApiResponse.ok("Huỷ đơn thành công",
+        return ResponseEntity.ok(ApiResponse.ok("Cancel order successfully",
                 orderService.cancelDirectly(user, id, request)));
     }
 
