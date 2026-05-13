@@ -46,8 +46,7 @@ public class CartController {
     public ResponseEntity<ApiResponse<CartResponse>> addItem(
             @AuthenticationPrincipal Users user,
             @Valid @RequestBody AddToCartRequest request) {
-        // Hết hàng → AppException.badRequest → 400
-        // Thuốc không tồn tại → AppException.notFound → 404
+
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.ok("Đã thêm vào giỏ hàng", cartService.addItem(user, request)));
     }
