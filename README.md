@@ -1,9 +1,9 @@
 # 💊 Pharmacy Web App
 
-Web ứng dụng nhà thuốc trực tuyến tương tự **NhathuocLongChau.com.vn** — được xây dựng bằng Spring Boot, MySQL và tích hợp thanh toán VNPay.
+Web ứng dụng nhà thuốc trực tuyến — được xây dựng bằng Spring Boot, MySQL và tích hợp thanh toán VNPay. Hệ thống bao gồm đầy đủ luồng mua bán, quản lý giỏ hàng, đặt hàng và tích hợp xác thực bảo mật JWT.
 
-🔗 **Demo:**  
-📖 **Swagger UI:** 
+🔗 **Demo:** [Link Demo của bạn]  
+📖 **Swagger UI:** [Link Swagger của bạn]
 
 ---
 
@@ -11,187 +11,112 @@ Web ứng dụng nhà thuốc trực tuyến tương tự **NhathuocLongChau.com
 
 | Layer | Công nghệ |
 |---|---|
-| Backend | Java 21, Spring Boot 3.x |
+| Backend | Java, Spring Boot 3.x |
 | Security | Spring Security, JWT (Access Token) + Refresh Token |
 | Database | MySQL 8.0, Spring Data JPA |
 | Payment | VNPay Sandbox |
 | Docs | Springdoc OpenAPI (Swagger UI) |
-| Deploy | Railway (free tier) |
-| Test | JUnit 5, Mockito |
+| Deploy | [Tùy chọn nền tảng: Railway/Render/AWS...] |
 
 ---
 
 ## Tính năng chính
 
 ### Khách hàng
-- Đăng ký / Đăng nhập với JWT — access token 1 giờ, refresh token 7 ngày
-- Duyệt và tìm kiếm thuốc theo tên, danh mục, nhà sản xuất
-- Giỏ hàng — thêm, sửa số lượng, xoá sản phẩm
-- Đặt hàng và thanh toán (COD hoặc VNPay)
-- Xem lịch sử đơn hàng, huỷ đơn khi đang chờ xác nhận
-- Gửi yêu cầu huỷ / hoàn hàng sau khi đơn đã xác nhận
+- Đăng ký / Đăng nhập an toàn với JWT (Bao gồm Access Token & Refresh Token).
+- Duyệt và tìm kiếm thông tin thuốc (Medicine), nhà sản xuất (Manufacturer), danh mục (Category).
+- Giỏ hàng (Cart) — thêm, sửa số lượng, xoá sản phẩm khỏi giỏ hàng.
+- Đặt hàng và thanh toán trực tuyến qua cổng VNPay.
+- Xem lịch sử đơn hàng, gửi yêu cầu huỷ đơn/hoàn hàng.
 
 ### Admin
-- Quản lý danh mục, nhà sản xuất, sản phẩm (CRUD)
-- Quản lý tồn kho — nhập kho, xem lịch sử xuất/nhập
-- Xử lý đơn hàng — duyệt, xác nhận giao hàng
-- Duyệt hoặc từ chối yêu cầu huỷ đơn của khách
-- Xác nhận hoàn hàng khi hàng về kho
+- Quản lý danh mục (Categories), nhà sản xuất (Manufacturers), sản phẩm (Medicines).
+- Quản lý tồn kho (Inventory) — nhập kho, theo dõi lịch sử tồn kho (Inventory Log).
+- Xử lý đơn hàng — duyệt đơn, xác nhận giao hàng.
+- Quản lý người dùng (Users) và quyền hạn (Roles).
+- Duyệt hoặc từ chối các yêu cầu huỷ đơn/hoàn hàng của khách.
 
 ### Thanh toán (VNPay)
-- Tạo link thanh toán, link có thời hạn 15 phút
-- Xử lý IPN callback từ VNPay (server-to-server)
-- Chống duplicate IPN — kiểm tra trạng thái trước khi xử lý
-- Lưu raw callback để debug tranh chấp
+- Tạo URL thanh toán an toàn với mã hoá HMAC-SHA512.
+- Xử lý IPN callback từ VNPay (để cập nhật trạng thái thanh toán tự động server-to-server).
+- Return URL để điều hướng người dùng sau khi giao dịch.
 
 ---
 
-## Luồng huỷ đơn hàng
+## Luồng quản lý đơn hàng cơ bản
 
-```
-PENDING      → [User tự huỷ]       → CANCELLED          (hoàn kho ngay)
+```text
+PENDING      → [User tự huỷ]       → CANCELLED
 CONFIRMED    → [User gửi yêu cầu]  → CANCEL_REQUESTED
-               [Admin duyệt]        → CANCELLED          (hoàn kho + refund)
-               [Admin từ chối]      → CONFIRMED          (tiếp tục bình thường)
+               [Admin duyệt]        → CANCELLED
+               [Admin từ chối]      → CONFIRMED
 SHIPPING     → [User gửi yêu cầu]  → RETURN_REQUESTED
-               [Admin xác nhận về]  → RETURNED           (hoàn kho + refund)
+               [Admin xác nhận về]  → RETURNED
 ```
 
 ---
 
-## Chạy local
+## Hướng dẫn cài đặt & Chạy Local
 
 ### Yêu cầu
-- Java 21+
-- MySQL 8.0
-- Maven 3.9+
+- Java (17 hoặc 21)
+- MySQL 8.0+
+- Maven
 
-### Bước 1 — Tạo database
+### Bước 1 — Thiết lập Database
 
-```sql
--- Chạy file này trên MySQL Workbench
-source src/main/resources/schema_final.sql
-```
+Tạo một database trong MySQL (ví dụ: `pharmacy_db`).
 
-### Bước 2 — Cấu hình
+### Bước 2 — Cấu hình ứng dụng
+
+Mở file `src/main/resources/application.properties` (hoặc `application.yml`) và cập nhật:
 
 ```properties
-# src/main/resources/application.properties
-spring.datasource.url=jdbc:mysql://localhost:3306/pharmacy_db?...
-spring.datasource.username=root
-spring.datasource.password=your_password
+spring.datasource.url=jdbc:mysql://localhost:3306/[Tên_DB_Của_Bạn]?useSSL=false&serverTimezone=UTC
+spring.datasource.username=[Tên_Đăng_Nhập_MySQL]
+spring.datasource.password=[Mật_Khẩu_MySQL]
 
-app.jwt.secret=your_base64_secret
-vnpay.tmn-code=your_tmn_code
-vnpay.hash-secret=your_hash_secret
+# Cấu hình JWT
+app.jwt.secret=[Chuỗi_Bí_Mật_JWT_Của_Bạn]
+
+# Cấu hình VNPay
+vnpay.tmn-code=[Mã_TMN_Code]
+vnpay.hash-secret=[Chuỗi_Hash_Secret]
 ```
 
-### Bước 3 — Chạy
+### Bước 3 — Khởi chạy ứng dụng
+
+Sử dụng Maven để chạy:
 
 ```bash
 mvn spring-boot:run
 ```
 
-Truy cập Swagger UI: http://localhost:8080/swagger-ui.html
+Sau khi chạy thành công, truy cập Swagger UI tại: `http://localhost:8080/swagger-ui.html` (Hoặc port tương ứng của bạn).
 
 ---
 
-## Chạy bằng Docker
+## Cấu trúc thư mục (Packages)
 
-```bash
-# 1. Copy file env
-cp .env.example .env
-# Điền giá trị thật vào .env
+Toàn bộ logic được tổ chức rõ ràng theo chuẩn mô hình MVC và RESTful API:
 
-# 2. Build và chạy
-docker-compose up -d
-
-# 3. Kiểm tra logs
-docker-compose logs -f app
+```text
+src/main/java/Pharmacy/
+├── Config/          # Chứa cấu hình Security, JWT, CORS, Swagger, VNPay
+├── Controllers/     # Các REST API Endpoint cho Client & Admin
+├── Services/        # Chứa Business Logic (Auth, Order, Cart, Medicine...)
+├── Repositories/    # Data Access Layer (Kế thừa JpaRepository)
+├── Entities/        # Các bảng CSDL (Users, Orders, Cart, Medicine, Inventory...)
+├── DTO/             # Data Transfer Objects (Request/Response payload)
+└── Exceptions/      # Global Exception Handler & Custom Exceptions
 ```
-
----
-
-## Cấu trúc project
-
-```
-src/main/java/com/pharmacy/
-├── config/          # SecurityConfig
-├── controller/      # REST Controllers
-├── service/         # Business Logic
-├── repository/      # Spring Data JPA
-├── entity/          # JPA Entities (14 bảng)
-├── dto/             # Request / Response DTOs
-├── exception/       # AppException + GlobalExceptionHandler
-└── security/        # JwtUtil, JwtFilter, VNPayUtil
-```
-
----
-
-## API Endpoints chính
-
-```
-POST /api/auth/register          Đăng ký
-POST /api/auth/login             Đăng nhập
-POST /api/auth/refresh           Làm mới token
-POST /api/auth/logout            Đăng xuất
-
-GET  /api/medicines              Danh sách thuốc + filter + phân trang
-GET  /api/medicines/{slug}       Chi tiết thuốc
-GET  /api/categories             Danh sách danh mục
-
-GET  /api/cart                   Xem giỏ hàng
-POST /api/cart/items             Thêm vào giỏ
-PATCH /api/cart/items/{id}       Cập nhật số lượng
-
-POST /api/orders                 Đặt hàng
-GET  /api/orders                 Lịch sử đơn hàng
-POST /api/orders/{id}/cancel     Huỷ đơn (khi PENDING)
-POST /api/orders/{id}/request-cancel   Yêu cầu huỷ (khi CONFIRMED)
-POST /api/orders/{id}/request-return   Yêu cầu hoàn (khi SHIPPING)
-
-POST /api/payment/vnpay/create/{orderId}  Tạo link thanh toán
-GET  /api/payment/vnpay-return            Return URL sau khi trả tiền
-GET  /api/payment/vnpay-ipn              IPN callback từ VNPay
-```
-
----
-
-## Test
-
-```bash
-# Chạy tất cả test
-mvn test
-
-# Chạy 1 class test cụ thể
-mvn test -Dtest=OrderServiceTest
-
-# Xem coverage report
-mvn test jacoco:report
-# Mở target/site/jacoco/index.html
-```
-
-**Bộ test hiện tại:** 47 unit test cho `AuthService`, `OrderService`, `PaymentService`  
-**Coverage:** ~65% Service layer
-
----
-
-## Những gì chưa implement (trả lời thành thật khi phỏng vấn)
-
-| Tính năng | Lý do chưa làm |
-|---|---|
-| Redis cache | Chưa cần ở scale hiện tại, sẽ thêm nếu có bottleneck |
-| Gọi VNPay Refund API thật | Hiện đánh dấu REFUNDED thủ công, cần account production |
-| Email notification | Thiếu SMTP config, có thể dùng Mailjet free |
-| Upload ảnh thuốc | Có thể tích hợp Cloudinary, hiện chỉ lưu URL |
-| Full-text search | Đang dùng LIKE, có thể nâng lên FULLTEXT index |
-| Tích hợp GHN/GHTK | Shipment hiện chỉ track trong DB |
 
 ---
 
 ## Tác giả
 
 **[Tên của bạn]**  
-Sinh viên năm 3 — Đại học [Tên trường]  
-📧 email@example.com  
-🔗 github.com/username
+Vai trò / Công việc: [Mô tả ngắn gọn / Sinh viên...]  
+📧 Email: [Địa chỉ Email của bạn]  
+🔗 GitHub: [Link Github của bạn]  
+🔗 LinkedIn: [Link LinkedIn của bạn]  
