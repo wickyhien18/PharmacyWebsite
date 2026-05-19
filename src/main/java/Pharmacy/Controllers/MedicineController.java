@@ -21,6 +21,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api")
 @Tag(name = "Medicines API")
 @RequiredArgsConstructor
+/**
+ * Class MedicineController.
+ * Provides functionality and data modeling for MedicineController.
+ */
 public class MedicineController {
 
     private final MedicineService medicineService;
@@ -41,6 +45,12 @@ public class MedicineController {
 
     @GetMapping("/medicines/{slug}")
     @Operation(summary = "Get medicine's information from Slug")
+    /**
+     * Retrieves by slug.
+     *
+     * @param slug the slug
+     * @return the ResponseEntity<ApiResponse<MedicineResponse>> result
+     */
     public ResponseEntity<ApiResponse<MedicineResponse>> getBySlug(@PathVariable String slug) {
         return ResponseEntity.ok(ApiResponse.ok(medicineService.getBySlug(slug)));
     }
@@ -67,6 +77,12 @@ public class MedicineController {
     @DeleteMapping("/admin/medicines/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Delete medicine's information")
+    /**
+     * Deletes .
+     *
+     * @param id the id
+     * @return the ResponseEntity<?> result
+     */
     public ResponseEntity<?> delete(@PathVariable Long id) {
         medicineService.delete(id);
         return ResponseEntity.ok(ApiResponse.ok("Delete medicine's information successfully"));

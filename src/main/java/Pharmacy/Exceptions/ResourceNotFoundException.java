@@ -1,6 +1,15 @@
 package Pharmacy.Exceptions;
 
+/**
+ * Class ResourceNotFoundException.
+ * Provides functionality and data modeling for ResourceNotFoundException.
+ */
 public class ResourceNotFoundException extends RuntimeException{
+    /**
+     * Resource not found exception.
+     *
+     * @param message the message
+     */
     public ResourceNotFoundException(String message) {
         super(message);
     }

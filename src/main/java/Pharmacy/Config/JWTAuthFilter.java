@@ -17,6 +17,10 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+/**
+ * Class JWTAuthFilter.
+ * Provides functionality and data modeling for JWTAuthFilter.
+ */
 public class JWTAuthFilter extends OncePerRequestFilter {
     // 1 Filter / 1 Request
 

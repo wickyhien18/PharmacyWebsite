@@ -13,6 +13,10 @@ import java.util.Base64;
 import java.util.Date;
 
 @Component
+/**
+ * Class JWTUtil.
+ * Provides functionality and data modeling for JWTUtil.
+ */
 public class JWTUtil {
     //Secret key
     @Value("${app.jwt.secret}")
@@ -26,6 +30,12 @@ public class JWTUtil {
     private Long accessExpiration;
     //3600000 mls - 1h
 
+    /**
+     * Generate access token.
+     *
+     * @param users the users
+     * @return the String result
+     */
     public String generateAccessToken(Users users) {
         return Jwts.builder()
                 .subject(users.getEmail())
@@ -40,10 +50,21 @@ public class JWTUtil {
                 .compact();
     }
 
+    /**
+     * Extract email.
+     *
+     * @param token the token
+     * @return the String result
+     */
     public String extractEmail(String token) {
         return parseClaims(token).getSubject();
     }
 
+    /**
+     * Generate refresh token.
+     *
+     * @return the String result
+     */
     public String generateRefreshToken() {
 
         //Create Random 256-bit String
@@ -57,6 +78,12 @@ public class JWTUtil {
         // Result String ~43 characters, example: "xK9mP2qR8vL4nJ6wT0yU3oI5hF7cB1eD"
     }
 
+    /**
+     * Checks if valid.
+     *
+     * @param token the token
+     * @return the boolean result
+     */
     public boolean isValid(String token) {
         try {
             parseClaims(token);
@@ -69,6 +96,12 @@ public class JWTUtil {
         return false;
     }
 
+    /**
+     * Parse claims.
+     *
+     * @param token the token
+     * @return the Claims result
+     */
     private Claims parseClaims(String token) {
         return Jwts.parser()
                 .verifyWith(getSecretKey())
@@ -78,6 +111,11 @@ public class JWTUtil {
     }
 
     //Get HashKey
+    /**
+     * Retrieves secret key.
+     *
+     * @return the SecretKey result
+     */
     private SecretKey getSecretKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }

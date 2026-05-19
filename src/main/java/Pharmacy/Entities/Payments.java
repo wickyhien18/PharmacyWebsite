@@ -92,11 +92,17 @@ public class Payments {
     private LocalDateTime updatedAt;
 
     @PrePersist
+    /**
+     * On create.
+     */
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
+    /**
+     * On update.
+     */
     protected void onUpdate() { updatedAt = LocalDateTime.now(); }
 }

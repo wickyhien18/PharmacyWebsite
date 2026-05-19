@@ -15,11 +15,20 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Class ManufacturerService.
+ * Provides functionality and data modeling for ManufacturerService.
+ */
 public class ManufacturerService {
 
     private final ManufacturerRepository manufacturerRepository;
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves all.
+     *
+     * @return the List<ManufacturerResponse> result
+     */
     public List<ManufacturerResponse> getAll() {
         return manufacturerRepository.findAllByOrderByNameAsc()
                 .stream()
@@ -28,6 +37,12 @@ public class ManufacturerService {
     }
 
     @Transactional
+    /**
+     * Creates a new Create.
+     *
+     * @param req the req
+     * @return the ManufacturerResponse result
+     */
     public ManufacturerResponse create(CreateManufacturerRequest req) {
         if (manufacturerRepository.existsByName(req.manufacturerName()))
             throw new ConflictException("Manufacturer '" + req.manufacturerName() + "' has been existed");
@@ -40,6 +55,13 @@ public class ManufacturerService {
     }
 
     @Transactional
+    /**
+     * Updates an existing .
+     *
+     * @param id the id
+     * @param req the req
+     * @return the ManufacturerResponse result
+     */
     public ManufacturerResponse update(Long id, CreateManufacturerRequest req) {
         Manufacturers m = manufacturerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Manufacturer isn't exist"));
@@ -49,12 +71,23 @@ public class ManufacturerService {
     }
 
     @Transactional
+    /**
+     * Deletes .
+     *
+     * @param id the id
+     */
     public void delete(Long id) {
         if (!manufacturerRepository.existsById(id))
             throw new ResourceNotFoundException("Manufacturer isn't exist");
         manufacturerRepository.deleteById(id);
     }
 
+    /**
+     * To response.
+     *
+     * @param m the m
+     * @return the ManufacturerResponse result
+     */
     public ManufacturerResponse toResponse(Manufacturers m) {
         return new ManufacturerResponse(m.getManufacturerId(), m.getManufacturerName(), m.getCountry());
     }

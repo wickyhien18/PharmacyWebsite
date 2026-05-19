@@ -20,6 +20,10 @@ import java.util.List;
 @PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 @Tag(name = "Inventory")
+/**
+ * Class InventoryController.
+ * Provides functionality and data modeling for InventoryController.
+ */
 public class InventoryController {
 
     private final InventoryService inventoryService;

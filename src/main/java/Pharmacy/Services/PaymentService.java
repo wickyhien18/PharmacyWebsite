@@ -23,6 +23,10 @@ import java.util.Map;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+/**
+ * Class PaymentService.
+ * Provides functionality and data modeling for PaymentService.
+ */
 public class PaymentService {
 
     private final PaymentRepository  paymentRepository;
@@ -33,6 +37,13 @@ public class PaymentService {
     // ================================================================
     // TẠO URL THANH TOÁN VNPAY
     // ================================================================
+    /**
+     * Creates a new vnpay url.
+     *
+     * @param orderId the orderId
+     * @param clientIp the clientIp
+     * @return the String result
+     */
     public String createVNPayUrl(Long orderId, String clientIp) {
         Orders order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng không tồn tại"));
@@ -70,6 +81,12 @@ public class PaymentService {
     // Việc cập nhật DB thực sự nên làm ở IPN (bên dưới)
     // ================================================================
     @Transactional
+    /**
+     * Handle return.
+     *
+     * @param params the params
+     * @return the PaymentResponse result
+     */
     public PaymentResponse handleReturn(Map<String, String> params) {
         // Verify chữ ký trước tiên
         if (!vnPayUtil.verifyCallback(params))
@@ -98,6 +115,12 @@ public class PaymentService {
     // IPN không qua browser → user không can thiệp được
     // ================================================================
     @Transactional
+    /**
+     * Handle ipn.
+     *
+     * @param params the params
+     * @return the String result
+     */
     public String handleIPN(Map<String, String> params) {
         // 1. Verify chữ ký
         if (!vnPayUtil.verifyCallback(params)) {
@@ -189,6 +212,12 @@ public class PaymentService {
     // LẤY THÔNG TIN THANH TOÁN CỦA ĐƠN
     // ================================================================
     @Transactional(readOnly = true)
+    /**
+     * Retrieves by order id.
+     *
+     * @param orderId the orderId
+     * @return the PaymentResponse result
+     */
     public PaymentResponse getByOrderId(Long orderId) {
         Payments payment = paymentRepository.findByOrderOrderId(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thanh toán"));
@@ -198,6 +227,12 @@ public class PaymentService {
     // ================================================================
     // MAPPER
     // ================================================================
+    /**
+     * To response.
+     *
+     * @param p the p
+     * @return the PaymentResponse result
+     */
     private PaymentResponse toResponse(Payments p) {
         return new PaymentResponse(
                 p.getPaymentId(),

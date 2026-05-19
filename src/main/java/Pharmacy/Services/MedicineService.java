@@ -29,6 +29,10 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Class MedicineService.
+ * Provides functionality and data modeling for MedicineService.
+ */
 public class MedicineService {
 
     private final MedicineRepository medicineRepository;
@@ -61,6 +65,12 @@ public class MedicineService {
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves by slug.
+     *
+     * @param slug the slug
+     * @return the MedicineResponse result
+     */
     public MedicineResponse getBySlug(String slug) {
         Medicines medicine = medicineRepository.findByMedicineSlugAndDeletedAtIsNull(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Medicine isn't found: " + slug));
@@ -68,6 +78,12 @@ public class MedicineService {
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves by id.
+     *
+     * @param id the id
+     * @return the MedicineResponse result
+     */
     public MedicineResponse getById(Long id) {
         Medicines medicine = medicineRepository.findById(id)
                 .filter(m -> m.getDeletedAt() == null)
@@ -76,6 +92,12 @@ public class MedicineService {
     }
 
     @Transactional
+    /**
+     * Creates a new Create.
+     *
+     * @param req the req
+     * @return the MedicineResponse result
+     */
     public MedicineResponse create(CreateUpdateMedicineRequest req) {
 
         // Tự sinh slug từ tên nếu bị trùng thì thêm số
@@ -120,6 +142,13 @@ public class MedicineService {
     }
 
     @Transactional
+    /**
+     * Updates an existing .
+     *
+     * @param id the id
+     * @param req the req
+     * @return the MedicineResponse result
+     */
     public MedicineResponse update(Long id, CreateUpdateMedicineRequest req) {
         Medicines medicine = medicineRepository.findById(id)
                 .filter(m -> m.getDeletedAt() == null)
@@ -153,6 +182,11 @@ public class MedicineService {
     }
 
     @Transactional
+    /**
+     * Deletes .
+     *
+     * @param id the id
+     */
     public void delete(Long id) {
         Medicines medicine = medicineRepository.findById(id)
                 .filter(m -> m.getDeletedAt() == null)
@@ -163,6 +197,12 @@ public class MedicineService {
         medicineRepository.save(medicine);
     }
 
+    /**
+     * To response.
+     *
+     * @param m the m
+     * @return the MedicineResponse result
+     */
     public MedicineResponse toResponse(Medicines m) {
         // Lấy tồn kho từ bảng inventory
         Integer stock = inventoryRepository
@@ -201,6 +241,12 @@ public class MedicineService {
     }
 
     // Chuyển tiếng Việt sang slug: "Vitamin C 1000mg" → "vitamin-c-1000mg"
+    /**
+     * Generate slug.
+     *
+     * @param input the input
+     * @return the String result
+     */
     private String generateSlug(String input) {
         //Split Signed character into 2 characters
         // á -> a + '
@@ -217,6 +263,12 @@ public class MedicineService {
     }
 
     // Nếu slug trùng thì tự thêm số: "vitamin-c" → "vitamin-c-2" → "vitamin-c-3"
+    /**
+     * Resolve slug.
+     *
+     * @param name the name
+     * @return the String result
+     */
     private String resolveSlug(String name) {
         String base = generateSlug(name);
         String slug = base;

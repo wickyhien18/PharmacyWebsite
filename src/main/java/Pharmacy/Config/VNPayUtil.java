@@ -78,6 +78,12 @@ public class VNPayUtil {
     // ================================================================
     // VERIFY CALLBACK — kiểm tra chữ ký VNPay gửi về
     // ================================================================
+    /**
+     * Verify callback.
+     *
+     * @param params the params
+     * @return the boolean result
+     */
     public boolean verifyCallback(Map<String, String> params) {
         // Lấy hash VNPay gửi về
         String receivedHash = params.get("vnp_SecureHash");
@@ -99,6 +105,12 @@ public class VNPayUtil {
     // ================================================================
     // KIỂM TRA GIAO DỊCH THÀNH CÔNG
     // ================================================================
+    /**
+     * Checks if success.
+     *
+     * @param params the params
+     * @return the boolean result
+     */
     public boolean isSuccess(Map<String, String> params) {
         // "00" = thành công theo tài liệu VNPay
         return "00".equals(params.get("vnp_ResponseCode"))
@@ -106,11 +118,23 @@ public class VNPayUtil {
     }
 
     // Lấy mã giao dịch VNPay (lưu vào cột transaction_code)
+    /**
+     * Retrieves transaction code.
+     *
+     * @param params the params
+     * @return the String result
+     */
     public String getTransactionCode(Map<String, String> params) {
         return params.get("vnp_TransactionNo");
     }
 
     // Lấy orderId từ txnRef (định dạng: "orderId-timestamp")
+    /**
+     * Extract order id.
+     *
+     * @param params the params
+     * @return the Long result
+     */
     public Long extractOrderId(Map<String, String> params) {
         String txnRef = params.get("vnp_TxnRef");
         if (txnRef == null) return null;
@@ -126,6 +150,12 @@ public class VNPayUtil {
     // ================================================================
 
     // Nối params thành chuỗi key=value&key=value (chưa encode)
+    /**
+     * Build hash data.
+     *
+     * @param params the params
+     * @return the String result
+     */
     private String buildHashData(Map<String, String> params) {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> entry : params.entrySet()) {
@@ -138,6 +168,12 @@ public class VNPayUtil {
     }
 
     // Nối params thành query string (đã URL encode value)
+    /**
+     * Build query string.
+     *
+     * @param params the params
+     * @return the String result
+     */
     private String buildQueryString(Map<String, String> params) {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> entry : params.entrySet()) {
@@ -152,6 +188,13 @@ public class VNPayUtil {
     }
 
     // Tạo chữ ký HMAC-SHA512
+    /**
+     * Hmac sha512.
+     *
+     * @param key the key
+     * @param data the data
+     * @return the String result
+     */
     private String hmacSHA512(String key, String data) {
         try {
             Mac mac = Mac.getInstance("HmacSHA512");

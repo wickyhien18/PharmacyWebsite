@@ -17,12 +17,21 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api")
 @Tag(name = "Manufacturer API")
 @RequiredArgsConstructor
+/**
+ * Class ManufacturerController.
+ * Provides functionality and data modeling for ManufacturerController.
+ */
 public class ManufacturerController {
 
     private final ManufacturerService manufacturerService;
 
     @GetMapping("/manufacturers")
     @Operation(summary = "List of Manufacturers")
+    /**
+     * Retrieves all.
+     *
+     * @return the ResponseEntity<?> result
+     */
     public ResponseEntity<?> getAll() {
         return ResponseEntity.ok(ApiResponse.ok(manufacturerService.getAll()));
     }

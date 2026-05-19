@@ -18,18 +18,33 @@ import java.util.List;
 @RequestMapping("/api")
 @Tag(name="Categories API")
 @RequiredArgsConstructor
+/**
+ * Class CategoriesController.
+ * Provides functionality and data modeling for CategoriesController.
+ */
 public class CategoriesController {
 
     private final CategoryService categoryService;
 
     @GetMapping("/categories/")
     @Operation(summary = "List of categories")
+    /**
+     * Retrieves all.
+     *
+     * @return the ResponseEntity<ApiResponse<List<CategoryResponse>>> result
+     */
     public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAll() {
         return ResponseEntity.ok(ApiResponse.ok(categoryService.getAll()));
     }
 
     @GetMapping("/categories/{slug}")
     @Operation(summary = "List of Categories by Slug")
+    /**
+     * Retrieves by slug.
+     *
+     * @param slug the slug
+     * @return the ResponseEntity<ApiResponse<CategoryResponse>> result
+     */
     public ResponseEntity<ApiResponse<CategoryResponse>> getBySlug(@PathVariable String slug) {
         return ResponseEntity.ok(ApiResponse.ok(categoryService.getBySlug(slug)));
     }
@@ -54,6 +69,12 @@ public class CategoriesController {
     @DeleteMapping("/admin/categories/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Delete Category")
+    /**
+     * Deletes .
+     *
+     * @param id the id
+     * @return the ResponseEntity<?> result
+     */
     public ResponseEntity<?> delete(@PathVariable Long id) {
         categoryService.delete(id);
         return ResponseEntity.ok(ApiResponse.ok("Delete Category Successfully"));

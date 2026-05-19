@@ -93,6 +93,9 @@ public class Users implements UserDetails {
     private Roles roles;
 
     @PrePersist
+    /**
+     * On create.
+     */
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
@@ -100,11 +103,19 @@ public class Users implements UserDetails {
     }
 
     @PreUpdate
+    /**
+     * On update.
+     */
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
 
     @Override
+    /**
+     * Retrieves username.
+     *
+     * @return the String result
+     */
     public String getUsername() { return email; }
 
     @Override

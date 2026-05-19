@@ -19,6 +19,10 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Class CartService.
+ * Provides functionality and data modeling for CartService.
+ */
 public class CartService {
 
     private final CartRepository      cartRepository;
@@ -31,6 +35,12 @@ public class CartService {
     // LẤY GIỎ HÀNG — tạo mới nếu chưa có
     // ================================================================
     @Transactional
+    /**
+     * Retrieves cart.
+     *
+     * @param user the user
+     * @return the CartResponse result
+     */
     public CartResponse getCart(Users user) {
         Carts cart = getOrCreateCart(user);
         return toResponse(cart);
@@ -41,6 +51,13 @@ public class CartService {
     // THÊM VÀO GIỎ HÀNG
     // ================================================================
     @Transactional
+    /**
+     * Creates a new item.
+     *
+     * @param user the user
+     * @param req the req
+     * @return the CartResponse result
+     */
     public CartResponse addItem(Users user, AddToCartRequest req) {
         Medicines medicine = medicineRepository.findById(req.medicineId())
                 .filter(m -> m.getDeletedAt() == null)
@@ -90,6 +107,14 @@ public class CartService {
     // CẬP NHẬT SỐ LƯỢNG — quantity = 0 → xoá item
     // ================================================================
     @Transactional
+    /**
+     * Updates an existing item.
+     *
+     * @param user the user
+     * @param medicineId the medicineId
+     * @param req the req
+     * @return the CartResponse result
+     */
     public CartResponse updateItem(Users user, Long medicineId, UpdateCartItemRequest req) {
         Carts cart = getOrCreateCart(user);
 
@@ -119,6 +144,13 @@ public class CartService {
     // XOÁ 1 ITEM
     // ================================================================
     @Transactional
+    /**
+     * Deletes item.
+     *
+     * @param user the user
+     * @param medicineId the medicineId
+     * @return the CartResponse result
+     */
     public CartResponse removeItem(Users user, Long medicineId) {
         Carts cart = getOrCreateCart(user);
 
@@ -136,6 +168,11 @@ public class CartService {
     // XOÁ TOÀN BỘ GIỎ HÀNG — gọi sau khi đặt hàng thành công
     // ================================================================
     @Transactional
+    /**
+     * Clear cart.
+     *
+     * @param user the user
+     */
     public void clearCart(Users user) {
         cartRepository.findByUserId(user.getUserId()).ifPresent(cart -> {
             cart.getCartItems().clear();
@@ -146,6 +183,12 @@ public class CartService {
     // ================================================================
     // PRIVATE HELPERS
     // ================================================================
+    /**
+     * Retrieves or create cart.
+     *
+     * @param user the user
+     * @return the Carts result
+     */
     private Carts getOrCreateCart(Users user) {
         return cartRepository.findByUserId(user.getUserId())
                 .orElseGet(() -> {
@@ -154,6 +197,12 @@ public class CartService {
                 });
     }
 
+    /**
+     * To response.
+     *
+     * @param cart the cart
+     * @return the CartResponse result
+     */
     public CartResponse toResponse(Carts cart) {
         List<CartResponse.CartItemResponse> items = cart.getCartItems().stream()
                 //Get CartItem from Cart and transfer into Stream to solve each elements

@@ -19,12 +19,22 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
+/**
+ * Class SecurityConfig.
+ * Provides functionality and data modeling for SecurityConfig.
+ */
 public class SecurityConfig {
 
     private final JWTAuthFilter jwtAuthFilter;
     private final CustomUserDetailService userDetailsService;
 
     @Bean
+    /**
+     * Security filter chain.
+     *
+     * @param http the http
+     * @return the SecurityFilterChain result
+     */
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws  Exception{
         http.csrf(csrf -> csrf.disable())
                 //Disable CSRF because using JWT Stateless
@@ -59,6 +69,11 @@ public class SecurityConfig {
 
 
     @Bean
+    /**
+     * Password encoder.
+     *
+     * @return the PasswordEncoder result
+     */
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }

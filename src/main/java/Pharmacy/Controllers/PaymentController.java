@@ -21,6 +21,10 @@ import java.util.Map;
 @RequestMapping("/api/payments")
 @RequiredArgsConstructor
 @Tag(name = "Payment API")
+/**
+ * Class PaymentController.
+ * Provides functionality and data modeling for PaymentController.
+ */
 public class PaymentController {
 
     private final PaymentService paymentService;
@@ -94,6 +98,12 @@ public class PaymentController {
     // ================================================================
     // PRIVATE — lấy IP thật của client (qua proxy/nginx)
     // ================================================================
+    /**
+     * Retrieves client ip.
+     *
+     * @param request the request
+     * @return the String result
+     */
     private String getClientIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
         if (ip == null || ip.isBlank() || "unknown".equalsIgnoreCase(ip)) {

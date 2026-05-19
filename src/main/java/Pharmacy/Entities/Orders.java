@@ -102,37 +102,73 @@ public class Orders {
     // ================================================================
 
     // User tự huỷ ngay — chỉ khi PENDING
+    /**
+     * Can user cancel directly.
+     *
+     * @return the boolean result
+     */
     public boolean canUserCancelDirectly() {
         return this.orderStatus == OrderStatus.PENDING;
     }
 
     // User gửi yêu cầu huỷ — chỉ khi CONFIRMED
     // Admin sẽ duyệt sau
+    /**
+     * Can user request cancel.
+     *
+     * @return the boolean result
+     */
     public boolean canUserRequestCancel() {
         return this.orderStatus == OrderStatus.CONFIRMED;
     }
 
     // User gửi yêu cầu hoàn hàng — chỉ khi SHIPPING
+    /**
+     * Can user request return.
+     *
+     * @return the boolean result
+     */
     public boolean canUserRequestReturn() {
         return this.orderStatus == OrderStatus.SHIPPING;
     }
 
     // Admin duyệt yêu cầu huỷ — chỉ khi CANCEL_REQUESTED
+    /**
+     * Can admin approve cancel.
+     *
+     * @return the boolean result
+     */
     public boolean canAdminApproveCancel() {
         return this.orderStatus == OrderStatus.CANCEL_REQUESTED;
     }
 
     // Admin từ chối yêu cầu huỷ — quay về CONFIRMED
+    /**
+     * Can admin reject cancel.
+     *
+     * @return the boolean result
+     */
     public boolean canAdminRejectCancel() {
         return this.orderStatus == OrderStatus.CANCEL_REQUESTED;
     }
 
     // Admin xác nhận hàng đã về kho
+    /**
+     * Can admin confirm return.
+     *
+     * @return the boolean result
+     */
     public boolean canAdminConfirmReturn() {
         return this.orderStatus == OrderStatus.RETURN_REQUESTED;
     }
 
     // State machine chuyển trạng thái thông thường
+    /**
+     * Can transition to.
+     *
+     * @param next the next
+     * @return the boolean result
+     */
     public boolean canTransitionTo(OrderStatus next) {
         return switch (this.orderStatus) {
             case PENDING           -> next == OrderStatus.CONFIRMED
@@ -149,11 +185,17 @@ public class Orders {
     }
 
     @PrePersist
+    /**
+     * On create.
+     */
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
+    /**
+     * On update.
+     */
     protected void onUpdate() { updatedAt = LocalDateTime.now(); }
 }

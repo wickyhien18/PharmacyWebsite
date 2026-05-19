@@ -18,6 +18,10 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Class InventoryService.
+ * Provides functionality and data modeling for InventoryService.
+ */
 public class InventoryService {
 
     private final InventoryRepository inventoryRepository;
@@ -28,6 +32,12 @@ public class InventoryService {
     // NHẬP KHO — Admin thêm hàng vào kho
     // ================================================================
     @Transactional
+    /**
+     * Import stock.
+     *
+     * @param req the req
+     * @return the InventoryResponse result
+     */
     public InventoryResponse importStock(ImportStockRequest req) {
         Medicines medicine = medicineRepository.findById(req.medicineId())
                 .filter(m -> m.getDeletedAt() == null)
@@ -72,6 +82,12 @@ public class InventoryService {
     // XEM TỒN KHO — theo medicineId
     // ================================================================
     @Transactional(readOnly = true)
+    /**
+     * Retrieves stock.
+     *
+     * @param medicineId the medicineId
+     * @return the InventoryResponse result
+     */
     public InventoryResponse getStock(Long medicineId) {
         Inventory inv = inventoryRepository
                 .findByMedicineId(medicineId)
@@ -83,11 +99,23 @@ public class InventoryService {
     // LỊCH SỬ NHẬP XUẤT KHO
     // ================================================================
     @Transactional(readOnly = true)
+    /**
+     * Retrieves logs.
+     *
+     * @param medicineId the medicineId
+     * @return the List<InventoryLog> result
+     */
     public List<InventoryLog> getLogs(Long medicineId) {
         return inventoryLogRepository
                 .findByMedicineIdOrderByCreatedAtDesc(medicineId);
     }
 
+    /**
+     * To response.
+     *
+     * @param inv the inv
+     * @return the InventoryResponse result
+     */
     private InventoryResponse toResponse(Inventory inv) {
         return new InventoryResponse(
                 inv.getMedicines().getMedicineId(),

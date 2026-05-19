@@ -15,6 +15,10 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
+/**
+ * Class GlobalExceptionHandler.
+ * Provides functionality and data modeling for GlobalExceptionHandler.
+ */
 public class GlobalExceptionHandler {
 
     // ---- Validation lỗi (@Valid) → 422 Unprocessable Entity ----
@@ -38,6 +42,12 @@ public class GlobalExceptionHandler {
 
     // ---- Auth lỗi → 401 ----
     @ExceptionHandler(AuthException.class)
+    /**
+     * Handle auth.
+     *
+     * @param ex the ex
+     * @return the ResponseEntity<ApiResponse<Void>> result
+     */
     public ResponseEntity<ApiResponse<Void>> handleAuth(AuthException ex) {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
@@ -46,6 +56,12 @@ public class GlobalExceptionHandler {
 
     // ---- Không có quyền → 403 ----
     @ExceptionHandler(AccessDeniedException.class)
+    /**
+     * Handle access denied.
+     *
+     * @param ex the ex
+     * @return the ResponseEntity<ApiResponse<Void>> result
+     */
     public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException ex) {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
@@ -54,6 +70,12 @@ public class GlobalExceptionHandler {
 
     // ---- Resource không tìm thấy → 404 ----
     @ExceptionHandler(ResourceNotFoundException.class)
+    /**
+     * Handle not found.
+     *
+     * @param ex the ex
+     * @return the ResponseEntity<ApiResponse<Void>> result
+     */
     public ResponseEntity<ApiResponse<Void>> handleNotFound(RuntimeException ex) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
@@ -62,6 +84,12 @@ public class GlobalExceptionHandler {
 
     // ---- Business logic lỗi → 400 ----
     @ExceptionHandler(BusinessException.class)
+    /**
+     * Handle business.
+     *
+     * @param ex the ex
+     * @return the ResponseEntity<ApiResponse<Void>> result
+     */
     public ResponseEntity<ApiResponse<Void>> handleBusiness(BusinessException ex) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
@@ -69,6 +97,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ConflictException.class)
+    /**
+     * Handle conflict.
+     *
+     * @param ex the ex
+     * @return the ResponseEntity<ApiResponse<Void>> result
+     */
     public ResponseEntity<ApiResponse<Void>> handleConflict(AccessDeniedException ex) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
@@ -77,6 +111,12 @@ public class GlobalExceptionHandler {
 
     // ---- Catch-all → 500 (không lộ stack trace ra client) ----
     @ExceptionHandler(Exception.class)
+    /**
+     * Handle general.
+     *
+     * @param ex the ex
+     * @return the ResponseEntity<ApiResponse<Void>> result
+     */
     public ResponseEntity<ApiResponse<Void>> handleGeneral(Exception ex) {
         log.error("Unhandled exception: ", ex);
         return ResponseEntity

@@ -15,6 +15,10 @@ import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Class CustomUserDetailService.
+ * Provides functionality and data modeling for CustomUserDetailService.
+ */
 public class CustomUserDetailService implements UserDetailsService {
     //Implement UserDetailsService - core interface in Spring Security
     //It's searching user's information in Database based on UserName
@@ -24,6 +28,12 @@ public class CustomUserDetailService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
+    /**
+     * Load user by username.
+     *
+     * @param email the email
+     * @return the UserDetails result
+     */
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Users users = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Not found: " + email));
@@ -37,6 +47,11 @@ public class CustomUserDetailService implements UserDetailsService {
             }
 
             @Override
+    /**
+     * Retrieves password.
+     *
+     * @return the String result
+     */
             public String getPassword() {
                 return users.getPassword();
                 //Spring Security automatically compare with password in database with password user receive
@@ -45,22 +60,42 @@ public class CustomUserDetailService implements UserDetailsService {
             }
 
             @Override
+    /**
+     * Retrieves username.
+     *
+     * @return the String result
+     */
             public String getUsername() {
                 return users.getEmail();  // Dùng email làm username
             }
 
             @Override
+    /**
+     * Checks if credentials non expired.
+     *
+     * @return the boolean result
+     */
             public boolean isCredentialsNonExpired() {
                 return true;
             }
 
             @Override
+    /**
+     * Checks if enabled.
+     *
+     * @return the boolean result
+     */
             public boolean isEnabled() {
                 return users.getIsActive() != null && users.getIsActive();
                 //If user's account isn't active, Spring Security will throw DisabledException
             }
 
             // Thêm method để lấy Users entity
+    /**
+     * Retrieves user.
+     *
+     * @return the Users result
+     */
             public Users getUser() {
                 return users;
             }

@@ -17,11 +17,20 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Class CategoryService.
+ * Provides functionality and data modeling for CategoryService.
+ */
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves all.
+     *
+     * @return the List<CategoryResponse> result
+     */
     public List<CategoryResponse> getAll() {
         return categoryRepository.findAllByOrderByCategoryNameAsc()
                 .stream()
@@ -30,6 +39,12 @@ public class CategoryService {
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves by slug.
+     *
+     * @param slug the slug
+     * @return the CategoryResponse result
+     */
     public CategoryResponse getBySlug(String slug) {
         return categoryRepository.findByCategorySlug(slug)
                 .map(this::toResponse)
@@ -37,6 +52,12 @@ public class CategoryService {
     }
 
     @Transactional
+    /**
+     * Creates a new Create.
+     *
+     * @param req the req
+     * @return the CategoryResponse result
+     */
     public CategoryResponse create(CreateCategoryRequest req) {
         if (categoryRepository.existsByCategorySlug(req.slug()))
             throw new ConflictException("Slug '" + req.slug() + "' has been existed");
@@ -49,6 +70,13 @@ public class CategoryService {
     }
 
     @Transactional
+    /**
+     * Updates an existing .
+     *
+     * @param id the id
+     * @param req the req
+     * @return the CategoryResponse result
+     */
     public CategoryResponse update(Long id, CreateCategoryRequest req) {
         Categories category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category isn't exist"));
@@ -62,12 +90,23 @@ public class CategoryService {
     }
 
     @Transactional
+    /**
+     * Deletes .
+     *
+     * @param id the id
+     */
     public void delete(Long id) {
         if (!categoryRepository.existsById(id))
             throw new ResourceNotFoundException("Category isn't exist");
         categoryRepository.deleteById(id);
     }
 
+    /**
+     * To response.
+     *
+     * @param c the c
+     * @return the CategoryResponse result
+     */
     public CategoryResponse toResponse(Categories c) {
         return new CategoryResponse(c.getCategoryId(), c.getCategoryName(), c.getCategorySlug());
     }

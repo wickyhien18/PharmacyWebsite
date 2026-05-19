@@ -8,9 +8,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api")
+/**
+ * Class HealthController.
+ * Provides functionality and data modeling for HealthController.
+ */
 public class HealthController {
 
     @GetMapping("/health")
+    /**
+     * Health.
+     *
+     * @return the ResponseEntity<String> result
+     */
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("OK");
     }

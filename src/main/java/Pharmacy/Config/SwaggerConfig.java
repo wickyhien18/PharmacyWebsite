@@ -9,9 +9,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+/**
+ * Class SwaggerConfig.
+ * Provides functionality and data modeling for SwaggerConfig.
+ */
 public class SwaggerConfig {
 
     @Bean
+    /**
+     * Custom open api.
+     *
+     * @return the OpenAPI result
+     */
     public OpenAPI customOpenAPI() {
 
         return new OpenAPI()

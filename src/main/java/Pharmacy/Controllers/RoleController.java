@@ -13,6 +13,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/roles")
 @Tag(name = "Roles API", description = "Quản lý vai trò")
+/**
+ * Class RoleController.
+ * Provides functionality and data modeling for RoleController.
+ */
 public class RoleController {
 
     @Autowired
@@ -20,6 +24,11 @@ public class RoleController {
 
     @GetMapping
     @Operation(summary = "Lấy danh sách vai trò")
+    /**
+     * Retrieves all roles.
+     *
+     * @return the List<Roles> result
+     */
     public List<Roles> getAllRoles() {
         return roleService.getAll();
     }

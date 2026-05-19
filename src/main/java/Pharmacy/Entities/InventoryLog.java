@@ -71,6 +71,9 @@ public class InventoryLog {
     private LocalDateTime createdAt;
 
     @PrePersist
+    /**
+     * On create.
+     */
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }

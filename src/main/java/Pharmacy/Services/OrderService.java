@@ -23,6 +23,10 @@ import java.util.Random;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+/**
+ * Class OrderService.
+ * Provides functionality and data modeling for OrderService.
+ */
 public class OrderService {
 
     private final OrderRepository     orderRepository;
@@ -47,6 +51,13 @@ public class OrderService {
     // → Không xảy ra tình trạng trừ kho nhưng không có đơn hàng
     // ================================================================
     @Transactional
+    /**
+     * Place order.
+     *
+     * @param user the user
+     * @param req the req
+     * @return the OrderResponse result
+     */
     public OrderResponse placeOrder(Users user, PlaceOrderRequest req) {
 
         // 1. Lấy giỏ hàng
@@ -152,6 +163,12 @@ public class OrderService {
     // LỊCH SỬ ĐƠN HÀNG CỦA USER
     // ================================================================
     @Transactional(readOnly = true)
+    /**
+     * Retrieves my orders.
+     *
+     * @param user the user
+     * @return the List<OrderResponse> result
+     */
     public List<OrderResponse> getMyOrders(Users user) {
         return orderRepository.findByUserUserIdOrderByCreatedAtDesc(user.getUserId())
                 .stream()
@@ -163,6 +180,13 @@ public class OrderService {
     // CHI TIẾT ĐƠN HÀNG
     // ================================================================
     @Transactional(readOnly = true)
+    /**
+     * Retrieves detail.
+     *
+     * @param user the user
+     * @param orderId the orderId
+     * @return the OrderResponse result
+     */
     public OrderResponse getDetail(Users user, Long orderId) {
         Orders order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order isn't found"));
@@ -188,6 +212,14 @@ public class OrderService {
     //              VNPay SUCCESS → đánh dấu REFUNDED
     // ================================================================
     @Transactional
+    /**
+     * Cancel directly.
+     *
+     * @param user the user
+     * @param orderId the orderId
+     * @param req the req
+     * @return the OrderResponse result
+     */
     public OrderResponse cancelDirectly(Users user, Long orderId, CancelOrderRequest req) {
         Orders order = findOrder(orderId);
 
@@ -222,6 +254,14 @@ public class OrderService {
     // Thanh toán: CHƯA xử lý — chờ admin duyệt
     // ================================================================
     @Transactional
+    /**
+     * Request cancel.
+     *
+     * @param user the user
+     * @param orderId the orderId
+     * @param req the req
+     * @return the OrderResponse result
+     */
     public OrderResponse requestCancel(Users user, Long orderId, RequestCancelRequest req) {
         Orders order = findOrder(orderId);
 
@@ -253,6 +293,13 @@ public class OrderService {
     // Thanh toán: xử lý refund nếu đã thanh toán
     // ================================================================
     @Transactional
+    /**
+     * Approve cancel.
+     *
+     * @param orderId the orderId
+     * @param req the req
+     * @return the OrderResponse result
+     */
     public OrderResponse approveCancel(Long orderId, CancelOrderRequest req) {
         Orders order = findOrder(orderId);
 
@@ -290,6 +337,13 @@ public class OrderService {
     // Tồn kho   : không thay đổi
     // ================================================================
     @Transactional
+    /**
+     * Reject cancel.
+     *
+     * @param orderId the orderId
+     * @param req the req
+     * @return the OrderResponse result
+     */
     public OrderResponse rejectCancel(Long orderId, RejectCancelRequest req) {
         Orders order = findOrder(orderId);
 
@@ -321,6 +375,14 @@ public class OrderService {
     // Thanh toán: CHƯA refund — chờ hàng về
     // ================================================================
     @Transactional
+    /**
+     * Request return.
+     *
+     * @param user the user
+     * @param orderId the orderId
+     * @param req the req
+     * @return the OrderResponse result
+     */
     public OrderResponse requestReturn(Users user, Long orderId, ReturnRequestRequest req) {
         Orders order = findOrder(orderId);
 
@@ -358,6 +420,12 @@ public class OrderService {
     // Thanh toán: refund nếu đã thanh toán VNPay
     // ================================================================
     @Transactional
+    /**
+     * Confirm return.
+     *
+     * @param orderId the orderId
+     * @return the OrderResponse result
+     */
     public OrderResponse confirmReturn(Long orderId) {
         Orders order = findOrder(orderId);
 
@@ -383,6 +451,13 @@ public class OrderService {
     // PENDING → CONFIRMED → SHIPPING → DELIVERED
     // ================================================================
     @Transactional
+    /**
+     * Updates an existing status.
+     *
+     * @param orderId the orderId
+     * @param req the req
+     * @return the OrderResponse result
+     */
     public OrderResponse updateStatus(Long orderId, UpdateOrderStatusRequest req) {
         Orders order = findOrder(orderId);
 
@@ -495,6 +570,14 @@ public class OrderService {
         });
     }
 
+    /**
+     * Deduct stock.
+     *
+     * @param medicine the medicine
+     * @param qty the qty
+     * @param orderId the orderId
+     * @param code the code
+     */
     private void deductStock(Medicines medicine, int qty, Long orderId, String code) {
         inventoryRepository
                 .findByMedicineId(medicine.getMedicineId())
@@ -519,22 +602,45 @@ public class OrderService {
                 });
     }
 
+    /**
+     * Checks if admin.
+     *
+     * @param user the user
+     * @return the boolean result
+     */
     private boolean isAdmin(Users user) {
         return user.getRoles() != null
                 && user.getRoles().getRoleName().equals("ROLE_ADMIN");
     }
 
+    /**
+     * Finds order.
+     *
+     * @param orderId the orderId
+     * @return the Orders result
+     */
     private Orders findOrder(Long orderId) {
         return orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order isn't existed"));
     }
 
+    /**
+     * Generate order code.
+     *
+     * @return the String result
+     */
     private String generateOrderCode() {
         String date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         int rand    = new Random().nextInt(90000) + 10000;
         return "ORD-" + date + "-" + rand;
     }
 
+    /**
+     * Calculate total.
+     *
+     * @param cart the cart
+     * @return the BigDecimal result
+     */
     private BigDecimal calculateTotal(Carts cart) {
         return cart.getCartItems().stream()
                 .map(i -> i.getMedicines().getPrice()
@@ -542,6 +648,12 @@ public class OrderService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    /**
+     * To response.
+     *
+     * @param order the order
+     * @return the OrderResponse result
+     */
     public OrderResponse toResponse(Orders order) {
         List<OrderResponse.OrderItemResponse> items = order.getOrderItems().stream()
                 .map(i -> new OrderResponse.OrderItemResponse(
