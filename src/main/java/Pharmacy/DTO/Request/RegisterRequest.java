@@ -7,6 +7,10 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+/**
+ * Data Transfer Object for RegisterRequest.
+ * This class is used to map data and handle basic structure.
+ */
 public record RegisterRequest (
 
     @NotBlank(message = "Username can't be left blank")

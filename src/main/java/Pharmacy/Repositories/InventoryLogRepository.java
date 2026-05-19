@@ -9,6 +9,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
+/**
+ * Repository interface for InventoryLogRepository.
+ * This class is used to map data and handle basic structure.
+ */
 public interface InventoryLogRepository extends JpaRepository<InventoryLog, Long> {
     @Query("SELECT il FROM InventoryLog il JOIN FETCH il.medicines WHERE il.medicines.medicineId = :medicineId ORDER BY il.createdAt DESC")
     List<InventoryLog> findByMedicineIdOrderByCreatedAtDesc(@Param("medicineId") Long medicineId);

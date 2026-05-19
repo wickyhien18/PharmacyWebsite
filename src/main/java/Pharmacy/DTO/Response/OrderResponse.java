@@ -4,6 +4,10 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Data Transfer Object for OrderResponse.
+ * This class is used to map data and handle basic structure.
+ */
 public record OrderResponse(
         Long             orderId,
         String           orderCode,
@@ -17,6 +21,10 @@ public record OrderResponse(
         PaymentResponse  payment,
         ShipmentResponse shipment
 ) {
+/**
+ * Data Transfer Object for OrderItemResponse.
+ * This class is used to map data and handle basic structure.
+ */
     public record OrderItemResponse(
             Long       medicineId,
             String     medicineName,

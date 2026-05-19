@@ -13,6 +13,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+/**
+ * Repository interface for UserRepository.
+ * This class is used to map data and handle basic structure.
+ */
 public interface UserRepository extends JpaRepository<Users,Long> {
 
     @Query("SELECT u FROM Users u JOIN FETCH u.roles WHERE u.userName = :username")

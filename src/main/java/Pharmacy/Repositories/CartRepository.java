@@ -9,6 +9,10 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
+/**
+ * Repository interface for CartRepository.
+ * This class is used to map data and handle basic structure.
+ */
 public interface CartRepository extends JpaRepository<Carts,Long> {
     @Query("SELECT c FROM Carts c JOIN FETCH c.users where c.users.userId = :userId")
     Optional<Carts> findByUserId(@Param("userId") Long userId);

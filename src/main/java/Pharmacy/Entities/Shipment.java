@@ -11,6 +11,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+/**
+ * Database Entity for Shipment.
+ * This class is used to map data and handle basic structure.
+ */
 public class Shipment {
 
     public enum ShipmentStatus { PENDING, SHIPPING, DELIVERED, FAILED }

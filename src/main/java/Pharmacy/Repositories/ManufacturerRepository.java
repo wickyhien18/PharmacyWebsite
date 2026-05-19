@@ -10,6 +10,10 @@ import java.util.List;
 
 
 @Repository
+/**
+ * Repository interface for ManufacturerRepository.
+ * This class is used to map data and handle basic structure.
+ */
 public interface ManufacturerRepository extends JpaRepository<Manufacturers, Long> {
     @Query("SELECT m FROM Manufacturers m ORDER BY m.manufacturerName")
     List<Manufacturers> findAllByOrderByNameAsc();

@@ -27,6 +27,10 @@ import lombok.*;
 @Getter
 //Generate Setter method for all attributes
 @Setter
+/**
+ * Database Entity for CartItems.
+ * This class is used to map data and handle basic structure.
+ */
 public class CartItems {
 
     //Primary key

@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+/**
+ * Repository interface for OrderRepository.
+ * This class is used to map data and handle basic structure.
+ */
 public interface OrderRepository extends JpaRepository<Orders,Long> {
     @Query("SELECT o FROM Orders o JOIN FETCH o.users where o.users.userId = :userId ORDER BY o.createdAt DESC")
     List<Orders> findByUserUserIdOrderByCreatedAtDesc(@Param("userId") Long userId);

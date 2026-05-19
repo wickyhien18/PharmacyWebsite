@@ -26,6 +26,10 @@ import java.util.List;
 @Getter
 //Generate Setter method for all attributes
 @Setter
+/**
+ * Database Entity for Roles.
+ * This class is used to map data and handle basic structure.
+ */
 public class Roles {
     //Primary key
     @Id

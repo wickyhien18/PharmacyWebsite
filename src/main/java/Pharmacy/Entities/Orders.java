@@ -29,6 +29,10 @@ import java.util.List;
 @Getter
 //Generate Setter method for all attributes
 @Setter
+/**
+ * Database Entity for Orders.
+ * This class is used to map data and handle basic structure.
+ */
 public class Orders {
 
     public enum OrderStatus  { PENDING, CONFIRMED, SHIPPING, DELIVERED, CANCELLED, CANCEL_REQUESTED, RETURN_REQUESTED, RETURNED }

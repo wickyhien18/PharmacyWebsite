@@ -24,6 +24,10 @@ import lombok.*;
 @Getter
 //Generate Setter method for all attributes
 @Setter
+/**
+ * Database Entity for Manufacturers.
+ * This class is used to map data and handle basic structure.
+ */
 public class Manufacturers {
 
     //Primary key

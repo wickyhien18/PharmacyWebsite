@@ -9,6 +9,10 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
+/**
+ * Repository interface for ShipmentRepository.
+ * This class is used to map data and handle basic structure.
+ */
 public interface ShipmentRepository extends JpaRepository<Shipment, Long> {
     @Query("SELECT s FROM Shipment s JOIN FETCH s.orders WHERE s.orders.orderId = :orderId")
     Optional<Shipment> findByOrderId(@Param("orderId") Long orderId);

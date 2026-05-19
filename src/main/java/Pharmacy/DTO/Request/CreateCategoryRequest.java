@@ -3,6 +3,10 @@ package Pharmacy.DTO.Request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
+/**
+ * Data Transfer Object for CreateCategoryRequest.
+ * This class is used to map data and handle basic structure.
+ */
 public record CreateCategoryRequest(
 
         @NotBlank

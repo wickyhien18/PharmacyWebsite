@@ -4,6 +4,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDateTime;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+/**
+ * Data Transfer Object for ApiResponse.
+ * This class is used to map data and handle basic structure.
+ */
 public record ApiResponse<T>(
         boolean success,
         String message,

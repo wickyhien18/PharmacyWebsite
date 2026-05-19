@@ -9,6 +9,10 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
+/**
+ * Repository interface for PaymentRepository.
+ * This class is used to map data and handle basic structure.
+ */
 public interface PaymentRepository extends JpaRepository<Payments,Long> {
 
     @Query("SELECT p FROM Payments p JOIN FETCH p.orders WHERE p.orders.orderId = :orderId")

@@ -3,6 +3,10 @@ package Pharmacy.DTO.Response;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * Data Transfer Object for PaymentResponse.
+ * This class is used to map data and handle basic structure.
+ */
 public record PaymentResponse(
         Long      paymentId,
         String    paymentMethod,

@@ -9,6 +9,10 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
+/**
+ * Repository interface for CartItemRepository.
+ * This class is used to map data and handle basic structure.
+ */
 public interface CartItemRepository extends JpaRepository<CartItems, Long> {
     @Query("SELECT ci FROM CartItems ci JOIN FETCH ci.carts JOIN FETCH ci.medicines WHERE ci.carts.cartId = :cartId AND ci.medicines.medicineId = :medicineId")
     Optional<CartItems> findByCartIdAndMedicineId(@Param("cartId") Long cartId,@Param("medicineId") Long medicineId);

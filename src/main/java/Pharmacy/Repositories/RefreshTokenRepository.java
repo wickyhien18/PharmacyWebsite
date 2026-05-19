@@ -13,6 +13,10 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Repository
+/**
+ * Repository interface for RefreshTokenRepository.
+ * This class is used to map data and handle basic structure.
+ */
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
 
     Optional<RefreshToken> findByToken(String token);

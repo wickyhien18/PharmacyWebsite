@@ -5,6 +5,10 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 
+/**
+ * Data Transfer Object for RefreshTokenRequest.
+ * This class is used to map data and handle basic structure.
+ */
 public record RefreshTokenRequest (
 
         @NotBlank

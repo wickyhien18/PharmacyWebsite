@@ -26,6 +26,10 @@ import java.math.BigDecimal;
 @Getter
 //Generate Setter method for all attributes
 @Setter
+/**
+ * Database Entity for OrderItems.
+ * This class is used to map data and handle basic structure.
+ */
 public class OrderItems {
 
     //Primary key

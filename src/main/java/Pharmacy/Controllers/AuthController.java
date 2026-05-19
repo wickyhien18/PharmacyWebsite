@@ -28,6 +28,11 @@ import  org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Map;
 
 
+/**
+ * REST Controller for managing authentication-related operations.
+ * This class handles user registration, login, token refresh, logout,
+ * and retrieving current user information.
+ */
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -36,6 +41,12 @@ public class AuthController {
 
     private final AuthService authService;
 
+    /**
+     * Registers a new user account in the system.
+     *
+     * @param req The registration request containing user details (username, password, email, etc.).
+     * @return ResponseEntity containing a success message and the newly generated authentication tokens.
+     */
     @PostMapping("/register")
     @Operation(summary = "Register Account")
     public ResponseEntity<?> register(
@@ -48,6 +59,12 @@ public class AuthController {
                 .body(ApiResponse.ok("Register Successfully", data));
     }
 
+    /**
+     * Authenticates a user and generates a JWT access token and a refresh token.
+     *
+     * @param req The login request containing user credentials (email and password).
+     * @return ResponseEntity containing a success message, the access token, refresh token, and user info.
+     */
     @PostMapping("/login")
     @Operation(summary = "Login to get Jwt token")
     public ResponseEntity<?> login(
@@ -58,6 +75,12 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.ok("Login Successfully", response));
     }
 
+    /**
+     * Generates a new access token using a valid refresh token.
+     *
+     * @param refreshToken The refresh token request containing the valid refresh token string.
+     * @return ResponseEntity containing the new access token and refresh token pair.
+     */
     @PostMapping("/refresh")
     @Operation(summary = "Refresh jwt token")
     public ResponseEntity<?> refresh(@Valid @RequestBody RefreshTokenRequest refreshToken) {
@@ -67,6 +90,12 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.ok("Refresh Token Successfully", data));
     }
 
+    /**
+     * Logs out the currently authenticated user by invalidating their refresh token.
+     *
+     * @param request The HTTP request containing the Authorization header with the Bearer token.
+     * @return ResponseEntity containing a success message indicating the user was logged out.
+     */
     @PostMapping("/logout")
     @Operation(summary = "Logout and delete refreshToken")
     public ResponseEntity<?> logout(HttpServletRequest request) {
@@ -76,6 +105,12 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.ok(result));
     }
 
+    /**
+     * Retrieves the profile information of the currently authenticated user.
+     *
+     * @param request The HTTP request containing the Authorization header with the Bearer token.
+     * @return ResponseEntity containing the user's detailed profile information.
+     */
     @GetMapping("/me")
     @Operation(summary = "Account info")
     public ResponseEntity<?> me(HttpServletRequest request) {

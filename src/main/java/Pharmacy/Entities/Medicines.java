@@ -28,6 +28,10 @@ import java.util.List;
 @Getter
 //Generate Setter method for all attributes
 @Setter
+/**
+ * Database Entity for Medicines.
+ * This class is used to map data and handle basic structure.
+ */
 public class Medicines {
 
     public enum Status{ACTIVE, INACTIVE, OUT_OF_STOCK}

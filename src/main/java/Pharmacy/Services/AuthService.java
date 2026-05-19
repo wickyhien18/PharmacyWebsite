@@ -25,6 +25,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 
+/**
+ * Service class for handling authentication and authorization logic.
+ * Manages user registration, login, token refresh, and user session operations.
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -35,6 +39,13 @@ public class AuthService {
     private final AuthenticationManager authManager;
     private final RefreshTokenRepository refreshTokenRepository;
 
+    /**
+     * Registers a new user account with default CUSTOMER role.
+     *
+     * @param req The registration request containing username, password, email, etc.
+     * @return AuthResponse containing the access and refresh tokens.
+     * @throws AuthException if email, phone, or username already exists.
+     */
     @Transactional
     public AuthResponse register(RegisterRequest req) {
 
@@ -63,7 +74,13 @@ public class AuthService {
         return createTokenPair(users);
     }
 
-    // ĐĂNG NHẬP
+    /**
+     * Authenticates a user based on email and password.
+     *
+     * @param req The login request containing email and password.
+     * @return AuthResponse containing the new access and refresh tokens.
+     * @throws AuthException if credentials are bad or account is locked.
+     */
     @Transactional
     public AuthResponse login(LoginRequest req) {
 
@@ -87,6 +104,13 @@ public class AuthService {
     }
 
 
+    /**
+     * Refreshes the access token using a valid, unexpired refresh token.
+     *
+     * @param refreshToken The request containing the refresh token string.
+     * @return AuthResponse containing a new token pair.
+     * @throws AuthException if the token is invalid or expired.
+     */
     @Transactional
     public AuthResponse refreshToken(RefreshTokenRequest refreshToken) {
 
@@ -105,6 +129,13 @@ public class AuthService {
         return createTokenPair(users);
     }
 
+    /**
+     * Logs out the user by deleting all their active refresh tokens.
+     *
+     * @param request The HttpServletRequest to extract the Authorization token from.
+     * @return A success message.
+     * @throws ResourceNotFoundException if the token is missing.
+     */
     @Transactional
     public String logout(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
@@ -123,6 +154,13 @@ public class AuthService {
         return "Logout Successfully";
     }
 
+    /**
+     * Retrieves information about the currently logged-in user.
+     *
+     * @param request The HttpServletRequest containing the Authorization header.
+     * @return UserInfo object containing current user's profile details.
+     * @throws ResourceNotFoundException if the token or user cannot be found.
+     */
     @Transactional
     public AuthResponse.UserInfo me(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
@@ -151,6 +189,13 @@ public class AuthService {
         return info;
     }
     
+    /**
+     * Helper method to create and save a new access/refresh token pair for a user.
+     * This will invalidate previous tokens by deleting them.
+     *
+     * @param user The user to generate tokens for.
+     * @return AuthResponse containing the token pair and user info.
+     */
     private AuthResponse createTokenPair(Users user) {
 
         refreshTokenRepository.deleteAllByUserId(user.getUserId());

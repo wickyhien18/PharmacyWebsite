@@ -34,6 +34,10 @@ import java.util.List;
 @Getter
 //Generate Setter method for all attributes
 @Setter
+/**
+ * Database Entity for Users.
+ * This class is used to map data and handle basic structure.
+ */
 public class Users implements UserDetails {
 
     //Primary key

@@ -25,6 +25,10 @@ import java.time.LocalDateTime;
 @Getter
 //Generate Setter method for all attributes
 @Setter
+/**
+ * Database Entity for InventoryLog.
+ * This class is used to map data and handle basic structure.
+ */
 public class InventoryLog {
 
     public enum ChangeType { IMPORT, EXPORT, ADJUST }

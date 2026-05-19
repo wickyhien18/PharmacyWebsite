@@ -11,6 +11,10 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
+/**
+ * Repository interface for MedicineRepository.
+ * This class is used to map data and handle basic structure.
+ */
 public interface MedicineRepository extends JpaRepository<Medicines,Long> {
 
     Optional<Medicines> findByMedicineSlugAndDeletedAtIsNull(String slug);

@@ -9,6 +9,10 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
+/**
+ * Repository interface for InventoryRepository.
+ * This class is used to map data and handle basic structure.
+ */
 public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     @Query("SELECT i FROM Inventory i JOIN FETCH i.medicines WHERE i.medicines.medicineId = :medicineId")
     Optional<Inventory> findByMedicineId(@Param("medicineId") Long medicineId);

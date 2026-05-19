@@ -8,6 +8,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+/**
+ * Repository interface for CategoryRepository.
+ * This class is used to map data and handle basic structure.
+ */
 public interface CategoryRepository extends JpaRepository<Categories, Long> {
 
     List<Categories> findAllByOrderByCategoryNameAsc();

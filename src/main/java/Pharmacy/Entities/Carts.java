@@ -29,6 +29,10 @@ import java.util.List;
 @Getter
 //Generate Setter method for all attributes
 @Setter
+/**
+ * Database Entity for Carts.
+ * This class is used to map data and handle basic structure.
+ */
 public class Carts {
 
     //Primary key
