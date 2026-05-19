@@ -17,9 +17,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+// Indicates that this class is a REST controller handling HTTP requests.
 @RestController
+// Maps HTTP requests to the controller or handler method.
 @RequestMapping("/api")
 @Tag(name = "Medicines API")
+// Generates a constructor with required arguments (e.g., final fields) via Lombok.
 @RequiredArgsConstructor
 /**
  * Class MedicineController.
@@ -29,6 +32,7 @@ public class MedicineController {
 
     private final MedicineService medicineService;
 
+    // Maps HTTP GET requests to this handler method.
     @GetMapping("/medicines/")
     @Operation(summary = "List of Medicines")
     public ResponseEntity<?> search(
@@ -43,6 +47,7 @@ public class MedicineController {
                 medicineService.search(keyword, categoryId, manufacturerId, status, pageable)));
     }
 
+    // Maps HTTP GET requests to this handler method.
     @GetMapping("/medicines/{slug}")
     @Operation(summary = "Get medicine's information from Slug")
     /**
@@ -56,24 +61,29 @@ public class MedicineController {
     }
 
 
+    // Maps HTTP POST requests to this handler method.
     @PostMapping("/admin/medicines")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Add medicine's information")
     public ResponseEntity<ApiResponse<MedicineResponse>> create(
+            // Marks a property, method parameter or method return type for validation cascading.
             @Valid @RequestBody CreateUpdateMedicineRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.ok(medicineService.create(request)));
     }
 
+    // Maps HTTP PUT requests to this handler method.
     @PutMapping("/admin/medicines/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Update medicine's information")
     public ResponseEntity<ApiResponse<MedicineResponse>> update(
             @PathVariable Long id,
+            // Marks a property, method parameter or method return type for validation cascading.
             @Valid @RequestBody CreateUpdateMedicineRequest request) {
         return ResponseEntity.ok(ApiResponse.ok(medicineService.update(id, request)));
     }
 
+    // Maps HTTP DELETE requests to this handler method.
     @DeleteMapping("/admin/medicines/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Delete medicine's information")

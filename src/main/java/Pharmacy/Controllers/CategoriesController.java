@@ -14,9 +14,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// Indicates that this class is a REST controller handling HTTP requests.
 @RestController
+// Maps HTTP requests to the controller or handler method.
 @RequestMapping("/api")
 @Tag(name="Categories API")
+// Generates a constructor with required arguments (e.g., final fields) via Lombok.
 @RequiredArgsConstructor
 /**
  * Class CategoriesController.
@@ -26,6 +29,7 @@ public class CategoriesController {
 
     private final CategoryService categoryService;
 
+    // Maps HTTP GET requests to this handler method.
     @GetMapping("/categories/")
     @Operation(summary = "List of categories")
     /**
@@ -37,6 +41,7 @@ public class CategoriesController {
         return ResponseEntity.ok(ApiResponse.ok(categoryService.getAll()));
     }
 
+    // Maps HTTP GET requests to this handler method.
     @GetMapping("/categories/{slug}")
     @Operation(summary = "List of Categories by Slug")
     /**
@@ -49,23 +54,28 @@ public class CategoriesController {
         return ResponseEntity.ok(ApiResponse.ok(categoryService.getBySlug(slug)));
     }
 
+    // Maps HTTP POST requests to this handler method.
     @PostMapping("/admin/categories/")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Create Category")
     public ResponseEntity<ApiResponse<CategoryResponse>> create(
+            // Marks a property, method parameter or method return type for validation cascading.
             @Valid @RequestBody CreateCategoryRequest request) {
         return ResponseEntity.ok(ApiResponse.ok(categoryService.create(request)));
     }
 
+    // Maps HTTP PUT requests to this handler method.
     @PutMapping("/admin/categories/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Update Category")
     public ResponseEntity<ApiResponse<CategoryResponse>> update(
             @PathVariable Long id,
+            // Marks a property, method parameter or method return type for validation cascading.
             @Valid @RequestBody CreateCategoryRequest request) {
         return ResponseEntity.ok(ApiResponse.ok(categoryService.update(id, request)));
     }
 
+    // Maps HTTP DELETE requests to this handler method.
     @DeleteMapping("/admin/categories/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Delete Category")

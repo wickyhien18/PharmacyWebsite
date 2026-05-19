@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+// Indicates that this class is a Data Access Object (DAO) interfacing with the database.
 @Repository
 /**
  * Repository interface for PaymentRepository.

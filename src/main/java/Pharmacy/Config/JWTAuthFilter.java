@@ -15,7 +15,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 
+// Indicates that an annotated class is a component and will be auto-detected.
 @Component
+// Generates a constructor with required arguments (e.g., final fields) via Lombok.
 @RequiredArgsConstructor
 /**
  * Class JWTAuthFilter.

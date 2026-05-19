@@ -21,7 +21,9 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
+// Indicates that this class provides business logic and acts as a service.
 @Service
+// Generates a constructor with required arguments (e.g., final fields) via Lombok.
 @RequiredArgsConstructor
 /**
  * Class PaymentService.
@@ -80,6 +82,7 @@ public class PaymentService {
     // DO NOT update the DB based on return-url because the user can fake it
     // Updating the DB should really be done in the IPN (below).
     // ================================================================
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Handle return.
@@ -114,6 +117,7 @@ public class PaymentService {
     // This is the correct place to update the DB
     // IPN does not go through the browser → the user cannot intervene
     // ================================================================
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Handle ipn.
@@ -211,6 +215,7 @@ public class PaymentService {
     // ================================================================
     // GET APPLICANT PAYMENT INFORMATION
     // ================================================================
+    // Defines transaction boundaries for this method/class.
     @Transactional(readOnly = true)
     /**
      * Retrieves by order id.

@@ -17,7 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
 
+// Indicates that this class provides business logic and acts as a service.
 @Service
+// Generates a constructor with required arguments (e.g., final fields) via Lombok.
 @RequiredArgsConstructor
 /**
  * Class CartService.
@@ -34,6 +36,7 @@ public class CartService {
     // ================================================================
     // GET A CART — create a new one if you don't have one
     // ================================================================
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Retrieves cart.
@@ -50,6 +53,7 @@ public class CartService {
     // ================================================================
     // ADD TO CART
     // ================================================================
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Creates a new item.
@@ -106,6 +110,7 @@ public class CartService {
     // ================================================================
     // UPDATE QUANTITY — quantity = 0 → delete item
     // ================================================================
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Updates an existing item.
@@ -143,6 +148,7 @@ public class CartService {
     // ================================================================
     // DELETE 1 ITEM
     // ================================================================
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Deletes item.
@@ -167,6 +173,7 @@ public class CartService {
     // ================================================================
     // CLEAR ENTIRE CART — call after successful order
     // ================================================================
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Clear cart.

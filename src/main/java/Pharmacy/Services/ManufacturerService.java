@@ -13,7 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+// Indicates that this class provides business logic and acts as a service.
 @Service
+// Generates a constructor with required arguments (e.g., final fields) via Lombok.
 @RequiredArgsConstructor
 /**
  * Class ManufacturerService.
@@ -23,6 +25,7 @@ public class ManufacturerService {
 
     private final ManufacturerRepository manufacturerRepository;
 
+    // Defines transaction boundaries for this method/class.
     @Transactional(readOnly = true)
     /**
      * Retrieves all.
@@ -36,6 +39,7 @@ public class ManufacturerService {
                 .toList();
     }
 
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Creates a new Create.
@@ -54,6 +58,7 @@ public class ManufacturerService {
         return toResponse(saved);
     }
 
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Updates an existing .
@@ -70,6 +75,7 @@ public class ManufacturerService {
         return toResponse(manufacturerRepository.save(m));
     }
 
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Deletes .

@@ -8,6 +8,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+// Indicates that the class declares one or more @Bean methods.
 @Configuration
 /**
  * Class SwaggerConfig.
@@ -15,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
  */
 public class SwaggerConfig {
 
+    // Indicates that a method produces a bean to be managed by the Spring container.
     @Bean
     /**
      * Custom open api.

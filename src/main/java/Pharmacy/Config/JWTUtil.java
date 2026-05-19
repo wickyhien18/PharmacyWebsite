@@ -12,6 +12,7 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Date;
 
+// Indicates that an annotated class is a component and will be auto-detected.
 @Component
 /**
  * Class JWTUtil.
@@ -19,6 +20,7 @@ import java.util.Date;
  */
 public class JWTUtil {
     //Secret key
+    // Indicates a default value expression for the annotated field.
     @Value("${app.jwt.secret}")
     private String secret;
     //Secret Key for register Token
@@ -26,6 +28,7 @@ public class JWTUtil {
     //Use for HMAC-SH256 aka Hash-based Message Authentication Code - Hashing with result 256 bits
 
     //Expiration of Access Token
+    // Indicates a default value expression for the annotated field.
     @Value("${app.jwt.expiration.access}")
     private Long accessExpiration;
     //3600000 mls - 1h

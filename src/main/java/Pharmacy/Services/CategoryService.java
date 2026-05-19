@@ -15,7 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+// Indicates that this class provides business logic and acts as a service.
 @Service
+// Generates a constructor with required arguments (e.g., final fields) via Lombok.
 @RequiredArgsConstructor
 /**
  * Class CategoryService.
@@ -25,6 +27,7 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
 
+    // Defines transaction boundaries for this method/class.
     @Transactional(readOnly = true)
     /**
      * Retrieves all.
@@ -38,6 +41,7 @@ public class CategoryService {
                 .toList();
     }
 
+    // Defines transaction boundaries for this method/class.
     @Transactional(readOnly = true)
     /**
      * Retrieves by slug.
@@ -51,6 +55,7 @@ public class CategoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Category isn't exist: " + slug));
     }
 
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Creates a new Create.
@@ -69,6 +74,7 @@ public class CategoryService {
         return toResponse(saved);
     }
 
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Updates an existing .
@@ -89,6 +95,7 @@ public class CategoryService {
         return toResponse(categoryRepository.save(category));
     }
 
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Deletes .

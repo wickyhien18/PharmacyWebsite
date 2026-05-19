@@ -20,18 +20,23 @@ import java.util.*;
  *   4. VNPay calls IPN URL (server-to-server) to notify the final result
  *   5. Server verifies signature → updates DB
  */
+// Indicates that an annotated class is a component and will be auto-detected.
 @Component
 public class VNPayUtil {
 
+    // Indicates a default value expression for the annotated field.
     @Value("${vnpay.url}")
     private String vnpayUrl;
 
+    // Indicates a default value expression for the annotated field.
     @Value("${vnpay.tmn-code}")
     private String tmnCode;
 
+    // Indicates a default value expression for the annotated field.
     @Value("${vnpay.hash-secret}")
     private String hashSecret;
 
+    // Indicates a default value expression for the annotated field.
     @Value("${vnpay.return-url}")
     private String returnUrl;
 

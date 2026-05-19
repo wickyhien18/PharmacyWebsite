@@ -16,11 +16,14 @@ import java.util.List;
  * REST Controller for managing User operations.
  * Exposes API endpoints for retrieving and managing user data within the system.
  */
+// Indicates that this class is a REST controller handling HTTP requests.
 @RestController
+// Maps HTTP requests to the controller or handler method.
 @RequestMapping("/api/users")
 @Tag(name = "Users API", description = "Users Management")
 public class UserController {
 
+    // Injects the required dependency automatically via Spring DI.
     @Autowired
     private UserService userService;
 
@@ -29,6 +32,7 @@ public class UserController {
      *
      * @return A list of Users entities containing user details.
      */
+    // Maps HTTP GET requests to this handler method.
     @GetMapping
     @Operation(summary= "Get user list")
     public List<Users> getAllUsers() {

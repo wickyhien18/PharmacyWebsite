@@ -15,9 +15,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+// Indicates that the class declares one or more @Bean methods.
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+// Generates a constructor with required arguments (e.g., final fields) via Lombok.
 @RequiredArgsConstructor
 /**
  * Class SecurityConfig.
@@ -28,6 +30,7 @@ public class SecurityConfig {
     private final JWTAuthFilter jwtAuthFilter;
     private final CustomUserDetailService userDetailsService;
 
+    // Indicates that a method produces a bean to be managed by the Spring container.
     @Bean
     /**
      * Security filter chain.
@@ -68,6 +71,7 @@ public class SecurityConfig {
     }
 
 
+    // Indicates that a method produces a bean to be managed by the Spring container.
     @Bean
     /**
      * Password encoder.
@@ -78,6 +82,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    // Indicates that a method produces a bean to be managed by the Spring container.
     @Bean
     public AuthenticationManager authManager(
             AuthenticationConfiguration config) throws Exception {

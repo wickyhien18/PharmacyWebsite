@@ -17,8 +17,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+// Indicates that this class is a REST controller handling HTTP requests.
 @RestController
+// Maps HTTP requests to the controller or handler method.
 @RequestMapping("/api/payments")
+// Generates a constructor with required arguments (e.g., final fields) via Lombok.
 @RequiredArgsConstructor
 @Tag(name = "Payment API")
 /**
@@ -33,6 +36,7 @@ public class PaymentController {
     // POST /api/payment/vnpay/create/{orderId}
     // Client calls to get payment URL → redirect to VNPay
     // ================================================================
+    // Maps HTTP POST requests to this handler method.
     @PostMapping("/vnpay/create/{orderId}")
     @Operation(summary = "Create VNPay payment URL")
     public ResponseEntity<ApiResponse<String>> createPaymentUrl(
@@ -51,6 +55,7 @@ public class PaymentController {
     // VNPay redirects users here after payment is complete
     // Only used to display results — no DB updates here
     // ================================================================
+    // Maps HTTP GET requests to this handler method.
     @GetMapping("/vnpay-return")
     @Operation(summary = "VNPay redirects to later payment (return URL)")
     public ResponseEntity<ApiResponse<PaymentResponse>> vnpayReturn(
@@ -72,6 +77,7 @@ public class PaymentController {
     // Must return the correct JSON format required by VNPay
     // This endpoint does NOT need JWT because VNPay calls directly
     // ================================================================
+    // Maps HTTP GET requests to this handler method.
     @GetMapping("/vnpay-ipn")
     @Operation(summary = "VNPay IPN - server notify results (no token needed)")
     public ResponseEntity<String> vnpayIPN(
@@ -86,6 +92,7 @@ public class PaymentController {
     // GET /api/payment/orders/{orderId}
     // View order payment information
     // ================================================================
+    // Maps HTTP GET requests to this handler method.
     @GetMapping("/orders/{orderId}")
     @Operation(summary = "View order payment information")
     public ResponseEntity<ApiResponse<PaymentResponse>> getByOrder(

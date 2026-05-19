@@ -23,8 +23,11 @@ import java.util.List;
 // ================================================================
 // CartController
 // ================================================================
+// Indicates that this class is a REST controller handling HTTP requests.
 @RestController
+// Maps HTTP requests to the controller or handler method.
 @RequestMapping("/api/cart")
+// Generates a constructor with required arguments (e.g., final fields) via Lombok.
 @RequiredArgsConstructor
 @Tag(name = "Cart API")
 @SecurityRequirement(name = "bearerAuth")
@@ -33,6 +36,7 @@ public class CartController {
     private final CartService cartService;
 
     /** GET /api/cart */
+    // Maps HTTP GET requests to this handler method.
     @GetMapping
     @Operation(summary = "Cart's Information")
     public ResponseEntity<ApiResponse<CartResponse>> getCart(
@@ -41,10 +45,12 @@ public class CartController {
     }
 
     /** POST /api/cart/items */
+    // Maps HTTP POST requests to this handler method.
     @PostMapping("/items")
     @Operation(summary = "Add medicines into Cart")
     public ResponseEntity<ApiResponse<CartResponse>> addItem(
             @AuthenticationPrincipal Users user,
+            // Marks a property, method parameter or method return type for validation cascading.
             @Valid @RequestBody AddToCartRequest request) {
 
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -57,12 +63,14 @@ public class CartController {
     public ResponseEntity<ApiResponse<CartResponse>> updateItem(
             @AuthenticationPrincipal Users user,
             @PathVariable Long medicineId,
+            // Marks a property, method parameter or method return type for validation cascading.
             @Valid @RequestBody UpdateCartItemRequest request) {
         return ResponseEntity.ok(ApiResponse.ok(
                 cartService.updateItem(user, medicineId, request)));
     }
 
     /** DELETE /api/cart/items/{medicineId} */
+    // Maps HTTP DELETE requests to this handler method.
     @DeleteMapping("/items/{medicineId}")
     @Operation(summary = "Remove medicines from Cart")
     public ResponseEntity<ApiResponse<CartResponse>> removeItem(
@@ -75,7 +83,9 @@ public class CartController {
 // ================================================================
 // OrderController
 // ================================================================
+// Indicates that this class is a REST controller handling HTTP requests.
 @RestController
+// Generates a constructor with required arguments (e.g., final fields) via Lombok.
 @RequiredArgsConstructor
 @Tag(name = "Orders API")
 @SecurityRequirement(name = "bearerAuth")
@@ -84,10 +94,12 @@ class OrderController {
     private final OrderService orderService;
 
     /** POST /api/orders — order from cart */
+    // Maps HTTP POST requests to this handler method.
     @PostMapping("/api/orders")
     @Operation(summary = "Order from the current cart")
     public ResponseEntity<ApiResponse<OrderResponse>> placeOrder(
             @AuthenticationPrincipal Users user,
+            // Marks a property, method parameter or method return type for validation cascading.
             @Valid @RequestBody PlaceOrderRequest request) {
         // @Transactional: subtract inventory + create order + delete cart in 1 transaction
         // Missing stock → AppException → full rollback → 400
@@ -97,6 +109,7 @@ class OrderController {
     }
 
     /** GET /api/orders — order history */
+    // Maps HTTP GET requests to this handler method.
     @GetMapping("/api/orders")
     @Operation(summary = "My order history")
     public ResponseEntity<ApiResponse<List<OrderResponse>>> getMyOrders(
@@ -105,6 +118,7 @@ class OrderController {
     }
 
     /** GET /api/orders/{id} — order details */
+    // Maps HTTP GET requests to this handler method.
     @GetMapping("/api/orders/{id}")
     @Operation(summary = "Order details")
     public ResponseEntity<ApiResponse<OrderResponse>> getDetail(
@@ -121,11 +135,13 @@ class OrderController {
      * POST /api/orders/{id}/cancel
      * Situation 1: User self-destructs when PENDING — no need for admin approval
      */
+    // Maps HTTP POST requests to this handler method.
     @PostMapping("/api/orders/{id}/cancel")
     @Operation(summary = "Self-cancel order while PENDING")
     public ResponseEntity<ApiResponse<OrderResponse>> cancelDirectly(
             @AuthenticationPrincipal Users user,
             @PathVariable Long id,
+            // Marks a property, method parameter or method return type for validation cascading.
             @Valid @RequestBody CancelOrderRequest request) {
         return ResponseEntity.ok(ApiResponse.ok("Cancel order successfully",
                 orderService.cancelDirectly(user, id, request)));
@@ -135,11 +151,13 @@ class OrderController {
      * POST /api/orders/{id}/request-cancel
      * Situation 2A: User submits a cancellation request when CONFIRMED — admin will review
      */
+    // Maps HTTP POST requests to this handler method.
     @PostMapping("/api/orders/{id}/request-cancel")
     @Operation(summary = "Submit cancellation request while CONFIRMED — wait for admin approval")
     public ResponseEntity<ApiResponse<OrderResponse>> requestCancel(
             @AuthenticationPrincipal Users user,
             @PathVariable Long id,
+            // Marks a property, method parameter or method return type for validation cascading.
             @Valid @RequestBody RequestCancelRequest request) {
         return ResponseEntity.ok(ApiResponse.ok(
                 "Cancellation request sent. Please wait for admin to review",
@@ -150,11 +168,13 @@ class OrderController {
      * POST /api/orders/{id}/request-return
      * Situation 3A: User submits a return request when SHIPPING
      */
+    // Maps HTTP POST requests to this handler method.
     @PostMapping("/api/orders/{id}/request-return")
     @Operation(summary = "Submit a return request while SHIPPING — waiting for admin to process")
     public ResponseEntity<ApiResponse<OrderResponse>> requestReturn(
             @AuthenticationPrincipal Users user,
             @PathVariable Long id,
+            // Marks a property, method parameter or method return type for validation cascading.
             @Valid @RequestBody ReturnRequestRequest request) {
         return ResponseEntity.ok(ApiResponse.ok(
                 "Refund request sent. Admin will contact you soon",
@@ -174,6 +194,7 @@ class OrderController {
     @Operation(summary = "Regular status update [ADMIN]")
     public ResponseEntity<ApiResponse<OrderResponse>> updateStatus(
             @PathVariable Long id,
+            // Marks a property, method parameter or method return type for validation cascading.
             @Valid @RequestBody UpdateOrderStatusRequest request) {
         return ResponseEntity.ok(ApiResponse.ok("Updated successfully",
                 orderService.updateStatus(id, request)));
@@ -184,11 +205,13 @@ class OrderController {
      * Situation 2B: Admin approves the cancellation request → CANCELLED
      * Restock + process refund if payment has been made
      */
+    // Maps HTTP POST requests to this handler method.
     @PostMapping("/api/admin/orders/{id}/approve-cancel")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Operation(summary = "Approve the request to cancel the order [ADMIN] → CANCELLED")
     public ResponseEntity<ApiResponse<OrderResponse>> approveCancel(
             @PathVariable Long id,
+            // Marks a property, method parameter or method return type for validation cascading.
             @Valid @RequestBody CancelOrderRequest request) {
         return ResponseEntity.ok(ApiResponse.ok("Order cancellation approved",
                 orderService.approveCancel(id, request)));
@@ -198,11 +221,13 @@ class OrderController {
      * POST /api/admin/orders/{id}/reject-cancel
      * Situation 2C: Admin refuses the cancellation request → returns to CONFIRMED
      */
+    // Maps HTTP POST requests to this handler method.
     @PostMapping("/api/admin/orders/{id}/reject-cancel")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Operation(summary = "Refuse the cancellation request [ADMIN] → return to CONFIRMED")
     public ResponseEntity<ApiResponse<OrderResponse>> rejectCancel(
             @PathVariable Long id,
+            // Marks a property, method parameter or method return type for validation cascading.
             @Valid @RequestBody RejectCancelRequest request) {
         return ResponseEntity.ok(ApiResponse.ok("Cancellation request declined",
                 orderService.rejectCancel(id, request)));
@@ -213,6 +238,7 @@ class OrderController {
      * Situation 3B: Admin confirms that the goods have arrived in the warehouse → RETURNED
      * Refund + refund if VNPay has been paid
      */
+    // Maps HTTP POST requests to this handler method.
     @PostMapping("/api/admin/orders/{id}/confirm-return")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Operation(summary = "Confirm the goods have arrived at the warehouse [ADMIN] → RETURNED + return to warehouse")

@@ -33,8 +33,11 @@ import java.util.Map;
  * This class handles user registration, login, token refresh, logout,
  * and retrieving current user information.
  */
+// Indicates that this class is a REST controller handling HTTP requests.
 @RestController
+// Maps HTTP requests to the controller or handler method.
 @RequestMapping("/api/auth")
+// Generates a constructor with required arguments (e.g., final fields) via Lombok.
 @RequiredArgsConstructor
 @Tag(name = "Auth API")
 public class AuthController {
@@ -47,9 +50,11 @@ public class AuthController {
      * @param req The registration request containing user details (username, password, email, etc.).
      * @return ResponseEntity containing a success message and the newly generated authentication tokens.
      */
+    // Maps HTTP POST requests to this handler method.
     @PostMapping("/register")
     @Operation(summary = "Register Account")
     public ResponseEntity<?> register(
+            // Marks a property, method parameter or method return type for validation cascading.
             @Valid @RequestBody RegisterRequest req) {
 
         AuthResponse data = authService.register(req);
@@ -65,9 +70,11 @@ public class AuthController {
      * @param req The login request containing user credentials (email and password).
      * @return ResponseEntity containing a success message, the access token, refresh token, and user info.
      */
+    // Maps HTTP POST requests to this handler method.
     @PostMapping("/login")
     @Operation(summary = "Login to get Jwt token")
     public ResponseEntity<?> login(
+            // Marks a property, method parameter or method return type for validation cascading.
             @Valid @RequestBody LoginRequest req) {
 
         AuthResponse response = authService.login(req);
@@ -81,6 +88,7 @@ public class AuthController {
      * @param refreshToken The refresh token request containing the valid refresh token string.
      * @return ResponseEntity containing the new access token and refresh token pair.
      */
+    // Maps HTTP POST requests to this handler method.
     @PostMapping("/refresh")
     @Operation(summary = "Refresh jwt token")
     public ResponseEntity<?> refresh(@Valid @RequestBody RefreshTokenRequest refreshToken) {
@@ -96,6 +104,7 @@ public class AuthController {
      * @param request The HTTP request containing the Authorization header with the Bearer token.
      * @return ResponseEntity containing a success message indicating the user was logged out.
      */
+    // Maps HTTP POST requests to this handler method.
     @PostMapping("/logout")
     @Operation(summary = "Logout and delete refreshToken")
     public ResponseEntity<?> logout(HttpServletRequest request) {
@@ -111,6 +120,7 @@ public class AuthController {
      * @param request The HTTP request containing the Authorization header with the Bearer token.
      * @return ResponseEntity containing the user's detailed profile information.
      */
+    // Maps HTTP GET requests to this handler method.
     @GetMapping("/me")
     @Operation(summary = "Account info")
     public ResponseEntity<?> me(HttpServletRequest request) {

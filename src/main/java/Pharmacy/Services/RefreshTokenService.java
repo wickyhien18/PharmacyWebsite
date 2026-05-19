@@ -12,7 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+// Indicates that this class provides business logic and acts as a service.
 @Service
+// Generates a constructor with required arguments (e.g., final fields) via Lombok.
 @RequiredArgsConstructor
 /**
  * Class RefreshTokenService.
@@ -20,6 +22,7 @@ import java.util.Optional;
  */
 public class RefreshTokenService {
 
+    // Injects the required dependency automatically via Spring DI.
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
 
@@ -33,6 +36,7 @@ public class RefreshTokenService {
         return refreshTokenRepository.findByToken(token);
     }
 
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Deletes refresh token.
@@ -55,6 +59,7 @@ public class RefreshTokenService {
                 .map(RefreshToken::getUsers);
     }
 
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Extend expiry date.

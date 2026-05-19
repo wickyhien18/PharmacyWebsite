@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+// Indicates that this class provides business logic and acts as a service.
 @Service
 /**
  * Class RoleService.
@@ -16,6 +17,7 @@ import java.util.Optional;
  */
 public class RoleService {
 
+    // Injects the required dependency automatically via Spring DI.
     @Autowired
     private RoleRepository roleRepository;
 

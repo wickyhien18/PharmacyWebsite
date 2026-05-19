@@ -29,7 +29,9 @@ import java.time.LocalDateTime;
  * Service class for handling authentication and authorization logic.
  * Manages user registration, login, token refresh, and user session operations.
  */
+// Indicates that this class provides business logic and acts as a service.
 @Service
+// Generates a constructor with required arguments (e.g., final fields) via Lombok.
 @RequiredArgsConstructor
 public class AuthService {
     private final UserRepository userRepository;
@@ -46,6 +48,7 @@ public class AuthService {
      * @return AuthResponse containing the access and refresh tokens.
      * @throws AuthException if email, phone, or username already exists.
      */
+    // Defines transaction boundaries for this method/class.
     @Transactional
     public AuthResponse register(RegisterRequest req) {
 
@@ -81,6 +84,7 @@ public class AuthService {
      * @return AuthResponse containing the new access and refresh tokens.
      * @throws AuthException if credentials are bad or account is locked.
      */
+    // Defines transaction boundaries for this method/class.
     @Transactional
     public AuthResponse login(LoginRequest req) {
 
@@ -111,6 +115,7 @@ public class AuthService {
      * @return AuthResponse containing a new token pair.
      * @throws AuthException if the token is invalid or expired.
      */
+    // Defines transaction boundaries for this method/class.
     @Transactional
     public AuthResponse refreshToken(RefreshTokenRequest refreshToken) {
 
@@ -136,6 +141,7 @@ public class AuthService {
      * @return A success message.
      * @throws ResourceNotFoundException if the token is missing.
      */
+    // Defines transaction boundaries for this method/class.
     @Transactional
     public String logout(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
@@ -161,6 +167,7 @@ public class AuthService {
      * @return UserInfo object containing current user's profile details.
      * @throws ResourceNotFoundException if the token or user cannot be found.
      */
+    // Defines transaction boundaries for this method/class.
     @Transactional
     public AuthResponse.UserInfo me(HttpServletRequest request) {
         String header = request.getHeader("Authorization");

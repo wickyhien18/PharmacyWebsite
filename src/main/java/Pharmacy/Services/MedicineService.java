@@ -27,7 +27,9 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+// Indicates that this class provides business logic and acts as a service.
 @Service
+// Generates a constructor with required arguments (e.g., final fields) via Lombok.
 @RequiredArgsConstructor
 /**
  * Class MedicineService.
@@ -43,6 +45,7 @@ public class MedicineService {
 
     private final InventoryRepository inventoryRepository;
 
+    // Defines transaction boundaries for this method/class.
     @Transactional(readOnly = true)
     public Page<MedicineResponse> search(
             String keyword,
@@ -64,6 +67,7 @@ public class MedicineService {
                 .map(this::toResponse);
     }
 
+    // Defines transaction boundaries for this method/class.
     @Transactional(readOnly = true)
     /**
      * Retrieves by slug.
@@ -77,6 +81,7 @@ public class MedicineService {
         return toResponse(medicine);
     }
 
+    // Defines transaction boundaries for this method/class.
     @Transactional(readOnly = true)
     /**
      * Retrieves by id.
@@ -91,6 +96,7 @@ public class MedicineService {
         return toResponse(medicine);
     }
 
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Creates a new Create.
@@ -141,6 +147,7 @@ public class MedicineService {
         return toResponse(medicine);
     }
 
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Updates an existing .
@@ -181,6 +188,7 @@ public class MedicineService {
         return toResponse(medicineRepository.save(medicine));
     }
 
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Deletes .

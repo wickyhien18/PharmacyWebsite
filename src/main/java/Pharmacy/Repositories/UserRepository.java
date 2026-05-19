@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+// Indicates that this class is a Data Access Object (DAO) interfacing with the database.
 @Repository
 /**
  * Repository interface for UserRepository.
@@ -36,6 +37,7 @@ public interface UserRepository extends JpaRepository<Users,Long> {
     boolean existsByEmailOrPhone(@Param("email") String email, @Param("phone") String phone);
 
     @Modifying
+    // Defines transaction boundaries for this method/class.
     @Transactional
     @Query("UPDATE Users u set u.lastActivity = :time where u.userName = :userName")
     void updateLastActivity(@Param("userName") String userName, @Param("time") LocalDateTime time);

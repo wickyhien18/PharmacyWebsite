@@ -15,9 +15,11 @@ import java.util.Optional;
  * Service class for managing User entities.
  * Contains business logic for user-related operations including CRUD.
  */
+// Indicates that this class provides business logic and acts as a service.
 @Service
 public class UserService {
 
+    // Injects the required dependency automatically via Spring DI.
     @Autowired
     private UserRepository userRepository;
 

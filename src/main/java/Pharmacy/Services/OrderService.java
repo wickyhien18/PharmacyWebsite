@@ -21,7 +21,9 @@ import java.util.List;
 import java.util.Random;
 
 @Slf4j
+// Indicates that this class provides business logic and acts as a service.
 @Service
+// Generates a constructor with required arguments (e.g., final fields) via Lombok.
 @RequiredArgsConstructor
 /**
  * Class OrderService.
@@ -50,6 +52,7 @@ public class OrderService {
     // If any step fails → rollback completely
     // → There is no situation where inventory is deducted but there are no orders
     // ================================================================
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Place order.
@@ -162,6 +165,7 @@ public class OrderService {
     // ================================================================
     // USER'S ORDER HISTORY
     // ================================================================
+    // Defines transaction boundaries for this method/class.
     @Transactional(readOnly = true)
     /**
      * Retrieves my orders.
@@ -179,6 +183,7 @@ public class OrderService {
     // ================================================================
     // ORDER DETAILS
     // ================================================================
+    // Defines transaction boundaries for this method/class.
     @Transactional(readOnly = true)
     /**
      * Retrieves detail.
@@ -211,6 +216,7 @@ public class OrderService {
     // VNPay PENDING → set FAILED
     // VNPay SUCCESS → mark REFUNDED
     // ================================================================
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Cancel directly.
@@ -253,6 +259,7 @@ public class OrderService {
     // Inventory: NOT yet completed - waiting for admin approval
     // Payment: NOT processed yet — waiting for admin approval
     // ================================================================
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Request cancel.
@@ -292,6 +299,7 @@ public class OrderService {
     // Inventory: refunded immediately upon admin approval
     // Payment: process refund if payment has been made
     // ================================================================
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Approve cancel.
@@ -336,6 +344,7 @@ public class OrderService {
     // Result: CANCEL_REQUSTED → CONFIRMED (return to normal)
     // Inventory: unchanged
     // ================================================================
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Reject cancel.
@@ -374,6 +383,7 @@ public class OrderService {
     // Inventory: NOT yet refunded — waiting for the goods to arrive at the physical warehouse
     // Payment: NO refund yet - waiting for goods to arrive
     // ================================================================
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Request return.
@@ -419,6 +429,7 @@ public class OrderService {
     // Inventory: refund immediately because the goods have arrived at the physical warehouse
     // Payment: refund if VNPay has been paid
     // ================================================================
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Confirm return.
@@ -450,6 +461,7 @@ public class OrderService {
     // ADMIN — NORMAL STATUS UPDATE
     // PENDING → CONFIRMED → SHIPPING → DELIVERED
     // ================================================================
+    // Defines transaction boundaries for this method/class.
     @Transactional
     /**
      * Updates an existing status.
