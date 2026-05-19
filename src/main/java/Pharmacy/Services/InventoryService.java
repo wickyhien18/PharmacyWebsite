@@ -29,7 +29,7 @@ public class InventoryService {
     private final MedicineRepository medicineRepository;
 
     // ================================================================
-    // NHẬP KHO — Admin thêm hàng vào kho
+    // IMPORT WAREHOUSES — Admin adds goods to the warehouse
     // ================================================================
     @Transactional
     /**
@@ -46,7 +46,7 @@ public class InventoryService {
         Inventory inv = inventoryRepository
                 .findByMedicineId(req.medicineId())
                 .orElseGet(() -> {
-                    // Tạo inventory nếu chưa có (trường hợp tạo thuốc thủ công)
+                    // Create inventory if you don't have one (in case of manually creating medicine)
                     Inventory newInv = Inventory.builder()
                             .medicines(medicine).quantity(0).build();
                     return inventoryRepository.save(newInv);
@@ -59,13 +59,13 @@ public class InventoryService {
         inv.setLastUpdated(LocalDateTime.now());
         inventoryRepository.save(inv);
 
-        // Nếu trước đó hết hàng → chuyển lại ACTIVE
+        // If previously out of stock → switch back to ACTIVE
         if (prevQty == 0 && medicine.getStatus() == Medicines.Status.OUT_OF_STOCK) {
             medicine.setStatus(Medicines.Status.ACTIVE);
             medicineRepository.save(medicine);
         }
 
-        // Ghi log nhập kho
+        // Record warehouse entry log
         inventoryLogRepository.save(InventoryLog.builder()
                 .medicines(medicine)
                 .changeType(InventoryLog.ChangeType.IMPORT)
@@ -79,7 +79,7 @@ public class InventoryService {
     }
 
     // ================================================================
-    // XEM TỒN KHO — theo medicineId
+    // VIEW INVENTORY — by medicineId
     // ================================================================
     @Transactional(readOnly = true)
     /**
@@ -96,7 +96,7 @@ public class InventoryService {
     }
 
     // ================================================================
-    // LỊCH SỬ NHẬP XUẤT KHO
+    // HISTORY OF IMPORT AND EXPORT OF WAREHOUSE
     // ================================================================
     @Transactional(readOnly = true)
     /**

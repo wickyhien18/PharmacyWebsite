@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  */
 public class GlobalExceptionHandler {
 
-    // ---- Validation lỗi (@Valid) → 422 Unprocessable Entity ----
+    // ---- Validation error (@Valid) → 422 Unprocessable Entity ----
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Map<String, String>>> handleValidation(
             MethodArgumentNotValidException ex) {
@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.toMap(
                         FieldError::getField,
                         e -> e.getDefaultMessage() != null ? e.getDefaultMessage() : "Invalid",
-                        (a, b) -> a  // Giữ lỗi đầu tiên nếu 1 field có nhiều lỗi
+                        (a, b) -> a  // Keep the first error if a field has multiple errors
                 ));
 
         return ResponseEntity
@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
                 .body(new ApiResponse<>(false, "Invalid Data", errors));
     }
 
-    // ---- Auth lỗi → 401 ----
+    // ---- Auth error → 401 ----
     @ExceptionHandler(AuthException.class)
     /**
      * Handle auth.
@@ -54,7 +54,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail(ex.getMessage()));
     }
 
-    // ---- Không có quyền → 403 ----
+    // ---- No permissions → 403 ----
     @ExceptionHandler(AccessDeniedException.class)
     /**
      * Handle access denied.
@@ -68,7 +68,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail("You don't have permission"));
     }
 
-    // ---- Resource không tìm thấy → 404 ----
+    // ---- Resource not found → 404 ----
     @ExceptionHandler(ResourceNotFoundException.class)
     /**
      * Handle not found.
@@ -82,7 +82,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail(ex.getMessage()));
     }
 
-    // ---- Business logic lỗi → 400 ----
+    // ---- Business logic error → 400 ----
     @ExceptionHandler(BusinessException.class)
     /**
      * Handle business.
@@ -109,7 +109,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail(ex.getMessage()));
     }
 
-    // ---- Catch-all → 500 (không lộ stack trace ra client) ----
+    // ---- Catch-all → 500 (does not expose stack trace to client) ----
     @ExceptionHandler(Exception.class)
     /**
      * Handle general.

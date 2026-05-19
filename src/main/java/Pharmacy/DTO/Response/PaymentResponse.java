@@ -14,7 +14,7 @@ public record PaymentResponse(
         String    status,
         String    transactionCode,
         LocalDateTime paidAt,
-        LocalDateTime expiredAt,    // Thêm: link hết hạn lúc nào
-        Integer   attemptCount      // Thêm: đã thử mấy lần
+        LocalDateTime expiredAt,    // Add: when does the link expire?
+        Integer   attemptCount      // Added: tried several times
 ) {
 }

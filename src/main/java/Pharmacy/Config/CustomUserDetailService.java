@@ -66,7 +66,7 @@ public class CustomUserDetailService implements UserDetailsService {
      * @return the String result
      */
             public String getUsername() {
-                return users.getEmail();  // Dùng email làm username
+                return users.getEmail();  // Use email as username
             }
 
             @Override
@@ -90,7 +90,7 @@ public class CustomUserDetailService implements UserDetailsService {
                 //If user's account isn't active, Spring Security will throw DisabledException
             }
 
-            // Thêm method để lấy Users entity
+            // Add method to get Users entity
     /**
      * Retrieves user.
      *

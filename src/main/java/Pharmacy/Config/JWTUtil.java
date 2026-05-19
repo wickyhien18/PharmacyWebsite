@@ -89,9 +89,9 @@ public class JWTUtil {
             parseClaims(token);
             return true;
         } catch (ExpiredJwtException e) {
-            System.out.println("Access token hết hạn");
+            System.out.println("Access token expires");
         } catch (JwtException e) {
-            System.out.println("Access token không hợp lệ: " + e.getMessage());
+            System.out.println("Invalid access token:" + e.getMessage());
         }
         return false;
     }

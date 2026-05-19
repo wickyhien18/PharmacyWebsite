@@ -58,7 +58,7 @@ public class OrderItems {
     @JoinColumn(name = "medicine_id")
     private Medicines medicines;
 
-    // Snapshot giá lúc đặt — giá sau có thể thay đổi
+    // Snapshot of price at time of booking — price may change later
     @Column(name = "unit_price", nullable = false, precision = 15, scale = 2)
     private BigDecimal unitPrice;
 

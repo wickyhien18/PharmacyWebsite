@@ -89,7 +89,7 @@ public class AuthService {
                     new UsernamePasswordAuthenticationToken(req.email(), req.password())
             );
         } catch (BadCredentialsException e) {
-            // Không tiết lộ email có tồn tại không
+            // Does not reveal whether the email exists
             throw new AuthException("Email or password is incorrect");
         }
 

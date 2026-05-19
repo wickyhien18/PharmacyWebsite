@@ -60,7 +60,7 @@ public class InventoryLog {
     @Column(name = "new_quantity", nullable = false)
     private Integer newQuantity;
 
-    // order_id nếu là bán hàng, null nếu nhập kho thủ công
+    // order_id if sales, null if manual inventory
     @Column(name = "reference_id")
     private Long referenceId;
 

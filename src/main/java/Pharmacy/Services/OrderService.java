@@ -37,18 +37,18 @@ public class OrderService {
     private final ShipmentRepository  shipmentRepository;
 
     // ================================================================
-    // ĐẶT HÀNG — @Transactional là điểm quan trọng nhất
+    // ORDER — @Transactional is the most important point
     //
-    // Các bước trong 1 transaction:
-    //   1. Lấy giỏ hàng
-    //   2. Kiểm tra tồn kho từng sản phẩm
-    //   3. Tạo Order + OrderItems
-    //   4. Trừ tồn kho + ghi InventoryLog
-    //   5. Tạo Payment
-    //   6. Xoá giỏ hàng
+    // Steps in a transaction:
+    // 1. Get shopping cart
+    // 2. Check inventory of each product
+    // 3. Create Order + OrderItems
+    // 4. Deduct inventory + record InventoryLog
+    // 5. Create Payment
+    // 6. Clear cart
     //
-    // Nếu bất kỳ bước nào lỗi → rollback toàn bộ
-    // → Không xảy ra tình trạng trừ kho nhưng không có đơn hàng
+    // If any step fails → rollback completely
+    // → There is no situation where inventory is deducted but there are no orders
     // ================================================================
     @Transactional
     /**
@@ -60,15 +60,15 @@ public class OrderService {
      */
     public OrderResponse placeOrder(Users user, PlaceOrderRequest req) {
 
-        // 1. Lấy giỏ hàng
+        // 1. Get shopping cart
         Carts cart = cartRepository.findByUserId(user.getUserId())
                 .orElseThrow(() -> new BusinessException("Cart is empty"));
 
         if (cart.getCartItems().isEmpty())
             throw new BusinessException("Cart is empty, Please add Medicines");
 
-        // 2. Kiểm tra tồn kho TRƯỚC khi tạo đơn
-        //    Dừng sớm nếu thiếu hàng — không để tạo nửa chừng
+        // 2. Check inventory BEFORE creating an order
+        // Stop early if there is a shortage — don't leave it half way
         for (CartItems cartItem : cart.getCartItems()) {
             Inventory inv = inventoryRepository
                     .findByMedicineId(cartItem.getMedicines().getMedicineId())
@@ -82,7 +82,7 @@ public class OrderService {
                                 " and you order " + cartItem.getQuantity());
         }
 
-        // 3. Tạo Order
+        // 3. Create Order
         String orderCode = generateOrderCode();
         BigDecimal totalPrice = calculateTotal(cart);
 
@@ -98,7 +98,7 @@ public class OrderService {
 
         orderRepository.save(order);
 
-        // Tạo OrderItems — snapshot giá lúc đặt
+        // Create OrderItems — snapshot of price at time of order
         List<OrderItems> orderItems = cart.getCartItems().stream()
                 .map(cartItem -> OrderItems.builder()
                         .orders(order)
@@ -113,7 +113,7 @@ public class OrderService {
         order.getOrderItems().addAll(orderItems);
         orderRepository.save(order);
 
-        // 4. Trừ tồn kho + ghi log
+        // 4. Deduct inventory + log
         for (CartItems cartItem : cart.getCartItems()) {
             Inventory inv = inventoryRepository
                     .findByMedicineId(cartItem.getMedicines().getMedicineId())
@@ -126,12 +126,12 @@ public class OrderService {
             inv.setLastUpdated(LocalDateTime.now());
             inventoryRepository.save(inv);
 
-            // Nếu hết hàng → tự động đổi status thuốc
+            // If out of stock → automatically change drug status
             if (newQty == 0) {
                 cartItem.getMedicines().setStatus(Medicines.Status.OUT_OF_STOCK);
             }
 
-            // Ghi log để audit — ai mua bao nhiêu lúc nào
+            // Record log for auditing — who bought how much when
             inventoryLogRepository.save(InventoryLog.builder()
                     .medicines(cartItem.getMedicines())
                     .changeType(InventoryLog.ChangeType.EXPORT)
@@ -143,7 +143,7 @@ public class OrderService {
                     .build());
         }
 
-        // 5. Tạo Payment
+        // 5. Create Payment
         Payments payment = Payments.builder()
                 .orders(order)
                 .paymentMethod(req.paymentMethod())
@@ -152,7 +152,7 @@ public class OrderService {
                 .build();
         paymentRepository.save(payment);
 
-        // 6. Xoá giỏ hàng sau khi đặt thành công
+        // 6. Delete cart after successful booking
         cart.getCartItems().clear();
         cartRepository.save(cart);
 
@@ -160,7 +160,7 @@ public class OrderService {
     }
 
     // ================================================================
-    // LỊCH SỬ ĐƠN HÀNG CỦA USER
+    // USER'S ORDER HISTORY
     // ================================================================
     @Transactional(readOnly = true)
     /**
@@ -177,7 +177,7 @@ public class OrderService {
     }
 
     // ================================================================
-    // CHI TIẾT ĐƠN HÀNG
+    // ORDER DETAILS
     // ================================================================
     @Transactional(readOnly = true)
     /**
@@ -191,7 +191,7 @@ public class OrderService {
         Orders order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order isn't found"));
 
-        // Customer chỉ xem đơn của mình
+        // Customer only views his/her order
         boolean isOwner = order.getUsers().getUserId().equals(user.getUserId());
         boolean isAdmin = user.getRoles() != null &&
                 user.getRoles().getRoleName().equals("ROLE_ADMIN");
@@ -203,13 +203,13 @@ public class OrderService {
     }
 
     // ================================================================
-    // TÌNH HUỐNG 1 — USER TỰ HUỶ KHI PENDING
+    // CASE 1 — USER SELF-DESTROYS WHEN PENDING
     //
-    // Điều kiện : chỉ chủ đơn, chỉ khi PENDING
-    // Tồn kho   : hoàn ngay
-    // Thanh toán : COD chưa thu → không làm gì
-    //              VNPay PENDING → set FAILED
-    //              VNPay SUCCESS → đánh dấu REFUNDED
+    // Conditions: only owner, only when PENDING
+    // Inventory: refund immediately
+    // Payment: COD not yet collected → do nothing
+    // VNPay PENDING → set FAILED
+    // VNPay SUCCESS → mark REFUNDED
     // ================================================================
     @Transactional
     /**
@@ -228,9 +228,9 @@ public class OrderService {
 
         if (!order.canUserCancelDirectly())
             throw new BusinessException(
-                    "Chỉ có thể tự huỷ khi đơn đang PENDING. "
-                            + "Trạng thái hiện tại: " + order.getOrderStatus().name() + ". "
-                            + "Nếu đơn đang CONFIRMED, vui lòng gửi yêu cầu huỷ để admin xét duyệt");
+                    "You can only self-cancel when the order is PENDING."
+                            + "Current status:" + order.getOrderStatus().name() + ". "
+                            + "If the application is CONFIRMED, please submit a cancellation request for admin to review");
 
         order.setOrderStatus(Orders.OrderStatus.CANCELLED);
         order.setCancelledBy("USER");
@@ -238,20 +238,20 @@ public class OrderService {
         order.setCancelledAt(LocalDateTime.now());
         orderRepository.save(order);
 
-        restoreStock(order, "Hoàn kho - user huỷ đơn " + order.getOrderCode());
+        restoreStock(order, "Refund - user cancels order" + order.getOrderCode());
         handlePaymentOnCancel(order);
 
-        log.info("User {} tự huỷ đơn {}", user.getUserId(), order.getOrderCode());
+        log.info("User {} self-cancels order {}", user.getUserId(), order.getOrderCode());
         return toResponse(order);
     }
 
     // ================================================================
-    // TÌNH HUỐNG 2A — USER GỬI YÊU CẦU HUỶ KHI CONFIRMED
+    // SCENARIO 2A — USER SENDS CANCELLATION REQUEST WHEN CONFIRMED
     //
-    // Điều kiện : chỉ chủ đơn, chỉ khi CONFIRMED
-    // Kết quả   : CONFIRMED → CANCEL_REQUESTED
-    // Tồn kho   : CHƯA hoàn — chờ admin duyệt
-    // Thanh toán: CHƯA xử lý — chờ admin duyệt
+    // Conditions: single owner only, only when CONFIRMED
+    // Result: CONFIRMED → CANCEL_REQUSTED
+    // Inventory: NOT yet completed - waiting for admin approval
+    // Payment: NOT processed yet — waiting for admin approval
     // ================================================================
     @Transactional
     /**
@@ -266,31 +266,31 @@ public class OrderService {
         Orders order = findOrder(orderId);
 
         if (!order.getUsers().getUserId().equals(user.getUserId()))
-            throw new AccessDeniedException("Bạn không có quyền yêu cầu huỷ đơn này");
+            throw new AccessDeniedException("You do not have the right to request cancellation of this order");
 
         if (!order.canUserRequestCancel())
             throw new BusinessException(
-                    "Chỉ có thể gửi yêu cầu huỷ khi đơn đang CONFIRMED. "
-                            + "Trạng thái hiện tại: " + order.getOrderStatus().name());
+                    "Cancellation requests can only be submitted when the application is CONFIRMED."
+                            + "Current status:" + order.getOrderStatus().name());
 
         order.setOrderStatus(Orders.OrderStatus.CANCEL_REQUESTED);
-        order.setCancelledReason(req.reason());  // Lý do user muốn huỷ
+        order.setCancelledReason(req.reason());  // The reason the user wants to cancel
         orderRepository.save(order);
 
-        // TODO: gửi notification cho admin biết có yêu cầu huỷ mới
+        // TODO: send a notification to the admin that there is a new cancellation request
 
-        log.info("User {} gửi yêu cầu huỷ đơn {}, lý do: {}",
+        log.info("User {} sent request to cancel order {}, reason: {}",
                 user.getUserId(), order.getOrderCode(), req.reason());
         return toResponse(order);
     }
 
     // ================================================================
-    // TÌNH HUỐNG 2B — ADMIN DUYỆT YÊU CẦU HUỶ
+    // SITUATION 2B — ADMIN APPROVES CANCELLATION REQUEST
     //
-    // Điều kiện : chỉ khi CANCEL_REQUESTED
-    // Kết quả   : CANCEL_REQUESTED → CANCELLED
-    // Tồn kho   : hoàn ngay khi admin duyệt
-    // Thanh toán: xử lý refund nếu đã thanh toán
+    // Condition: only if CANCEL_REQUSTED
+    // Result: CANCEL_REQUSTED → CANCELLED
+    // Inventory: refunded immediately upon admin approval
+    // Payment: process refund if payment has been made
     // ================================================================
     @Transactional
     /**
@@ -305,36 +305,36 @@ public class OrderService {
 
         if (!order.canAdminApproveCancel())
             throw new BusinessException(
-                    "Chỉ duyệt huỷ khi đơn đang CANCEL_REQUESTED. "
-                            + "Trạng thái hiện tại: " + order.getOrderStatus().name());
+                    "Only approve cancellation when the order is CANCEL_REQUSTED."
+                            + "Current status:" + order.getOrderStatus().name());
 
         order.setOrderStatus(Orders.OrderStatus.CANCELLED);
         order.setCancelledBy("ADMIN");
-        // Giữ nguyên cancelledReason của user, thêm lý do admin duyệt vào note
+        // Keep the user's canceledReason intact, add the reason for admin approval in the note
         order.setNote((order.getNote() != null ? order.getNote() + " | " : "")
-                + "Admin duyệt huỷ: " + req.reason());
+                + "Admin approves cancellation:" + req.reason());
         order.setCancelledAt(LocalDateTime.now());
         orderRepository.save(order);
 
-        // Huỷ Shipment nếu có
+        // Cancel Shipment if any
         shipmentRepository.findByOrderId(orderId).ifPresent(s -> {
             s.setStatus(Shipment.ShipmentStatus.FAILED);
             shipmentRepository.save(s);
         });
 
-        restoreStock(order, "Hoàn kho - admin duyệt huỷ đơn " + order.getOrderCode());
+        restoreStock(order, "Refund - admin approves cancellation of order" + order.getOrderCode());
         handlePaymentOnCancel(order);
 
-        log.info("Admin duyệt huỷ đơn {}", order.getOrderCode());
+        log.info("Admin approves cancellation of order {}", order.getOrderCode());
         return toResponse(order);
     }
 
     // ================================================================
-    // TÌNH HUỐNG 2C — ADMIN TỪ CHỐI YÊU CẦU HUỶ
+    // SITUATION 2C — ADMIN REFUSES CANCELLATION REQUEST
     //
-    // Điều kiện : chỉ khi CANCEL_REQUESTED
-    // Kết quả   : CANCEL_REQUESTED → CONFIRMED (quay về bình thường)
-    // Tồn kho   : không thay đổi
+    // Condition: only if CANCEL_REQUSTED
+    // Result: CANCEL_REQUSTED → CONFIRMED (return to normal)
+    // Inventory: unchanged
     // ================================================================
     @Transactional
     /**
@@ -349,30 +349,30 @@ public class OrderService {
 
         if (!order.canAdminRejectCancel())
             throw new BusinessException(
-                    "Chỉ từ chối khi đơn đang CANCEL_REQUESTED. "
-                            + "Trạng thái hiện tại: " + order.getOrderStatus().name());
+                    "Only refuse when the application is CANCEL_REQUSTED."
+                            + "Current status:" + order.getOrderStatus().name());
 
-        // Quay về CONFIRMED — đơn tiếp tục được xử lý bình thường
+        // Return to CONFIRMED — applications continue to be processed normally
         order.setOrderStatus(Orders.OrderStatus.CONFIRMED);
-        order.setCancelledReason(null);  // Xoá lý do huỷ
+        order.setCancelledReason(null);  // Delete cancellation reason
         order.setNote((order.getNote() != null ? order.getNote() + " | " : "")
-                + "Admin từ chối huỷ: " + req.reason());
+                + "Admin refuses to cancel:" + req.reason());
         orderRepository.save(order);
 
-        // TODO: gửi notification cho user biết yêu cầu bị từ chối
+        // TODO: send a notification to the user that the request has been rejected
 
-        log.info("Admin từ chối yêu cầu huỷ đơn {}, lý do: {}",
+        log.info("Admin refused request to cancel order {}, reason: {}",
                 order.getOrderCode(), req.reason());
         return toResponse(order);
     }
 
     // ================================================================
-    // TÌNH HUỐNG 3A — USER GỬI YÊU CẦU HOÀN HÀNG KHI SHIPPING
+    // SCENARIO 3A — USER SENDS REFUND REQUEST WHEN SHIPPING
     //
-    // Điều kiện : chỉ chủ đơn, chỉ khi SHIPPING
-    // Kết quả   : SHIPPING → RETURN_REQUESTED
-    // Tồn kho   : CHƯA hoàn — chờ hàng về kho vật lý
-    // Thanh toán: CHƯA refund — chờ hàng về
+    // Conditions: single owner only, only when SHIPPING
+    // Result: SHIPPING → RETURN_REQUESTED
+    // Inventory: NOT yet refunded — waiting for the goods to arrive at the physical warehouse
+    // Payment: NO refund yet - waiting for goods to arrive
     // ================================================================
     @Transactional
     /**
@@ -387,37 +387,37 @@ public class OrderService {
         Orders order = findOrder(orderId);
 
         if (!order.getUsers().getUserId().equals(user.getUserId()))
-            throw new AccessDeniedException("Bạn không có quyền yêu cầu hoàn đơn này");
+            throw new AccessDeniedException("You do not have the right to request a refund of this form");
 
         if (!order.canUserRequestReturn())
             throw new BusinessException(
-                    "Chỉ có thể yêu cầu hoàn hàng khi đơn đang SHIPPING. "
-                            + "Trạng thái hiện tại: " + order.getOrderStatus().name());
+                    "Refunds can only be requested when the order is SHIPPING."
+                            + "Current status:" + order.getOrderStatus().name());
 
         order.setOrderStatus(Orders.OrderStatus.RETURN_REQUESTED);
         order.setCancelledReason(req.reason());
         orderRepository.save(order);
 
-        // Đánh dấu Shipment FAILED — admin cần liên hệ GHN/GHTK
+        // Mark Shipment FAILED — admin needs to contact GHN/GHTK
         shipmentRepository.findByOrderId(orderId).ifPresent(s -> {
             s.setStatus(Shipment.ShipmentStatus.FAILED);
             shipmentRepository.save(s);
         });
 
-        // TODO: gửi notification cho admin
+        // TODO: send notification to admin
 
-        log.info("User {} yêu cầu hoàn đơn {}, lý do: {}",
+        log.info("User {} requested a refund {}, reason: {}",
                 user.getUserId(), order.getOrderCode(), req.reason());
         return toResponse(order);
     }
 
     // ================================================================
-    // TÌNH HUỐNG 3B — ADMIN XÁC NHẬN HÀNG ĐÃ VỀ KHO
+    // SITUATION 3B — ADMIN CONFIRMS ITEMS HAVE BEEN IN STOCK
     //
-    // Điều kiện : chỉ khi RETURN_REQUESTED
-    // Kết quả   : RETURN_REQUESTED → RETURNED
-    // Tồn kho   : hoàn ngay vì hàng đã về kho vật lý
-    // Thanh toán: refund nếu đã thanh toán VNPay
+    // Condition: only if RETURN_REQUSTED
+    // Result: RETURN_REQUESTED → RETURNED
+    // Inventory: refund immediately because the goods have arrived at the physical warehouse
+    // Payment: refund if VNPay has been paid
     // ================================================================
     @Transactional
     /**
@@ -431,23 +431,23 @@ public class OrderService {
 
         if (!order.canAdminConfirmReturn())
             throw new BusinessException(
-                    "Chỉ xác nhận hoàn hàng khi đơn đang RETURN_REQUESTED. "
-                            + "Trạng thái hiện tại: " + order.getOrderStatus().name());
+                    "Only confirm returns when the order is RETURN_REQUESTED."
+                            + "Current status:" + order.getOrderStatus().name());
 
         order.setOrderStatus(Orders.OrderStatus.RETURNED);
         order.setCancelledBy("ADMIN");
         order.setCancelledAt(LocalDateTime.now());
         orderRepository.save(order);
 
-        restoreStock(order, "Hoàn kho - hàng về sau return " + order.getOrderCode());
+        restoreStock(order, "Restock - returned goods later" + order.getOrderCode());
         handlePaymentOnCancel(order);
 
-        log.info("Admin xác nhận hàng về kho, đơn {}", order.getOrderCode());
+        log.info("Admin confirms goods arriving at warehouse, order {}", order.getOrderCode());
         return toResponse(order);
     }
 
     // ================================================================
-    // ADMIN — CẬP NHẬT TRẠNG THÁI THÔNG THƯỜNG
+    // ADMIN — NORMAL STATUS UPDATE
     // PENDING → CONFIRMED → SHIPPING → DELIVERED
     // ================================================================
     @Transactional
@@ -461,23 +461,23 @@ public class OrderService {
     public OrderResponse updateStatus(Long orderId, UpdateOrderStatusRequest req) {
         Orders order = findOrder(orderId);
 
-        // Các trạng thái đặc biệt phải dùng endpoint riêng
+        // Special states must use separate endpoints
         if (req.status() == Orders.OrderStatus.CANCELLED
                 || req.status() == Orders.OrderStatus.CANCEL_REQUESTED
                 || req.status() == Orders.OrderStatus.RETURN_REQUESTED
                 || req.status() == Orders.OrderStatus.RETURNED)
             throw new BusinessException(
-                    "Trạng thái '" + req.status() + "' phải dùng endpoint riêng. "
-                            + "Xem API docs để biết thêm");
+                    "Status '" + req.status() + "' must use a separate endpoint."
+                            + "See API docs for more");
 
         if (!order.canTransitionTo(req.status()))
             throw new BusinessException(
-                    "Không thể chuyển từ '" + order.getOrderStatus()
+                    "Cannot convert from '" + order.getOrderStatus()
                             + "' sang '" + req.status() + "'");
 
         order.setOrderStatus(req.status());
 
-        // SHIPPING → tạo Shipment nếu chưa có
+        // SHIPPING → create Shipment if you don't have one
         if (req.status() == Orders.OrderStatus.SHIPPING
                 && shipmentRepository.findByOrderId(orderId).isEmpty()) {
             shipmentRepository.save(Shipment.builder()
@@ -487,7 +487,7 @@ public class OrderService {
                     .build());
         }
 
-        // DELIVERED → thu tiền COD + cập nhật Shipment
+        // DELIVERED → collect COD + update Shipment
         if (req.status() == Orders.OrderStatus.DELIVERED) {
             paymentRepository.findByOrderOrderId(orderId).ifPresent(p -> {
                 if (p.getPaymentMethod() == Payments.PaymentMethod.COD) {
@@ -513,8 +513,8 @@ public class OrderService {
     // ================================================================
 
     /**
-     * Hoàn kho — dùng chung cho mọi tình huống huỷ/hoàn.
-     * Chỉ gọi khi hàng chắc chắn chưa/không đến tay user.
+     * Refund — used for all cancellation/refund situations.
+     * Only call when the goods are sure not/will not arrive to the user.
      */
     private void restoreStock(Orders order, String logNote) {
         for (OrderItems item : order.getOrderItems()) {
@@ -529,7 +529,7 @@ public class OrderService {
                         inv.setLastUpdated(LocalDateTime.now());
                         inventoryRepository.save(inv);
 
-                        // Nếu trước đó hết hàng → chuyển lại ACTIVE
+                        // If previously out of stock → switch back to ACTIVE
                         if (prev == 0)
                             item.getMedicines().setStatus(Medicines.Status.ACTIVE);
 
@@ -547,22 +547,22 @@ public class OrderService {
     }
 
     /**
-     * Xử lý payment khi huỷ/hoàn đơn.
+     * Processing payment when canceling/refunding orders.
      *
-     * COD PENDING  → set FAILED (chưa thu tiền, không cần làm gì thêm)
-     * VNPay SUCCESS → set REFUNDED (cần admin hoàn tiền thực tế qua VNPay portal)
-     * VNPay PENDING → set FAILED (chưa thanh toán)
+     * COD PENDING → set FAILED (no payment yet, no need to do anything else)
+     * VNPay SUCCESS → set REFUNDED (need admin to actually refund via VNPay portal)
+     * VNPay PENDING → set FAILED (unpaid)
      */
     private void handlePaymentOnCancel(Orders order) {
         paymentRepository.findByOrderOrderId(order.getOrderId()).ifPresent(p -> {
             if (p.getStatus() == Payments.PaymentStatus.SUCCESS) {
-                // Đã thu tiền → đánh dấu cần hoàn
-                // Production: gọi VNPay Refund API tại đây
+                // Money collected → mark as needing refund
+                // Production: call VNPay Refund API here
                 p.setStatus(Payments.PaymentStatus.REFUNDED);
                 paymentRepository.save(p);
                 order.setPaymentStatus(Orders.PaymentStatus.REFUNDED);
                 orderRepository.save(order);
-                log.info("Đơn {} đã thanh toán → cần refund", order.getOrderCode());
+                log.info("Order {} has been paid → need refund", order.getOrderCode());
             } else if (p.getStatus() == Payments.PaymentStatus.PENDING) {
                 p.setStatus(Payments.PaymentStatus.FAILED);
                 paymentRepository.save(p);
@@ -597,7 +597,7 @@ public class OrderService {
                             .previousQuantity(prev)
                             .newQuantity(next)
                             .referenceId(orderId)
-                            .note("Bán hàng - đơn " + code)
+                            .note("Sales - orders" + code)
                             .build());
                 });
     }

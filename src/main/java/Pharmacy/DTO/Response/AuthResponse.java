@@ -20,6 +20,6 @@ public record AuthResponse(
             String fullName,
             String email,
             String phone,
-            String role         // CUSTOMER / PHARMACIST / ADMIN — client dùng để ẩn/hiện menu
+            String role         // CUSTOMER / PHARMACIST / ADMIN — client used to hide/show menu
     ) {}
 }

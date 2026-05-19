@@ -35,7 +35,7 @@ public class PaymentService {
     private final VNPayUtil vnPayUtil;
 
     // ================================================================
-    // TẠO URL THANH TOÁN VNPAY
+    // CREATE VNPAY PAYMENT URL
     // ================================================================
     /**
      * Creates a new vnpay url.
@@ -46,24 +46,24 @@ public class PaymentService {
      */
     public String createVNPayUrl(Long orderId, String clientIp) {
         Orders order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng không tồn tại"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order does not exist"));
 
         if (order.getPaymentStatus() == Orders.PaymentStatus.PAID)
-            throw new BusinessException("Đơn hàng này đã được thanh toán");
+            throw new BusinessException("This order has been paid");
 
         if (order.getOrderStatus() == Orders.OrderStatus.CANCELLED)
-            throw new BusinessException("Đơn hàng đã bị huỷ");
+            throw new BusinessException("Order has been cancelled");
 
         Payments payment = paymentRepository.findByOrderOrderId(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông tin thanh toán"));
+                .orElseThrow(() -> new ResourceNotFoundException("Payment information not found"));
 
         if (payment.getPaymentMethod() != Payments.PaymentMethod.VNPAY)
-            throw new BusinessException("Đơn hàng này không dùng thanh toán VNPay");
+            throw new BusinessException("This order does not use VNPay payment");
 
-        // Tăng attempt_count — theo dõi user thử bao nhiêu lần
+        // Increase attempt_count — track how many times the user tries
         payment.setAttemptCount(payment.getAttemptCount() + 1);
 
-        // Set expired_at: link VNPay hết hạn sau 15 phút
+        // Set expired_at: VNPay link expires after 15 minutes
         payment.setExpiredAt(LocalDateTime.now().plusMinutes(15));
         paymentRepository.save(payment);
 
@@ -74,11 +74,11 @@ public class PaymentService {
     }
 
     // ================================================================
-    // XỬ LÝ RETURN URL — VNPay redirect user về sau khi thanh toán
+    // HANDLING RETURN URL — VNPay redirects users back after payment
     //
-    // Lưu ý: return-url chỉ dùng để hiển thị kết quả cho user
-    // KHÔNG nên cập nhật DB dựa vào return-url vì user có thể giả mạo
-    // Việc cập nhật DB thực sự nên làm ở IPN (bên dưới)
+    // Note: return-url is only used to display results to the user
+    // DO NOT update the DB based on return-url because the user can fake it
+    // Updating the DB should really be done in the IPN (below).
     // ================================================================
     @Transactional
     /**
@@ -88,19 +88,19 @@ public class PaymentService {
      * @return the PaymentResponse result
      */
     public PaymentResponse handleReturn(Map<String, String> params) {
-        // Verify chữ ký trước tiên
+        // Verify the signature first
         if (!vnPayUtil.verifyCallback(params))
-            throw new BusinessException("Chữ ký không hợp lệ");
+            throw new BusinessException("Invalid signature");
 
         Long orderId = vnPayUtil.extractOrderId(params);
         if (orderId == null)
-            throw new BusinessException("Không xác định được đơn hàng");
+            throw new BusinessException("Order cannot be determined");
 
         Payments payment = paymentRepository.findByOrderOrderId(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thanh toán"));
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
 
-        // Chỉ log ở return-url, không cập nhật DB
-        // DB sẽ được cập nhật ở IPN (handleIPN bên dưới)
+        // Only logs at return-url, does not update DB
+        // DB will be updated at IPN (handleIPN below)
         boolean success = vnPayUtil.isSuccess(params);
         log.info("VNPay return: orderId={}, success={}, txn={}",
                 orderId, success, params.get("vnp_TransactionNo"));
@@ -109,10 +109,10 @@ public class PaymentService {
     }
 
     // ================================================================
-    // XỬ LÝ IPN — VNPay gọi server-to-server để notify kết quả cuối
+    // IPN PROCESSING — VNPay calls server-to-server to notify the final result
     //
-    // Đây mới là nơi cập nhật DB chính xác
-    // IPN không qua browser → user không can thiệp được
+    // This is the correct place to update the DB
+    // IPN does not go through the browser → the user cannot intervene
     // ================================================================
     @Transactional
     /**
@@ -122,58 +122,58 @@ public class PaymentService {
      * @return the String result
      */
     public String handleIPN(Map<String, String> params) {
-        // 1. Verify chữ ký
+        // 1. Verify signature
         if (!vnPayUtil.verifyCallback(params)) {
-            log.warn("VNPay IPN: chữ ký không hợp lệ, params={}", params);
+            log.warn("VNPay IPN: invalid signature, params={}", params);
             return "{'RspCode':'97','Message':'Invalid Checksum'}";
         }
 
-        // 2. Lấy orderId
+        // 2. Get orderId
         Long orderId = vnPayUtil.extractOrderId(params);
         if (orderId == null) {
             return "{'RspCode':'01','Message':'Order not found'}";
         }
 
-        // 3. Tìm payment trong DB
+        // 3. Find payment in DB
         Payments payment = paymentRepository.findByOrderOrderId(orderId).orElse(null);
         if (payment == null) {
             return "{'RspCode':'01','Message':'Order not found'}";
         }
 
-        // 4. Kiểm tra đã xử lý chưa — tránh xử lý 2 lần
+        // 4. Check if it has been processed yet — avoid processing twice
         if (payment.getStatus() != Payments.PaymentStatus.PENDING) {
-            log.info("VNPay IPN: orderId={} đã được xử lý rồi", orderId);
+            log.info("VNPay IPN: orderId={} has been processed", orderId);
             return "{'RspCode':'02','Message':'Order already confirmed'}";
         }
 
-        // 4. Kiểm tra link đã hết hạn chưa
+        // 4. Check if the link has expired
         if (payment.getExpiredAt() != null
                 && payment.getExpiredAt().isBefore(LocalDateTime.now())) {
-            log.warn("VNPay IPN: payment link đã hết hạn, orderId={}", orderId);
+            log.warn("VNPay IPN: payment link has expired, orderId={}", orderId);
             return "{'RspCode':'99','Message':'Payment link expired'}";
         }
 
-        // 5. Kiểm tra số tiền khớp không
+        // 5. Check if the amount matches
         long expectedAmount = payment.getAmount().longValue() * 100;
         long receivedAmount = Long.parseLong(params.getOrDefault("vnp_Amount", "0"));
         if (expectedAmount != receivedAmount) {
-            log.warn("VNPay IPN: số tiền không khớp. Expected={}, Received={}",
+            log.warn("VNPay IPN: amount does not match. Expected={}, Received={}",
                     expectedAmount, receivedAmount);
             return "{'RspCode':'04','Message':'Invalid Amount'}";
         }
 
-        // 6. Lưu raw callback trước khi xử lý — debug sau này dễ hơn
+        // 6. Save the raw callback before processing — easier to debug later
         try {
             payment.setRawCallback(new com.fasterxml.jackson.databind.ObjectMapper()
                     .writeValueAsString(params));
         } catch (Exception e) {
-            log.warn("Không thể serialize raw callback: {}", e.getMessage());
+            log.warn("Unable to serialize raw callback: {}", e.getMessage());
         }
 
-        // 7. Cập nhật DB theo kết quả
+        // 7. Update DB according to results
         Orders order = payment.getOrders();
         if (vnPayUtil.isSuccess(params)) {
-            // Thanh toán thành công
+            // Payment successful
             payment.setStatus(Payments.PaymentStatus.SUCCESS);
             payment.setTransactionCode(vnPayUtil.getTransactionCode(params));
             payment.setPaidAt(LocalDateTime.now());
@@ -183,7 +183,7 @@ public class PaymentService {
             order.setOrderStatus(Orders.OrderStatus.CONFIRMED);
             orderRepository.save(order);
 
-            // Tạo shipment khi đã xác nhận thanh toán
+            // Create shipment once payment has been confirmed
             if (shipmentRepository.findByOrderId(orderId).isEmpty()) {
                 shipmentRepository.save(Shipment.builder()
                         .orders(order)
@@ -191,25 +191,25 @@ public class PaymentService {
                         .build());
             }
 
-            log.info("VNPay IPN: thanh toán thành công orderId={}", orderId);
+            log.info("VNPay IPN: successful payment orderId={}", orderId);
         } else {
-            // Thanh toán thất bại
+            // Payment failed
             payment.setStatus(Payments.PaymentStatus.FAILED);
             paymentRepository.save(payment);
 
             order.setPaymentStatus(Orders.PaymentStatus.FAILED);
             orderRepository.save(order);
 
-            log.info("VNPay IPN: thanh toán thất bại orderId={}, code={}",
+            log.info("VNPay IPN: payment failed orderId={}, code={}",
                     orderId, params.get("vnp_ResponseCode"));
         }
 
-        // VNPay yêu cầu trả về đúng format này để biết server đã nhận
+        // VNPay requires this exact format to be returned to know the server has received it
         return "{'RspCode':'00','Message':'Confirm Success'}";
     }
 
     // ================================================================
-    // LẤY THÔNG TIN THANH TOÁN CỦA ĐƠN
+    // GET APPLICANT PAYMENT INFORMATION
     // ================================================================
     @Transactional(readOnly = true)
     /**
@@ -220,7 +220,7 @@ public class PaymentService {
      */
     public PaymentResponse getByOrderId(Long orderId) {
         Payments payment = paymentRepository.findByOrderOrderId(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thanh toán"));
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
         return toResponse(payment);
     }
 

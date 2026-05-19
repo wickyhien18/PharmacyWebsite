@@ -32,7 +32,7 @@ public class CartService {
 
 
     // ================================================================
-    // LẤY GIỎ HÀNG — tạo mới nếu chưa có
+    // GET A CART — create a new one if you don't have one
     // ================================================================
     @Transactional
     /**
@@ -48,7 +48,7 @@ public class CartService {
 
 
     // ================================================================
-    // THÊM VÀO GIỎ HÀNG
+    // ADD TO CART
     // ================================================================
     @Transactional
     /**
@@ -66,7 +66,7 @@ public class CartService {
         if (medicine.getStatus() == Medicines.Status.INACTIVE)
             throw new BusinessException("This medicine is no longer being sold");
 
-        // Kiểm tra tồn kho
+        // Check inventory
         int stock = inventoryRepository.findByMedicineId(medicine.getMedicineId())
                 .map(Inventory::getQuantity).orElse(0);
         if (stock == 0)
@@ -74,7 +74,7 @@ public class CartService {
 
         Carts cart = getOrCreateCart(user);
 
-        // Nếu đã có item này → cộng dồn số lượng
+        // If you already have this item → add up the quantity
         cartItemRepository
                 .findByCartIdAndMedicineId(cart.getCartId(), medicine.getMedicineId())
                 .ifPresentOrElse(
@@ -104,7 +104,7 @@ public class CartService {
     }
 
     // ================================================================
-    // CẬP NHẬT SỐ LƯỢNG — quantity = 0 → xoá item
+    // UPDATE QUANTITY — quantity = 0 → delete item
     // ================================================================
     @Transactional
     /**
@@ -126,7 +126,7 @@ public class CartService {
             cart.getCartItems().remove(item);
             cartItemRepository.delete(item);
         } else {
-            // Kiểm tra tồn kho trước khi cập nhật
+            // Check inventory before updating
             int stock = inventoryRepository
                     .findByMedicineId(medicineId)
                     .map(Inventory::getQuantity).orElse(0);
@@ -141,7 +141,7 @@ public class CartService {
     }
 
     // ================================================================
-    // XOÁ 1 ITEM
+    // DELETE 1 ITEM
     // ================================================================
     @Transactional
     /**
@@ -165,7 +165,7 @@ public class CartService {
     }
 
     // ================================================================
-    // XOÁ TOÀN BỘ GIỎ HÀNG — gọi sau khi đặt hàng thành công
+    // CLEAR ENTIRE CART — call after successful order
     // ================================================================
     @Transactional
     /**

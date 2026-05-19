@@ -100,10 +100,10 @@ public class MedicineService {
      */
     public MedicineResponse create(CreateUpdateMedicineRequest req) {
 
-        // Tự sinh slug từ tên nếu bị trùng thì thêm số
+        // Automatically generate slug from name, if duplicate, add number
         String slug = resolveSlug(req.medicinesName());
 
-        // Validate category + manufacturer tồn tại
+        // Validate category + manufacturer exists
         Categories category = null;
         if (req.categoryId() != null) {
             category = categoryRepository.findById(req.categoryId())
@@ -130,8 +130,8 @@ public class MedicineService {
 
         medicineRepository.save(medicine);
 
-        // Tạo inventory với quantity = 0 khi tạo thuốc mới
-        // Nhập kho sau thông qua InventoryService
+        // Create inventory with quantity = 0 when creating new medicine
+        // Import inventory later through InventoryService
         Inventory inventory = Inventory.builder()
                 .medicines(medicine)
                 .quantity(0)
@@ -204,7 +204,7 @@ public class MedicineService {
      * @return the MedicineResponse result
      */
     public MedicineResponse toResponse(Medicines m) {
-        // Lấy tồn kho từ bảng inventory
+        // Get inventory from the inventory table
         Integer stock = inventoryRepository
                 .findByMedicineId(m.getMedicineId())
                 .map(Inventory::getQuantity)
@@ -240,7 +240,7 @@ public class MedicineService {
         );
     }
 
-    // Chuyển tiếng Việt sang slug: "Vitamin C 1000mg" → "vitamin-c-1000mg"
+    // Convert Vietnamese to slug: "Vitamin C 1000mg" → "vitamin-c-1000mg"
     /**
      * Generate slug.
      *
@@ -249,20 +249,20 @@ public class MedicineService {
      */
     private String generateSlug(String input) {
         //Split Signed character into 2 characters
-        // á -> a + '
+        // a -> a + '
         String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
         String slug = Pattern.compile("\\p{InCombiningDiacriticalMarks}+")
                 .matcher(normalized).replaceAll("")
                 //Delete sign from signed character
                 .toLowerCase()
-                .replaceAll("đ", "d")
+                .replaceAll("D", "d")
                 .replaceAll("[^a-z0-9\\s-]", "")
                 .trim()
                 .replaceAll("\\s+", "-");
         return slug;
     }
 
-    // Nếu slug trùng thì tự thêm số: "vitamin-c" → "vitamin-c-2" → "vitamin-c-3"
+    // If the slug is the same, add the number yourself: "vitamin-c" → "vitamin-c-2" → "vitamin-c-3"
     /**
      * Resolve slug.
      *

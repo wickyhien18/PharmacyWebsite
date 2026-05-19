@@ -24,7 +24,7 @@ public record CartResponse(
             String unit,
             Integer quantity,
             BigDecimal subtotal,
-            Integer stockQuantity   // Để frontend kiểm tra đủ hàng không
+            Integer stockQuantity   // Let the frontend check if there are enough items
     ) {
     }
 }

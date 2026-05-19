@@ -20,7 +20,7 @@ public interface MedicineRepository extends JpaRepository<Medicines,Long> {
     Optional<Medicines> findByMedicineSlugAndDeletedAtIsNull(String slug);
     boolean existsByMedicineSlug(String slug);
 
-    // Tìm kiếm + filter — JPQL đơn giản, dễ giải thích trong phỏng vấn
+    // Search + filter — JPQL is simple, easy to explain in interviews
     @Query("""
            SELECT m FROM Medicines m
            WHERE m.deletedAt IS NULL

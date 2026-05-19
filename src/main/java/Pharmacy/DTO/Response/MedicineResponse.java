@@ -17,7 +17,7 @@ public record MedicineResponse(
         String              unit,
         String              status,
         LocalDate           expireDate,
-        Integer             stockQuantity,   // Lấy từ bảng inventory
+        Integer             stockQuantity,   // Get it from the inventory table
         CategoryResponse    category,
         ManufacturerResponse manufacturer,
         LocalDateTime       createdAt

@@ -53,7 +53,7 @@ public class Payments {
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal amount;
 
-    // Mã giao dịch từ VNPay/Momo — null nếu là COD
+    // Transaction code from VNPay/Momo — null if COD
     @Column(name = "transaction_code", length = 255)
     private String transactionCode;
 
@@ -72,15 +72,15 @@ public class Payments {
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
 
-    // Link thanh toán hết hạn sau 15 phút — phải tạo link mới
+    // The payment link expires after 15 minutes — a new link must be created
     @Column(name = "expired_at")
     private LocalDateTime expiredAt;
 
-    // Lưu nguyên payload VNPay trả về — debug tranh chấp với ngân hàng
+    // Save the returned payload VNPay — debug disputes with banks
     @Column(name = "raw_callback", columnDefinition = "JSON")
     private String rawCallback;
 
-    // Đếm số lần user thử thanh toán lại
+    // Count the number of times the user tries to pay again
     @Column(name = "attempt_count")
     @Builder.Default
     private Integer attemptCount = 0;

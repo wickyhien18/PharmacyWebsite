@@ -31,63 +31,63 @@ public class PaymentController {
 
     // ================================================================
     // POST /api/payment/vnpay/create/{orderId}
-    // Client gọi để lấy URL thanh toán → redirect sang VNPay
+    // Client calls to get payment URL → redirect to VNPay
     // ================================================================
     @PostMapping("/vnpay/create/{orderId}")
-    @Operation(summary = "Tạo URL thanh toán VNPay")
+    @Operation(summary = "Create VNPay payment URL")
     public ResponseEntity<ApiResponse<String>> createPaymentUrl(
             @PathVariable Long orderId,
             HttpServletRequest request) {
 
-        // Lấy IP thật của client — VNPay yêu cầu truyền ip vào params
+        // Get the client's real IP — VNPay requires passing the ip into params
         String clientIp = getClientIp(request);
         String paymentUrl = paymentService.createVNPayUrl(orderId, clientIp);
 
-        return ResponseEntity.ok(ApiResponse.ok("Tạo URL thành công", paymentUrl));
+        return ResponseEntity.ok(ApiResponse.ok("URL generation successful", paymentUrl));
     }
 
     // ================================================================
     // GET /api/payment/vnpay-return
-    // VNPay redirect user về đây sau khi thanh toán xong
-    // Chỉ dùng để hiển thị kết quả — không cập nhật DB ở đây
+    // VNPay redirects users here after payment is complete
+    // Only used to display results — no DB updates here
     // ================================================================
     @GetMapping("/vnpay-return")
-    @Operation(summary = "VNPay redirect về sau thanh toán (return URL)")
+    @Operation(summary = "VNPay redirects to later payment (return URL)")
     public ResponseEntity<ApiResponse<PaymentResponse>> vnpayReturn(
             @RequestParam Map<String, String> params) {
 
-        // handleReturn chỉ verify chữ ký và log
-        // Việc cập nhật DB thực sự do IPN xử lý
+        // handleReturn only verifies the signature and log
+        // The actual DB updating is handled by IPN
         PaymentResponse response = paymentService.handleReturn(params);
         String message = "00".equals(params.get("vnp_ResponseCode"))
-                ? "Thanh toán thành công"
-                : "Thanh toán thất bại";
+                ? "Payment successful"
+                : "Payment failed";
 
         return ResponseEntity.ok(ApiResponse.ok(message, response));
     }
 
     // ================================================================
     // GET /api/payment/vnpay-ipn
-    // VNPay gọi trực tiếp server-to-server để notify kết quả cuối cùng
-    // Phải trả về đúng format JSON VNPay yêu cầu
-    // Endpoint này KHÔNG cần JWT vì VNPay gọi trực tiếp
+    // VNPay calls server-to-server directly to notify the final result
+    // Must return the correct JSON format required by VNPay
+    // This endpoint does NOT need JWT because VNPay calls directly
     // ================================================================
     @GetMapping("/vnpay-ipn")
-    @Operation(summary = "VNPay IPN - server notify kết quả (không cần token)")
+    @Operation(summary = "VNPay IPN - server notify results (no token needed)")
     public ResponseEntity<String> vnpayIPN(
             @RequestParam Map<String, String> params) {
 
-        // handleIPN verify chữ ký + cập nhật DB + trả string VNPay yêu cầu
+        // handleIPN verify signature + update DB + return required VNPay string
         String result = paymentService.handleIPN(params);
         return ResponseEntity.ok(result);
     }
 
     // ================================================================
     // GET /api/payment/orders/{orderId}
-    // Xem thông tin thanh toán của đơn hàng
+    // View order payment information
     // ================================================================
     @GetMapping("/orders/{orderId}")
-    @Operation(summary = "Xem thông tin thanh toán của đơn hàng")
+    @Operation(summary = "View order payment information")
     public ResponseEntity<ApiResponse<PaymentResponse>> getByOrder(
             @PathVariable Long orderId,
             @AuthenticationPrincipal Users user) {
@@ -96,7 +96,7 @@ public class PaymentController {
     }
 
     // ================================================================
-    // PRIVATE — lấy IP thật của client (qua proxy/nginx)
+    // PRIVATE — get the real IP of the client (via proxy/nginx)
     // ================================================================
     /**
      * Retrieves client ip.
@@ -112,8 +112,8 @@ public class PaymentController {
         if (ip == null || ip.isBlank() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
         }
-        // X-Forwarded-For có thể chứa nhiều IP: "client, proxy1, proxy2"
-        // Lấy IP đầu tiên
+        // X-Forwarded-For can contain multiple IPs: "client, proxy1, proxy2"
+        // Get IP first
         if (ip != null && ip.contains(",")) {
             ip = ip.split(",")[0].trim();
         }

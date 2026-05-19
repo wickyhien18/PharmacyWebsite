@@ -41,7 +41,7 @@ public class InventoryController {
     @Operation(summary = "Import")
     public ResponseEntity<ApiResponse<InventoryResponse>> importStock(
             @Valid @RequestBody ImportStockRequest request) {
-        return ResponseEntity.ok(ApiResponse.ok("Nhập kho thành công",
+        return ResponseEntity.ok(ApiResponse.ok("Imported warehouse successfully",
                 inventoryService.importStock(request)));
     }
 

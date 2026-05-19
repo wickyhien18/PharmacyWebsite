@@ -80,7 +80,7 @@ public class Orders {
     private String cancelledBy;          // USER / ADMIN
 
     @Column(name = "cancelled_reason", length = 500)
-    private String cancelledReason;      // Lý do huỷ / hoàn
+    private String cancelledReason;      // Reason for cancellation / refund
 
     @Column(name = "cancelled_at")
     private LocalDateTime cancelledAt;
@@ -101,7 +101,7 @@ public class Orders {
     // BUSINESS RULES
     // ================================================================
 
-    // User tự huỷ ngay — chỉ khi PENDING
+    // The user self-destructs immediately — only when PENDING
     /**
      * Can user cancel directly.
      *
@@ -111,8 +111,8 @@ public class Orders {
         return this.orderStatus == OrderStatus.PENDING;
     }
 
-    // User gửi yêu cầu huỷ — chỉ khi CONFIRMED
-    // Admin sẽ duyệt sau
+    // User submits cancellation request — only if CONFIRMED
+    // Admin will approve later
     /**
      * Can user request cancel.
      *
@@ -122,7 +122,7 @@ public class Orders {
         return this.orderStatus == OrderStatus.CONFIRMED;
     }
 
-    // User gửi yêu cầu hoàn hàng — chỉ khi SHIPPING
+    // User submits a return request — only when SHIPPING
     /**
      * Can user request return.
      *
@@ -132,7 +132,7 @@ public class Orders {
         return this.orderStatus == OrderStatus.SHIPPING;
     }
 
-    // Admin duyệt yêu cầu huỷ — chỉ khi CANCEL_REQUESTED
+    // Admin approves cancellation request — only if CANCEL_REQUSTED
     /**
      * Can admin approve cancel.
      *
@@ -142,7 +142,7 @@ public class Orders {
         return this.orderStatus == OrderStatus.CANCEL_REQUESTED;
     }
 
-    // Admin từ chối yêu cầu huỷ — quay về CONFIRMED
+    // Admin refuses cancellation request — return to CONFIRMED
     /**
      * Can admin reject cancel.
      *
@@ -152,7 +152,7 @@ public class Orders {
         return this.orderStatus == OrderStatus.CANCEL_REQUESTED;
     }
 
-    // Admin xác nhận hàng đã về kho
+    // Admin confirmed that the goods have arrived in the warehouse
     /**
      * Can admin confirm return.
      *
@@ -162,7 +162,7 @@ public class Orders {
         return this.orderStatus == OrderStatus.RETURN_REQUESTED;
     }
 
-    // State machine chuyển trạng thái thông thường
+    // State machine transitions to normal state
     /**
      * Can transition to.
      *
@@ -177,8 +177,8 @@ public class Orders {
                     || next == OrderStatus.CANCEL_REQUESTED;
             case SHIPPING          -> next == OrderStatus.DELIVERED
                     || next == OrderStatus.RETURN_REQUESTED;
-            case CANCEL_REQUESTED  -> next == OrderStatus.CANCELLED    // Admin duyệt
-                    || next == OrderStatus.CONFIRMED;   // Admin từ chối
+            case CANCEL_REQUESTED  -> next == OrderStatus.CANCELLED    // Admin approved
+                    || next == OrderStatus.CONFIRMED;   // Admin refused
             case RETURN_REQUESTED  -> next == OrderStatus.RETURNED;
             default                -> false;
         };
