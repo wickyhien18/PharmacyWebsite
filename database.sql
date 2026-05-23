@@ -1,258 +1,297 @@
-CREATE DATABASE IF NOT EXISTS PharmacyDB
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
+-- ================================================================
+-- PharmacyDB — PostgreSQL schema
+-- ================================================================
 
-USE PharmacyDB;
+CREATE DATABASE PharmacyDB
+    ENCODING 'UTF8'
+    LC_COLLATE = 'en_US.UTF-8'
+    LC_CTYPE   = 'en_US.UTF-8';
 
+\c PharmacyDB;
+
+-- ----------------------------------------------------------------
+-- Custom ENUM types (PostgreSQL không inline ENUM trong CREATE TABLE)
+-- ----------------------------------------------------------------
+CREATE TYPE medicine_status   AS ENUM ('ACTIVE', 'INACTIVE', 'OUT_OF_STOCK');
+CREATE TYPE change_type_enum  AS ENUM ('IMPORT', 'EXPORT', 'ADJUST');
+CREATE TYPE order_status_enum AS ENUM (
+    'PENDING',           -- Vừa đặt, chờ xác nhận
+    'CONFIRMED',         -- Đã xác nhận, chuẩn bị hàng
+    'SHIPPING',          -- Đang giao
+    'DELIVERED',         -- Giao thành công
+    'CANCEL_REQUESTED',  -- User yêu cầu huỷ khi đang CONFIRMED
+    'CANCELLED',         -- Đã huỷ
+    'RETURN_REQUESTED',  -- User yêu cầu hoàn hàng khi đang SHIPPING
+    'RETURNED'           -- Hàng đã về kho → hoàn tiền + hoàn kho
+);
+CREATE TYPE payment_status_enum AS ENUM (
+    'PENDING', -- Chờ thanh toán
+    'PAID', -- Đã thanh toán
+    'FAILED', -- Thanh toán thất bại
+    'REFUNDED' -- Đã hoàn tiền
+);
+CREATE TYPE payment_method_enum AS ENUM ('COD', 'VNPAY', 'MOMO');
+CREATE TYPE txn_status_enum     AS ENUM (
+     'PENDING',             -- Chờ thanh toán
+     'SUCCESS',             -- Thanh toán thành công
+     'FAILED',              -- Thất bại / bị huỷ
+     'REFUNDED'             -- Đã hoàn tiền
+);
+CREATE TYPE shipment_status_enum AS ENUM ('PENDING', 'SHIPPING', 'DELIVERED', 'FAILED');
+
+-- ----------------------------------------------------------------
+-- 1. ROLES
+-- ----------------------------------------------------------------
 CREATE TABLE roles (
-                       role_id   BIGINT       NOT NULL AUTO_INCREMENT,
-                       role_name VARCHAR(100) NOT NULL UNIQUE,
-                       PRIMARY KEY (role_id)
+    role_id   BIGSERIAL    NOT NULL,
+    role_name VARCHAR(100) NOT NULL UNIQUE,
+    PRIMARY KEY (role_id)
 );
 
 -- ----------------------------------------------------------------
 -- 2. USERS
 -- ----------------------------------------------------------------
 CREATE TABLE users (
-                       user_id       BIGINT       NOT NULL AUTO_INCREMENT,
-                       user_name     VARCHAR(100) NOT NULL UNIQUE,
-                       password      VARCHAR(255) NOT NULL,
-                       full_name     VARCHAR(255) NOT NULL,
-                       email         VARCHAR(255) NOT NULL UNIQUE,
-                       phone         VARCHAR(20)  NOT NULL UNIQUE,
-                       role_id       BIGINT,
-                       is_active     TINYINT(1)   DEFAULT 1,
-                       created_at    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-                       updated_at    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                       last_activity TIMESTAMP    NULL,
-                       deleted_at    TIMESTAMP    NULL,
-                       PRIMARY KEY (user_id),
-                       CONSTRAINT fk_user_role
-                           FOREIGN KEY (role_id) REFERENCES roles(role_id) ON DELETE SET NULL
+    user_id       BIGSERIAL    NOT NULL,
+    user_name     VARCHAR(100) NOT NULL UNIQUE,
+    password      VARCHAR(255) NOT NULL,
+    full_name     VARCHAR(255) NOT NULL,
+    email         VARCHAR(255) NOT NULL UNIQUE,
+    phone         VARCHAR(20)  NOT NULL UNIQUE,
+    role_id       BIGINT,
+    is_active     BOOLEAN      DEFAULT TRUE,
+    created_at    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    updated_at    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    last_activity TIMESTAMP    NULL,
+    deleted_at    TIMESTAMP    NULL,
+    PRIMARY KEY (user_id),
+    CONSTRAINT fk_user_role
+        FOREIGN KEY (role_id) REFERENCES roles(role_id) ON DELETE SET NULL
 );
 
+-- Trigger thay thế ON UPDATE CURRENT_TIMESTAMP của MySQL
+CREATE OR REPLACE FUNCTION set_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_users_updated_at
+    BEFORE UPDATE ON users
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
 -- ----------------------------------------------------------------
--- 3. REFRESH_TOKENS — lưu random string, không phải JWT
+-- 3. REFRESH_TOKENS
 -- ----------------------------------------------------------------
 CREATE TABLE refresh_tokens (
-                                id         BIGINT       NOT NULL AUTO_INCREMENT,
-                                token      VARCHAR(500) NOT NULL UNIQUE,
-                                user_id    BIGINT       NOT NULL,
-                                expire_at  TIMESTAMP    NULL,
-                                created_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-                                PRIMARY KEY (id),
-                                FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    id         BIGSERIAL    NOT NULL,
+    token      VARCHAR(500) NOT NULL UNIQUE,
+    user_id    BIGINT       NOT NULL,
+    expire_at  TIMESTAMP    NULL,
+    created_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 -- ----------------------------------------------------------------
 -- 4. CATEGORIES
 -- ----------------------------------------------------------------
 CREATE TABLE categories (
-                            category_id BIGINT       NOT NULL AUTO_INCREMENT,
-                            name        VARCHAR(255) NOT NULL,
-                            slug        VARCHAR(255) NOT NULL UNIQUE,
-                            PRIMARY KEY (category_id)
+    category_id BIGSERIAL    NOT NULL,
+    name        VARCHAR(255) NOT NULL,
+    slug        VARCHAR(255) NOT NULL UNIQUE,
+    PRIMARY KEY (category_id)
 );
 
 -- ----------------------------------------------------------------
 -- 5. MANUFACTURERS
 -- ----------------------------------------------------------------
 CREATE TABLE manufacturers (
-                               manufacturer_id BIGINT       NOT NULL AUTO_INCREMENT,
-                               name            VARCHAR(255) NOT NULL,
-                               country         VARCHAR(255) NULL,
-                               PRIMARY KEY (manufacturer_id)
+    manufacturer_id BIGSERIAL    NOT NULL,
+    name            VARCHAR(255) NOT NULL,
+    country         VARCHAR(255) NULL,
+    PRIMARY KEY (manufacturer_id)
 );
 
 -- ----------------------------------------------------------------
 -- 6. MEDICINES
 -- ----------------------------------------------------------------
 CREATE TABLE medicines (
-                           medicine_id     BIGINT        NOT NULL AUTO_INCREMENT,
-                           name            VARCHAR(500)  NOT NULL,
-                           slug            VARCHAR(520)  NOT NULL UNIQUE,
-                           image           VARCHAR(500)  NULL,
-                           description     TEXT          NULL,
-                           price           DECIMAL(15,2) NOT NULL,
-                           unit            VARCHAR(50)   DEFAULT 'Hộp',
-                           category_id     BIGINT        NULL,
-                           manufacturer_id BIGINT        NULL,
-                           status          ENUM('ACTIVE','INACTIVE','OUT_OF_STOCK') DEFAULT 'ACTIVE',
-                           expire_date     DATE          NULL,
-                           created_at      TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
-                           updated_at      TIMESTAMP     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                           deleted_at      TIMESTAMP     NULL,
-                           PRIMARY KEY (medicine_id),
-                           INDEX idx_category     (category_id),
-                           INDEX idx_manufacturer (manufacturer_id),
-                           FOREIGN KEY (category_id)     REFERENCES categories(category_id)       ON DELETE SET NULL,
-                           FOREIGN KEY (manufacturer_id) REFERENCES manufacturers(manufacturer_id) ON DELETE SET NULL
+    medicine_id     BIGSERIAL        NOT NULL,
+    name            VARCHAR(500)     NOT NULL,
+    slug            VARCHAR(520)     NOT NULL UNIQUE,
+    image           VARCHAR(500)     NULL,
+    description     TEXT             NULL,
+    price           NUMERIC(15,2)    NOT NULL,
+    unit            VARCHAR(50)      DEFAULT 'Hộp',
+    category_id     BIGINT           NULL,
+    manufacturer_id BIGINT           NULL,
+    status          medicine_status  DEFAULT 'ACTIVE',
+    expire_date     DATE             NULL,
+    created_at      TIMESTAMP        DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP        DEFAULT CURRENT_TIMESTAMP,
+    deleted_at      TIMESTAMP        NULL,
+    PRIMARY KEY (medicine_id),
+    FOREIGN KEY (category_id)     REFERENCES categories(category_id)       ON DELETE SET NULL,
+    FOREIGN KEY (manufacturer_id) REFERENCES manufacturers(manufacturer_id) ON DELETE SET NULL
 );
 
+CREATE INDEX idx_medicines_category     ON medicines(category_id);
+CREATE INDEX idx_medicines_manufacturer ON medicines(manufacturer_id);
+
+CREATE TRIGGER trg_medicines_updated_at
+    BEFORE UPDATE ON medicines
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
 -- ----------------------------------------------------------------
--- 7. INVENTORY — tồn kho hiện tại (1-1 với medicines)
+-- 7. INVENTORY
 -- ----------------------------------------------------------------
 CREATE TABLE inventory (
-                           inventory_id BIGINT    NOT NULL AUTO_INCREMENT,
-                           medicine_id  BIGINT    NOT NULL,
-                           quantity     INT       NOT NULL DEFAULT 0,
-                           last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                           PRIMARY KEY (inventory_id),
-                           UNIQUE KEY uk_inventory_medicine (medicine_id),
-                           FOREIGN KEY (medicine_id) REFERENCES medicines(medicine_id) ON DELETE CASCADE
+    inventory_id BIGSERIAL NOT NULL,
+    medicine_id  BIGINT    NOT NULL,
+    quantity     INT       NOT NULL DEFAULT 0,
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (inventory_id),
+    CONSTRAINT uk_inventory_medicine UNIQUE (medicine_id),
+    FOREIGN KEY (medicine_id) REFERENCES medicines(medicine_id) ON DELETE CASCADE
 );
 
+CREATE TRIGGER trg_inventory_last_updated
+    BEFORE UPDATE ON inventory
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
 -- ----------------------------------------------------------------
--- 8. INVENTORY_LOGS — lịch sử nhập/xuất/điều chỉnh kho
+-- 8. INVENTORY_LOGS
 -- ----------------------------------------------------------------
 CREATE TABLE inventory_logs (
-                                log_id            BIGINT      NOT NULL AUTO_INCREMENT,
-                                medicine_id       BIGINT      NOT NULL,
-                                change_type       ENUM('IMPORT','EXPORT','ADJUST') NOT NULL,
-                                quantity          INT         NOT NULL,
-                                previous_quantity INT         NOT NULL,
-                                new_quantity      INT         NOT NULL,
-                                reference_id      BIGINT      NULL,         -- order_id nếu là bán hàng
-                                note              VARCHAR(500) NULL,
-                                created_at        TIMESTAMP   DEFAULT CURRENT_TIMESTAMP,
-                                PRIMARY KEY (log_id),
-                                INDEX idx_medicine (medicine_id),
-                                INDEX idx_type     (change_type),
-                                FOREIGN KEY (medicine_id) REFERENCES medicines(medicine_id) ON DELETE CASCADE
+    log_id            BIGSERIAL        NOT NULL,
+    medicine_id       BIGINT           NOT NULL,
+    change_type       change_type_enum NOT NULL,
+    quantity          INT              NOT NULL,
+    previous_quantity INT              NOT NULL,
+    new_quantity      INT              NOT NULL,
+    reference_id      BIGINT           NULL,
+    note              VARCHAR(500)     NULL,
+    created_at        TIMESTAMP        DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (log_id),
+    FOREIGN KEY (medicine_id) REFERENCES medicines(medicine_id) ON DELETE CASCADE
 );
 
+CREATE INDEX idx_inventory_logs_medicine ON inventory_logs(medicine_id);
+CREATE INDEX idx_inventory_logs_type     ON inventory_logs(change_type);
+
 -- ----------------------------------------------------------------
--- 9. CARTS — header giỏ hàng (1 user 1 cart)
+-- 9. CARTS
 -- ----------------------------------------------------------------
 CREATE TABLE carts (
-                       cart_id    BIGINT    NOT NULL AUTO_INCREMENT,
-                       user_id    BIGINT    NULL,
-                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                       PRIMARY KEY (cart_id),
-                       FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    cart_id    BIGSERIAL NOT NULL,
+    user_id    BIGINT    NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (cart_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 -- ----------------------------------------------------------------
 -- 10. CART_ITEMS
 -- ----------------------------------------------------------------
 CREATE TABLE cart_items (
-                            cart_item_id BIGINT NOT NULL AUTO_INCREMENT,
-                            cart_id      BIGINT NOT NULL,
-                            medicine_id  BIGINT NOT NULL,
-                            quantity     INT    NOT NULL DEFAULT 1,
-                            PRIMARY KEY (cart_item_id),
-                            UNIQUE KEY uk_cart_medicine (cart_id, medicine_id),
-                            FOREIGN KEY (cart_id)     REFERENCES carts(cart_id)       ON DELETE CASCADE,
-                            FOREIGN KEY (medicine_id) REFERENCES medicines(medicine_id) ON DELETE CASCADE
+    cart_item_id BIGSERIAL NOT NULL,
+    cart_id      BIGINT    NOT NULL,
+    medicine_id  BIGINT    NOT NULL,
+    quantity     INT       NOT NULL DEFAULT 1,
+    PRIMARY KEY (cart_item_id),
+    CONSTRAINT uk_cart_medicine UNIQUE (cart_id, medicine_id),
+    FOREIGN KEY (cart_id)     REFERENCES carts(cart_id)         ON DELETE CASCADE,
+    FOREIGN KEY (medicine_id) REFERENCES medicines(medicine_id) ON DELETE CASCADE
 );
 
 -- ----------------------------------------------------------------
 -- 11. ORDERS
--- Bao gồm cả update từ schema_v2 (REFUNDED) và schema_v3 (RETURN_REQUESTED, RETURNED)
 -- ----------------------------------------------------------------
 CREATE TABLE orders (
-                        order_id         BIGINT        NOT NULL AUTO_INCREMENT,
-                        user_id          BIGINT        NULL,
-                        order_code       VARCHAR(100)  NOT NULL UNIQUE,
-                        total_price      DECIMAL(15,2) NOT NULL,
-
-                        order_status     ENUM(
-                            'PENDING',           -- Vừa đặt, chờ xác nhận
-                            'CONFIRMED',         -- Đã xác nhận, chuẩn bị hàng
-                            'SHIPPING',          -- Đang giao
-                            'DELIVERED',         -- Giao thành công
-                            'CANCEL_REQUESTED',  -- User yêu cầu huỷ khi đang CONFIRMED
-                            'CANCELLED',         -- Đã huỷ
-                            'RETURN_REQUESTED',  -- User yêu cầu hoàn hàng khi đang SHIPPING
-                            'RETURNED'           -- Hàng đã về kho → hoàn tiền + hoàn kho
-                            ) DEFAULT 'PENDING',
-
-                        payment_status   ENUM(
-                            'PENDING',           -- Chờ thanh toán
-                            'PAID',              -- Đã thanh toán
-                            'FAILED',            -- Thanh toán thất bại
-                            'REFUNDED'           -- Đã hoàn tiền
-                            ) DEFAULT 'PENDING',
-
-                        shipping_address VARCHAR(500) NULL,
-                        note             TEXT         NULL,
-
-    -- Thông tin huỷ/hoàn hàng
-                        cancelled_by     VARCHAR(20)  NULL,      -- 'USER' hoặc 'ADMIN'
-                        cancelled_reason VARCHAR(500) NULL,      -- Lý do huỷ / hoàn
-                        cancelled_at     TIMESTAMP    NULL,
-
-                        created_at       TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-                        updated_at       TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-                        PRIMARY KEY (order_id),
-                        INDEX idx_user   (user_id),
-                        INDEX idx_status (order_status),
-                        FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
+    order_id         BIGSERIAL           NOT NULL,
+    user_id          BIGINT              NULL,
+    order_code       VARCHAR(100)        NOT NULL UNIQUE,
+    total_price      NUMERIC(15,2)       NOT NULL,
+    order_status     order_status_enum   DEFAULT 'PENDING',
+    payment_status   payment_status_enum DEFAULT 'PENDING',
+    shipping_address VARCHAR(500)        NULL,
+    note             TEXT                NULL,
+    cancelled_by     VARCHAR(20)         NULL,
+    cancelled_reason VARCHAR(500)        NULL,
+    cancelled_at     TIMESTAMP           NULL,
+    created_at       TIMESTAMP           DEFAULT CURRENT_TIMESTAMP,
+    updated_at       TIMESTAMP           DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (order_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
 );
+
+CREATE INDEX idx_orders_user   ON orders(user_id);
+CREATE INDEX idx_orders_status ON orders(order_status);
+
+CREATE TRIGGER trg_orders_updated_at
+    BEFORE UPDATE ON orders
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- ----------------------------------------------------------------
 -- 12. ORDER_ITEMS
 -- ----------------------------------------------------------------
 CREATE TABLE order_items (
-                             order_item_id BIGINT        NOT NULL AUTO_INCREMENT,
-                             order_id      BIGINT        NOT NULL,
-                             medicine_id   BIGINT        NULL,         -- SET NULL khi medicine bị xoá
-                             quantity      INT           NOT NULL,
-                             unit_price    DECIMAL(15,2) NOT NULL,     -- Snapshot giá lúc đặt
-                             total_price   DECIMAL(15,2) NOT NULL,
-                             PRIMARY KEY (order_item_id),
-                             INDEX idx_order (order_id),
-                             FOREIGN KEY (order_id)    REFERENCES orders(order_id)       ON DELETE CASCADE,
-                             FOREIGN KEY (medicine_id) REFERENCES medicines(medicine_id) ON DELETE SET NULL
+    order_item_id BIGSERIAL     NOT NULL,
+    order_id      BIGINT        NOT NULL,
+    medicine_id   BIGINT        NULL,
+    quantity      INT           NOT NULL,
+    unit_price    NUMERIC(15,2) NOT NULL,
+    total_price   NUMERIC(15,2) NOT NULL,
+    PRIMARY KEY (order_item_id),
+    FOREIGN KEY (order_id)    REFERENCES orders(order_id)         ON DELETE CASCADE,
+    FOREIGN KEY (medicine_id) REFERENCES medicines(medicine_id)   ON DELETE SET NULL
 );
+
+CREATE INDEX idx_order_items_order ON order_items(order_id);
 
 -- ----------------------------------------------------------------
 -- 13. PAYMENTS
--- Bao gồm update từ schema_v2: expired_at, raw_callback, attempt_count, REFUNDED
 -- ----------------------------------------------------------------
 CREATE TABLE payments (
-                          payment_id       BIGINT        NOT NULL AUTO_INCREMENT,
-                          order_id         BIGINT        NOT NULL,
-
-                          payment_method   ENUM('COD','VNPAY','MOMO') NOT NULL,
-                          amount           DECIMAL(15,2) NOT NULL,
-                          transaction_code VARCHAR(255)  NULL,       -- Mã từ VNPay/Momo
-
-                          status           ENUM(
-                              'PENDING',             -- Chờ thanh toán
-                              'SUCCESS',             -- Thanh toán thành công
-                              'FAILED',              -- Thất bại / bị huỷ
-                              'REFUNDED'             -- Đã hoàn tiền
-                              ) DEFAULT 'PENDING',
-
-                          paid_at          TIMESTAMP     NULL,       -- Thời điểm thanh toán thành công
-                          expired_at       TIMESTAMP     NULL,       -- Link VNPay hết hạn sau 15 phút
-                          raw_callback     JSON          NULL,       -- Raw payload VNPay gửi về (debug)
-                          attempt_count    INT           NOT NULL DEFAULT 0,  -- Số lần user thử thanh toán
-
-                          created_at       TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
-                          updated_at       TIMESTAMP     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-                          PRIMARY KEY (payment_id),
-                          INDEX idx_order  (order_id),
-                          INDEX idx_status (status),
-                          FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
+    payment_id       BIGSERIAL           NOT NULL,
+    order_id         BIGINT              NOT NULL,
+    payment_method   payment_method_enum NOT NULL,
+    amount           NUMERIC(15,2)       NOT NULL,
+    transaction_code VARCHAR(255)        NULL,
+    status           txn_status_enum     DEFAULT 'PENDING',
+    paid_at          TIMESTAMP           NULL,
+    expired_at       TIMESTAMP           NULL,
+    raw_callback     JSONB               NULL,
+    attempt_count    INT                 NOT NULL DEFAULT 0,
+    created_at       TIMESTAMP           DEFAULT CURRENT_TIMESTAMP,
+    updated_at       TIMESTAMP           DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (payment_id),
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
 );
+
+CREATE INDEX idx_payments_order  ON payments(order_id);
+CREATE INDEX idx_payments_status ON payments(status);
+
+CREATE TRIGGER trg_payments_updated_at
+    BEFORE UPDATE ON payments
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- ----------------------------------------------------------------
 -- 14. SHIPMENTS
 -- ----------------------------------------------------------------
 CREATE TABLE shipments (
-                           shipment_id  BIGINT       NOT NULL AUTO_INCREMENT,
-                           order_id     BIGINT       NOT NULL,
-                           tracking_code VARCHAR(100) NULL,
-                           carrier       VARCHAR(100) NULL,          -- GHN, GHTK, VNPost...
-                           status        ENUM('PENDING','SHIPPING','DELIVERED','FAILED') NULL,
-                           shipped_at    TIMESTAMP    NULL,
-                           delivered_at  TIMESTAMP    NULL,
-                           PRIMARY KEY (shipment_id),
-                           FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
+    shipment_id   BIGSERIAL            NOT NULL,
+    order_id      BIGINT               NOT NULL,
+    tracking_code VARCHAR(100)         NULL,
+    carrier       VARCHAR(100)         NULL,
+    status        shipment_status_enum NULL,
+    shipped_at    TIMESTAMP            NULL,
+    delivered_at  TIMESTAMP            NULL,
+    PRIMARY KEY (shipment_id),
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
 );
 
 -- ================================================================
