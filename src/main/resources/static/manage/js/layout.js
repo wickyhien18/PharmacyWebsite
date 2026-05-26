@@ -21,21 +21,30 @@ async function loadComponent(selector, url) {
 async function initLayout() {
   // Load 3 component song song — nhanh hơn load tuần tự
   await Promise.all([
-    loadComponent('#header-placeholder', 'components/header.html'),
-    loadComponent('#navbar-placeholder', 'components/navbar.html'),
-    loadComponent('#footer-placeholder', 'components/footer.html')
+    loadComponent('#header-placeholder', '../components/header.html'),
+    loadComponent('#navbar-placeholder', '../components/navbar.html'),
+    loadComponent('#footer-placeholder', '../components/footer.html')
   ])
 
   // Sau khi load xong mới chạy các logic phụ thuộc DOM
-  initUserState()
-  highlightActiveNav()
-  initSearch()
-  initLogout()
+  // initUserState()
+  // highlightActiveNav()
+  // initSearch()
+  // initLogout()
 }
 
 // ════════════════════════════════════════════
 // KIỂM TRA TRẠNG THÁI ĐĂNG NHẬP
 // ════════════════════════════════════════════
+
+function initDropdown() {
+
+  const items = document.querySelectorAll(".menu-link.menu-toggle");
+  items.forEach(item => {
+    const toggle = item.querySelector()
+  })
+}
+
 
 function initUserState() {
   const token = localStorage.getItem('accessToken')
