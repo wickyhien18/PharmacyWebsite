@@ -27,6 +27,8 @@ async function initLayout() {
   ])
 
   // Sau khi load xong mới chạy các logic phụ thuộc DOM
+  initDropdown()
+  highlightActiveView()
   // initUserState()
   // highlightActiveNav()
   // initSearch()
@@ -39,9 +41,56 @@ async function initLayout() {
 
 function initDropdown() {
 
-  const items = document.querySelectorAll(".menu-link.menu-toggle");
+  const items = document.querySelectorAll(".menu-item.menu-toggle");
   items.forEach(item => {
-    const toggle = item.querySelector()
+    const toggle = item.querySelector(".menu-toggle")
+    toggle.addEventListener("click", (e) => {
+      e.preventDefault()
+
+      const isOpen = item.classList.contains("open")
+      document.querySelectorAll(".menu-item.open")
+          .forEach(i => i.classList.remove("open"))
+
+      if (!isOpen) {
+        item.classList.add("open")
+      }
+    })
+  })
+}
+
+function highlightActiveView() {
+  const currentPath = window.location.pathname
+
+  document.querySelectorAll(".menu-item.active").forEach(item => {
+    item.classList.remove("active")
+  })
+  document.querySelectorAll(".menu-link.active").forEach(link => {
+    link.classList.remove("active")
+  })
+
+  document.querySelectorAll(".menu-link").forEach(link => {
+    const href = link.getAttribute("href")
+    if (href && href !== "javascript:void(0);" && currentPath.includes(href)) {
+
+      // Highlight menu-item chứa link này
+      const menuItem = link.closest(".menu-item")
+      if (menuItem) {
+        menuItem.classList.add("active")
+
+        // Nếu đang ở trong menu con (menu-sub), highlight cả menu cha (menu-toggle)
+        const menuToggle = menuItem.closest(".menu-item.menu-toggle")
+        if (menuToggle) {
+          menuToggle.classList.add("active")
+          menuToggle.classList.add("open")
+
+          // Mở menu cha (expand)
+          const menuSub = menuToggle.querySelector(".menu-sub")
+          if (menuSub) {
+            menuSub.style.display = "block"
+          }
+        }
+      }
+    }
   })
 }
 
