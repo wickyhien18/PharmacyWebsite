@@ -27,8 +27,8 @@ async function initLayout() {
   ])
 
   // Sau khi load xong mới chạy các logic phụ thuộc DOM
-  initDropdown()
   highlightActiveView()
+  initDropdown()
   // initUserState()
   // highlightActiveNav()
   // initSearch()
@@ -42,15 +42,15 @@ async function initLayout() {
 function initDropdown() {
   const items = document.querySelectorAll('.menu-item.menu-toggle')
   items.forEach(item => {
-    const toggle = item.querySelector('.menu-toggle')
+    const toggle = item.querySelector('.menu-link.menu-toggle')
     toggle.addEventListener('click', e => {
       e.preventDefault()
 
-      const isOpen = item.classList.contains('open')
-      document.querySelectorAll('.menu-item.open').forEach(i => i.classList.remove('open'))
-
-      if (!isOpen) {
+      document.querySelectorAll('.open').forEach(i => i.classList.remove('open'))
+      if (!item.classList.contains('open')) {
         item.classList.add('open')
+      } else {
+        item.classList.remove('open')
       }
     })
   })
@@ -61,7 +61,6 @@ function highlightActiveView() {
 
   document.querySelectorAll('.menu-item.active').forEach(i => i.classList.remove('active'))
   document.querySelectorAll('.menu-link.active').forEach(l => l.classList.remove('active'))
-  document.querySelectorAll('.menu-item.open').forEach(i => i.classList.remove('open'))
   document.querySelectorAll('.menu-sub').forEach(s => (s.style.display = ''))
 
   document.querySelectorAll('.menu-link:not(.menu-toggle)').forEach(link => {
