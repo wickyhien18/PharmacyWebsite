@@ -27,7 +27,7 @@
       content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
 
-    <title>Without navbar - Layouts | Sneat - Bootstrap 5 HTML Admin Template - Pro</title>
+    <title>Tooltips and popovers - UI elements | Sneat - Bootstrap 5 HTML Admin Template - Pro</title>
 
     <meta name="description" content="" />
 
@@ -147,7 +147,7 @@
             </li>
 
             <!-- Layouts -->
-            <li class="menu-item active open">
+            <li class="menu-item">
               <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-layout"></i>
                 <div data-i18n="Layouts">Layouts</div>
@@ -155,12 +155,12 @@
 
               <ul class="menu-sub">
                 <li class="menu-item">
-                  <a href="layouts-without-menu.html" class="menu-link">
+                  <a href="resource/layouts-without-menu.html" class="menu-link">
                     <div data-i18n="Without menu">Without menu</div>
                   </a>
                 </li>
-                <li class="menu-item active">
-                  <a href="layouts-without-navbar.html" class="menu-link">
+                <li class="menu-item">
+                  <a href="resource/layouts-without-navbar.html" class="menu-link">
                     <div data-i18n="Without navbar">Without navbar</div>
                   </a>
                 </li>
@@ -170,7 +170,7 @@
                   </a>
                 </li>
                 <li class="menu-item">
-                  <a href="layouts-fluid.html" class="menu-link">
+                  <a href="resource/layouts-fluid.html" class="menu-link">
                     <div data-i18n="Fluid">Fluid</div>
                   </a>
                 </li>
@@ -192,17 +192,17 @@
               </a>
               <ul class="menu-sub">
                 <li class="menu-item">
-                  <a href="pages-account-settings-account.html" class="menu-link">
+                  <a href="resource/pages-account-settings-account.html" class="menu-link">
                     <div data-i18n="Account">Account</div>
                   </a>
                 </li>
                 <li class="menu-item">
-                  <a href="pages-account-settings-notifications.html" class="menu-link">
+                  <a href="resource/pages-account-settings-notifications.html" class="menu-link">
                     <div data-i18n="Notifications">Notifications</div>
                   </a>
                 </li>
                 <li class="menu-item">
-                  <a href="pages-account-settings-connections.html" class="menu-link">
+                  <a href="resource/pages-account-settings-connections.html" class="menu-link">
                     <div data-i18n="Connections">Connections</div>
                   </a>
                 </li>
@@ -259,7 +259,7 @@
               </a>
             </li>
             <!-- User interface -->
-            <li class="menu-item">
+            <li class="menu-item active open">
               <a href="javascript:void(0)" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-box"></i>
                 <div data-i18n="User interface">User interface</div>
@@ -276,37 +276,37 @@
                   </a>
                 </li>
                 <li class="menu-item">
-                  <a href="ui-badges.html" class="menu-link">
+                  <a href="resource/ui-badges.html" class="menu-link">
                     <div data-i18n="Badges">Badges</div>
                   </a>
                 </li>
                 <li class="menu-item">
-                  <a href="ui-buttons.html" class="menu-link">
+                  <a href="resource/ui-buttons.html" class="menu-link">
                     <div data-i18n="Buttons">Buttons</div>
                   </a>
                 </li>
                 <li class="menu-item">
-                  <a href="ui-carousel.html" class="menu-link">
+                  <a href="resource/ui-carousel.html" class="menu-link">
                     <div data-i18n="Carousel">Carousel</div>
                   </a>
                 </li>
                 <li class="menu-item">
-                  <a href="ui-collapse.html" class="menu-link">
+                  <a href="resource/ui-collapse.html" class="menu-link">
                     <div data-i18n="Collapse">Collapse</div>
                   </a>
                 </li>
                 <li class="menu-item">
-                  <a href="ui-dropdowns.html" class="menu-link">
+                  <a href="resource/ui-dropdowns.html" class="menu-link">
                     <div data-i18n="Dropdowns">Dropdowns</div>
                   </a>
                 </li>
                 <li class="menu-item">
-                  <a href="ui-footer.html" class="menu-link">
+                  <a href="resource/ui-footer.html" class="menu-link">
                     <div data-i18n="Footer">Footer</div>
                   </a>
                 </li>
                 <li class="menu-item">
-                  <a href="ui-list-groups.html" class="menu-link">
+                  <a href="resource/ui-list-groups.html" class="menu-link">
                     <div data-i18n="List Groups">List groups</div>
                   </a>
                 </li>
@@ -350,7 +350,7 @@
                     <div data-i18n="Toasts">Toasts</div>
                   </a>
                 </li>
-                <li class="menu-item">
+                <li class="menu-item active">
                   <a href="ui-tooltips-popovers.html" class="menu-link">
                     <div data-i18n="Tooltips & Popovers">Tooltips &amp; popovers</div>
                   </a>
@@ -464,28 +464,250 @@
 
         <!-- Layout container -->
         <div class="layout-page">
+          <!-- Navbar -->
+
+          <nav
+            class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
+            id="layout-navbar"
+          >
+            <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+              <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+                <i class="bx bx-menu bx-sm"></i>
+              </a>
+            </div>
+
+            <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+              <!-- Search -->
+              <div class="navbar-nav align-items-center">
+                <div class="nav-item d-flex align-items-center">
+                  <i class="bx bx-search fs-4 lh-0"></i>
+                  <input
+                    type="text"
+                    class="form-control border-0 shadow-none"
+                    placeholder="Search..."
+                    aria-label="Search..."
+                  />
+                </div>
+              </div>
+              <!-- /Search -->
+
+              <ul class="navbar-nav flex-row align-items-center ms-auto">
+                <!-- Place this tag where you want the button to render. -->
+                <li class="nav-item lh-1 me-3">
+                  <a
+                    class="github-button"
+                    href="https://github.com/themeselection/sneat-html-admin-template-free"
+                    data-icon="octicon-star"
+                    data-size="large"
+                    data-show-count="true"
+                    aria-label="Star themeselection/sneat-html-admin-template-free on GitHub"
+                    >Star</a
+                  >
+                </li>
+
+                <!-- User -->
+                <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                  <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                    <div class="avatar avatar-online">
+                      <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                    </div>
+                  </a>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                      <a class="dropdown-item" href="#">
+                        <div class="d-flex">
+                          <div class="flex-shrink-0 me-3">
+                            <div class="avatar avatar-online">
+                              <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                            </div>
+                          </div>
+                          <div class="flex-grow-1">
+                            <span class="fw-semibold d-block">John Doe</span>
+                            <small class="text-muted">Admin</small>
+                          </div>
+                        </div>
+                      </a>
+                    </li>
+                    <li>
+                      <div class="dropdown-divider"></div>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="#">
+                        <i class="bx bx-user me-2"></i>
+                        <span class="align-middle">My Profile</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="#">
+                        <i class="bx bx-cog me-2"></i>
+                        <span class="align-middle">Settings</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="#">
+                        <span class="d-flex align-items-center align-middle">
+                          <i class="flex-shrink-0 bx bx-credit-card me-2"></i>
+                          <span class="flex-grow-1 align-middle">Billing</span>
+                          <span class="flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20">4</span>
+                        </span>
+                      </a>
+                    </li>
+                    <li>
+                      <div class="dropdown-divider"></div>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="resource/auth-login-basic.html">
+                        <i class="bx bx-power-off me-2"></i>
+                        <span class="align-middle">Log Out</span>
+                      </a>
+                    </li>
+                  </ul>
+                </li>
+                <!--/ User -->
+              </ul>
+            </div>
+          </nav>
+
+          <!-- / Navbar -->
+
           <!-- Content wrapper -->
           <div class="content-wrapper">
             <!-- Content -->
 
             <div class="container-xxl flex-grow-1 container-p-y">
-              <!-- Layout Demo -->
-              <div class="layout-demo-wrapper">
-                <div class="layout-demo-placeholder">
-                  <img
-                    src="../assets/img/layouts/layout-without-navbar-light.png"
-                    class="img-fluid"
-                    alt="Layout without navbar"
-                    data-app-light-img="layouts/layout-without-navbar-light.png"
-                    data-app-dark-img="layouts/layout-without-navbar-dark.png"
-                  />
-                </div>
-                <div class="layout-demo-info">
-                  <h4>Layout without Navbar</h4>
-                  <p>Layout does not contain Navbar component.</p>
+              <h4 class="fw-bold py-3 mb-4">
+                <span class="text-muted fw-light">UI elements /</span> Tooltips & popovers
+              </h4>
+
+              <!-- Tooltips -->
+              <div class="card mb-4">
+                <h5 class="card-header">Tooltips</h5>
+                <div class="card-body">
+                  <div class="text-light small fw-semibold">Directions</div>
+                  <div class="row demo-vertical-spacing">
+                    <div class="col">
+                      <button
+                        type="button"
+                        class="btn btn-primary"
+                        data-bs-toggle="tooltip"
+                        data-bs-offset="0,4"
+                        data-bs-placement="right"
+                        data-bs-html="true"
+                        title="<i class='bx bx-trending-up bx-xs' ></i> <span>Tooltip on right</span>"
+                      >
+                        Right
+                      </button>
+                    </div>
+                    <div class="col">
+                      <button
+                        type="button"
+                        class="btn btn-primary"
+                        data-bs-toggle="tooltip"
+                        data-bs-offset="0,4"
+                        data-bs-placement="top"
+                        data-bs-html="true"
+                        title="<i class='bx bx-bell bx-xs' ></i> <span>Tooltip on top</span>"
+                      >
+                        Top
+                      </button>
+                    </div>
+                    <div class="col">
+                      <button
+                        type="button"
+                        class="btn btn-primary"
+                        data-bs-toggle="tooltip"
+                        data-bs-offset="0,4"
+                        data-bs-placement="bottom"
+                        data-bs-html="true"
+                        title="<i class='bx bx-heart bx-xs' ></i> <span>Tooltip on bottom</span>"
+                      >
+                        Bottom
+                      </button>
+                    </div>
+                    <div class="col">
+                      <button
+                        type="button"
+                        class="btn btn-primary"
+                        data-bs-toggle="tooltip"
+                        data-bs-offset="0,4"
+                        data-bs-placement="left"
+                        data-bs-html="true"
+                        title="<i class='bx bx-dollar bx-xs' ></i> <span>Tooltip on left</span>"
+                      >
+                        Left
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <!--/ Layout Demo -->
+              <!--/ Tooltips -->
+
+              <!-- Popovers -->
+              <div class="card">
+                <h5 class="card-header">Popovers</h5>
+                <div class="card-body">
+                  <div class="text-light small fw-semibold">Directions</div>
+                  <div class="row demo-vertical-spacing">
+                    <div class="col">
+                      <button
+                        type="button"
+                        class="btn btn-primary text-nowrap"
+                        data-bs-toggle="popover"
+                        data-bs-offset="0,14"
+                        data-bs-placement="right"
+                        data-bs-html="true"
+                        data-bs-content="<p>This is a very beautiful popover, show some love.</p> <div class='d-flex justify-content-between'><button type='button' class='btn btn-sm btn-outline-secondary'>Skip</button><button type='button' class='btn btn-sm btn-primary'>Read More</button></div>"
+                        title="Popover Title"
+                      >
+                        Popover on right
+                      </button>
+                    </div>
+                    <div class="col">
+                      <button
+                        type="button"
+                        class="btn btn-primary text-nowrap"
+                        data-bs-toggle="popover"
+                        data-bs-offset="0,14"
+                        data-bs-placement="top"
+                        data-bs-html="true"
+                        data-bs-content="<p>This is a very beautiful popover, show some love.</p> <div class='d-flex justify-content-between'><button type='button' class='btn btn-sm btn-outline-secondary'>Skip</button><button type='button' class='btn btn-sm btn-primary'>Read More</button></div>"
+                        title="Popover Title"
+                      >
+                        Popover on top
+                      </button>
+                    </div>
+                    <div class="col">
+                      <button
+                        type="button"
+                        class="btn btn-primary text-nowrap"
+                        data-bs-toggle="popover"
+                        data-bs-offset="0,14"
+                        data-bs-placement="bottom"
+                        data-bs-html="true"
+                        data-bs-content="<p>This is a very beautiful popover, show some love.</p> <div class='d-flex justify-content-between'><button type='button' class='btn btn-sm btn-outline-secondary'>Skip</button><button type='button' class='btn btn-sm btn-primary'>Read More</button></div>"
+                        title="Popover Title"
+                      >
+                        Popover on bottom
+                      </button>
+                    </div>
+                    <div class="col">
+                      <button
+                        type="button"
+                        class="btn btn-primary text-nowrap"
+                        data-bs-toggle="popover"
+                        data-bs-offset="0,14"
+                        data-bs-placement="left"
+                        data-bs-html="true"
+                        data-bs-content="<p>This is a very beautiful popover, show some love.</p> <div class='d-flex justify-content-between'><button type='button' class='btn btn-sm btn-outline-secondary'>Skip</button><button type='button' class='btn btn-sm btn-primary'>Read More</button></div>"
+                        title="Popover Title"
+                      >
+                        Popover on left
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!--/ Popovers -->
             </div>
             <!-- / Content -->
 
@@ -559,6 +781,7 @@
     <script src="../assets/js/main.js"></script>
 
     <!-- Page JS -->
+    <script src="../assets/js/ui-popover.js"></script>
 
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
