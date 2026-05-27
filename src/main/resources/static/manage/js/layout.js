@@ -40,19 +40,17 @@ async function initLayout() {
 // ════════════════════════════════════════════
 
 function initDropdown() {
-
-  const items = document.querySelectorAll(".menu-item.menu-toggle");
+  const items = document.querySelectorAll('.menu-item.menu-toggle')
   items.forEach(item => {
-    const toggle = item.querySelector(".menu-toggle")
-    toggle.addEventListener("click", (e) => {
+    const toggle = item.querySelector('.menu-toggle')
+    toggle.addEventListener('click', e => {
       e.preventDefault()
 
-      const isOpen = item.classList.contains("open")
-      document.querySelectorAll(".menu-item.open")
-          .forEach(i => i.classList.remove("open"))
+      const isOpen = item.classList.contains('open')
+      document.querySelectorAll('.menu-item.open').forEach(i => i.classList.remove('open'))
 
       if (!isOpen) {
-        item.classList.add("open")
+        item.classList.add('open')
       }
     })
   })
@@ -61,39 +59,35 @@ function initDropdown() {
 function highlightActiveView() {
   const currentPath = window.location.pathname
 
-  document.querySelectorAll(".menu-item.active").forEach(item => {
-    item.classList.remove("active")
-  })
-  document.querySelectorAll(".menu-link.active").forEach(link => {
-    link.classList.remove("active")
-  })
+  document.querySelectorAll('.menu-item.active').forEach(i => i.classList.remove('active'))
+  document.querySelectorAll('.menu-link.active').forEach(l => l.classList.remove('active'))
+  document.querySelectorAll('.menu-item.open').forEach(i => i.classList.remove('open'))
+  document.querySelectorAll('.menu-sub').forEach(s => (s.style.display = ''))
 
-  document.querySelectorAll(".menu-link").forEach(link => {
-    const href = link.getAttribute("href")
-    if (href && href !== "javascript:void(0);" && currentPath.includes(href)) {
+  document.querySelectorAll('.menu-link:not(.menu-toggle)').forEach(link => {
+    const href = link.getAttribute('href')
+    if (!href || href === 'javascript:void(0);') return
 
-      // Highlight menu-item chứa link này
-      const menuItem = link.closest(".menu-item")
-      if (menuItem) {
-        menuItem.classList.add("active")
+    // So sánh chính xác hơn — tránh match nhầm
+    const linkPath = new URL(href, window.location.origin).pathname
 
-        // Nếu đang ở trong menu con (menu-sub), highlight cả menu cha (menu-toggle)
-        const menuToggle = menuItem.closest(".menu-item.menu-toggle")
-        if (menuToggle) {
-          menuToggle.classList.add("active")
-          menuToggle.classList.add("open")
+    if (currentPath === linkPath || currentPath.endsWith(linkPath)) {
+      // Highlight link và menu-item chứa nó
+      link.classList.add('active')
+      const menuItem = link.closest('.menu-item')
+      if (menuItem) menuItem.classList.add('active')
 
-          // Mở menu cha (expand)
-          const menuSub = menuToggle.querySelector(".menu-sub")
-          if (menuSub) {
-            menuSub.style.display = "block"
-          }
-        }
+      // Nếu đang trong menu-sub → mở dropdown cha
+      const parentToggle = link.closest('.menu-sub')?.closest('.menu-item.menu-toggle')
+
+      if (parentToggle) {
+        parentToggle.classList.add('active', 'open')
+        const menuSub = parentToggle.querySelector('.menu-sub')
+        if (menuSub) menuSub.style.display = 'block'
       }
     }
   })
 }
-
 
 function initUserState() {
   const token = localStorage.getItem('accessToken')
