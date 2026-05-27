@@ -27,8 +27,8 @@ async function initLayout() {
   ])
 
   // Sau khi load xong mới chạy các logic phụ thuộc DOM
-  highlightActiveView()
   initDropdown()
+  highlightActiveView()
   // initUserState()
   // highlightActiveNav()
   // initSearch()
@@ -46,8 +46,11 @@ function initDropdown() {
     toggle.addEventListener('click', e => {
       e.preventDefault()
 
-      document.querySelectorAll('.open').forEach(i => i.classList.remove('open'))
-      if (!item.classList.contains('open')) {
+      const isOpen = item.classList.contains('open')
+
+      document.querySelectorAll('.menu-item.menu-toggle.open').forEach(i => i.classList.remove('open'))
+
+      if (!isOpen) {
         item.classList.add('open')
       } else {
         item.classList.remove('open')
@@ -80,9 +83,7 @@ function highlightActiveView() {
       const parentToggle = link.closest('.menu-sub')?.closest('.menu-item.menu-toggle')
 
       if (parentToggle) {
-        parentToggle.classList.add('active', 'open')
-        const menuSub = parentToggle.querySelector('.menu-sub')
-        if (menuSub) menuSub.style.display = 'block'
+        parentToggle.classList.add('active')
       }
     }
   })
