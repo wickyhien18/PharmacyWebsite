@@ -110,24 +110,6 @@ function initUserState() {
 }
 
 // ════════════════════════════════════════════
-// HIGHLIGHT TRANG HIỆN TẠI TRÊN NAVBAR
-// ════════════════════════════════════════════
-
-function highlightActiveNav() {
-  // Lấy tên file hiện tại: /products.html → "products.html"
-  const currentPage = window.location.pathname.split('/').pop() || 'index.html'
-
-  document.querySelectorAll('.nav-link[data-page]').forEach(link => {
-    const page = link.getAttribute('data-page')
-
-    // So sánh data-page với tên file hiện tại
-    if (currentPage.includes(page) && page !== '') {
-      link.classList.add('active')
-    }
-  })
-}
-
-// ════════════════════════════════════════════
 // SEARCH
 // ════════════════════════════════════════════
 
