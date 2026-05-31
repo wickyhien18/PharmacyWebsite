@@ -1,10 +1,6 @@
 # 💊 Pharmacy Web App
 
 Web ứng dụng nhà thuốc trực tuyến — được xây dựng bằng Spring Boot, MySQL và tích hợp thanh toán VNPay. Hệ thống bao gồm đầy đủ luồng mua bán, quản lý giỏ hàng, đặt hàng và tích hợp xác thực bảo mật JWT.
-
-🔗 **Demo:** [Link Demo của bạn]  
-📖 **Swagger UI:** [Link Swagger của bạn]
-
 ---
 
 ## Tech Stack
@@ -110,13 +106,3 @@ src/main/java/Pharmacy/
 ├── DTO/             # Data Transfer Objects (Request/Response payload)
 └── Exceptions/      # Global Exception Handler & Custom Exceptions
 ```
-
----
-
-## Tác giả
-
-**[Tên của bạn]**  
-Vai trò / Công việc: [Mô tả ngắn gọn / Sinh viên...]  
-📧 Email: [Địa chỉ Email của bạn]  
-🔗 GitHub: [Link Github của bạn]  
-🔗 LinkedIn: [Link LinkedIn của bạn]  
