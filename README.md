@@ -1,6 +1,6 @@
 # 💊 Pharmacy Web App
 
-Web ứng dụng nhà thuốc trực tuyến — được xây dựng bằng Spring Boot, MySQL và tích hợp thanh toán VNPay. Hệ thống bao gồm đầy đủ luồng mua bán, quản lý giỏ hàng, đặt hàng và tích hợp xác thực bảo mật JWT.
+Web ứng dụng nhà thuốc trực tuyến — được xây dựng bằng Spring Boot, PostgreSQL và tích hợp thanh toán VNPay. Hệ thống bao gồm đầy đủ luồng mua bán, quản lý giỏ hàng, đặt hàng và tích hợp xác thực bảo mật JWT.
 
 🔗 **Demo:** [Link Demo của bạn]  
 📖 **Swagger UI:** [Link Swagger của bạn]
@@ -11,9 +11,9 @@ Web ứng dụng nhà thuốc trực tuyến — được xây dựng bằng Spr
 
 | Layer | Công nghệ |
 |---|---|
-| Backend | Java, Spring Boot 3.x |
+| Backend | Java 17, Spring Boot 3.x |
 | Security | Spring Security, JWT (Access Token) + Refresh Token |
-| Database | MySQL 8.0, Spring Data JPA |
+| Database | PostgreSQL, Spring Data JPA |
 | Payment | VNPay Sandbox |
 | Docs | Springdoc OpenAPI (Swagger UI) |
 | Deploy | [Tùy chọn nền tảng: Railway/Render/AWS...] |
@@ -36,10 +36,11 @@ Web ứng dụng nhà thuốc trực tuyến — được xây dựng bằng Spr
 - Quản lý người dùng (Users) và quyền hạn (Roles).
 - Duyệt hoặc từ chối các yêu cầu huỷ đơn/hoàn hàng của khách.
 
-### Thanh toán (VNPay)
+### Thanh toán (VNPay) & Hệ thống
 - Tạo URL thanh toán an toàn với mã hoá HMAC-SHA512.
 - Xử lý IPN callback từ VNPay (để cập nhật trạng thái thanh toán tự động server-to-server).
 - Return URL để điều hướng người dùng sau khi giao dịch.
+- API Health Check để kiểm tra tình trạng server.
 
 ---
 
@@ -59,29 +60,30 @@ SHIPPING     → [User gửi yêu cầu]  → RETURN_REQUESTED
 ## Hướng dẫn cài đặt & Chạy Local
 
 ### Yêu cầu
-- Java (17 hoặc 21)
-- MySQL 8.0+
+- Java 17+
+- PostgreSQL
 - Maven
 
 ### Bước 1 — Thiết lập Database
 
-Tạo một database trong MySQL (ví dụ: `pharmacy_db`).
+Tạo một database trong PostgreSQL.
 
 ### Bước 2 — Cấu hình ứng dụng
 
-Mở file `src/main/resources/application.properties` (hoặc `application.yml`) và cập nhật:
+Ứng dụng lấy cấu hình từ biến môi trường (Environment Variables). Bạn cần thiết lập các biến sau:
 
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/[Tên_DB_Của_Bạn]?useSSL=false&serverTimezone=UTC
-spring.datasource.username=[Tên_Đăng_Nhập_MySQL]
-spring.datasource.password=[Mật_Khẩu_MySQL]
+```bash
+# Cấu hình PostgreSQL
+PGURL=jdbc:postgresql://localhost:5432/[Tên_DB_Của_Bạn]
+PGUSER=[Tên_Đăng_Nhập_PostgreSQL]
+PGPASSWORD=[Mật_Khẩu_PostgreSQL]
 
 # Cấu hình JWT
-app.jwt.secret=[Chuỗi_Bí_Mật_JWT_Của_Bạn]
+JWT_SECRET=[Chuỗi_Bí_Mật_JWT_Của_Bạn]
 
-# Cấu hình VNPay
-vnpay.tmn-code=[Mã_TMN_Code]
-vnpay.hash-secret=[Chuỗi_Hash_Secret]
+# Cấu hình VNPay (cấu hình trong application.properties hoặc truyền qua biến)
+# vnpay.tmn-code=[Mã_TMN_Code]
+# vnpay.hash-secret=[Chuỗi_Hash_Secret]
 ```
 
 ### Bước 3 — Khởi chạy ứng dụng
@@ -92,7 +94,7 @@ Sử dụng Maven để chạy:
 mvn spring-boot:run
 ```
 
-Sau khi chạy thành công, truy cập Swagger UI tại: `http://localhost:8080/swagger-ui.html` (Hoặc port tương ứng của bạn).
+Sau khi chạy thành công, truy cập Swagger UI tại: `http://localhost:8080/swagger-ui.html` (Hoặc port do biến `${PORT}` quy định).
 
 ---
 
@@ -103,12 +105,28 @@ Toàn bộ logic được tổ chức rõ ràng theo chuẩn mô hình MVC và R
 ```text
 src/main/java/Pharmacy/
 ├── Config/          # Chứa cấu hình Security, JWT, CORS, Swagger, VNPay
-├── Controllers/     # Các REST API Endpoint cho Client & Admin
+├── Controllers/     # Các REST API Endpoint cho Client, Admin & Health check
 ├── Services/        # Chứa Business Logic (Auth, Order, Cart, Medicine...)
 ├── Repositories/    # Data Access Layer (Kế thừa JpaRepository)
 ├── Entities/        # Các bảng CSDL (Users, Orders, Cart, Medicine, Inventory...)
 ├── DTO/             # Data Transfer Objects (Request/Response payload)
 └── Exceptions/      # Global Exception Handler & Custom Exceptions
+```
+
+> **Lưu ý**: Dự án có bao gồm các thư mục frontend/static (HTML/CSS/JS) nằm trong `src/main/resources/static` để phục vụ UI, nhưng phần Core API vẫn chạy hoàn toàn độc lập.
+
+---
+
+## Unit Testing
+
+Dự án có sẵn các unit test (sử dụng JUnit và Mockito) cho các service quan trọng:
+- `AuthServiceTest`
+- `OrderServiceTest`
+- `PaymentServiceTest`
+
+Chạy test bằng lệnh:
+```bash
+mvn test
 ```
 
 ---
