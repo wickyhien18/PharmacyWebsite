@@ -1,127 +1,126 @@
 # 💊 Pharmacy Web App
 
-Web ứng dụng nhà thuốc trực tuyến — được xây dựng bằng Spring Boot, PostgreSQL và tích hợp thanh toán VNPay. Hệ thống bao gồm đầy đủ luồng mua bán, quản lý giỏ hàng, đặt hàng và tích hợp xác thực bảo mật JWT.
+An online pharmacy web application built with Spring Boot, PostgreSQL, and VNPay payment integration. The system encompasses a full buying/selling flow, cart management, ordering, and JWT security authentication.
 
 ---
 
 ## Tech Stack
 
-| Layer | Công nghệ |
+| Layer | Technology |
 |---|---|
 | Backend | Java 17, Spring Boot 3.x |
 | Security | Spring Security, JWT (Access Token) + Refresh Token |
 | Database | PostgreSQL, Spring Data JPA |
 | Payment | VNPay Sandbox |
 | Docs | Springdoc OpenAPI (Swagger UI) |
-| Deploy | [Tùy chọn nền tảng: Railway/Render/AWS...] |
 
 ---
 
-## Tính năng chính
+## Key Features
 
-### Khách hàng
-- Đăng ký / Đăng nhập an toàn với JWT (Bao gồm Access Token & Refresh Token).
-- Duyệt và tìm kiếm thông tin thuốc (Medicine), nhà sản xuất (Manufacturer), danh mục (Category).
-- Giỏ hàng (Cart) — thêm, sửa số lượng, xoá sản phẩm khỏi giỏ hàng.
-- Đặt hàng và thanh toán trực tuyến qua cổng VNPay.
-- Xem lịch sử đơn hàng, gửi yêu cầu huỷ đơn/hoàn hàng.
+### Customer
+- Secure Registration / Login using JWT (Includes Access Token & Refresh Token).
+- Browse and search for medicines, manufacturers, and categories.
+- Shopping Cart — add, update quantities, or remove products from the cart.
+- Order and pay online via VNPay gateway.
+- View order history, send order cancellation/return requests.
 
 ### Admin
-- Quản lý danh mục (Categories), nhà sản xuất (Manufacturers), sản phẩm (Medicines).
-- Quản lý tồn kho (Inventory) — nhập kho, theo dõi lịch sử tồn kho (Inventory Log).
-- Xử lý đơn hàng — duyệt đơn, xác nhận giao hàng.
-- Quản lý người dùng (Users) và quyền hạn (Roles).
-- Duyệt hoặc từ chối các yêu cầu huỷ đơn/hoàn hàng của khách.
+- Manage categories, manufacturers, and medicines (products).
+- Inventory Management — import stock, track inventory history (Inventory Log).
+- Order Processing — approve orders, confirm delivery.
+- Manage Users and Roles.
+- Approve or reject cancellation/return requests from customers.
 
-### Thanh toán (VNPay) & Hệ thống
-- Tạo URL thanh toán an toàn với mã hoá HMAC-SHA512.
-- Xử lý IPN callback từ VNPay (để cập nhật trạng thái thanh toán tự động server-to-server).
-- Return URL để điều hướng người dùng sau khi giao dịch.
-- API Health Check để kiểm tra tình trạng server.
+### Payment (VNPay) & System
+- Generate secure payment URLs using HMAC-SHA512 encryption.
+- Handle IPN callbacks from VNPay (to update payment statuses automatically server-to-server).
+- Return URL to redirect users after transactions.
+- Health Check API to monitor server status.
 
 ---
 
-## Luồng quản lý đơn hàng cơ bản
+## Basic Order Workflow
 
 ```text
-PENDING      → [User tự huỷ]       → CANCELLED
-CONFIRMED    → [User gửi yêu cầu]  → CANCEL_REQUESTED
-               [Admin duyệt]        → CANCELLED
-               [Admin từ chối]      → CONFIRMED
-SHIPPING     → [User gửi yêu cầu]  → RETURN_REQUESTED
-               [Admin xác nhận về]  → RETURNED
+PENDING      → [User self-cancels]      → CANCELLED
+CONFIRMED    → [User requests cancel]   → CANCEL_REQUESTED
+               [Admin approves]         → CANCELLED
+               [Admin rejects]          → CONFIRMED
+SHIPPING     → [User requests return]   → RETURN_REQUESTED
+               [Admin confirms return]  → RETURNED
 ```
 
 ---
 
-## Hướng dẫn cài đặt & Chạy Local
+## Installation & Local Setup
 
-### Yêu cầu
+### Prerequisites
 - Java 17+
 - PostgreSQL
 - Maven
 
-### Bước 1 — Thiết lập Database
+### Step 1 — Database Setup
 
-Tạo một database trong PostgreSQL.
+Create a database in PostgreSQL.
 
-### Bước 2 — Cấu hình ứng dụng
+### Step 2 — Application Configuration
 
-Ứng dụng lấy cấu hình từ biến môi trường (Environment Variables). Bạn cần thiết lập các biến sau:
+The application loads its configuration from Environment Variables. You need to set up the following variables:
 
 ```bash
-# Cấu hình PostgreSQL
-PGURL=jdbc:postgresql://localhost:5432/[Tên_DB_Của_Bạn]
-PGUSER=[Tên_Đăng_Nhập_PostgreSQL]
-PGPASSWORD=[Mật_Khẩu_PostgreSQL]
+# PostgreSQL Configuration
+PGURL=jdbc:postgresql://localhost:5432/[Your_DB_Name]
+PGUSER=[PostgreSQL_Username]
+PGPASSWORD=[PostgreSQL_Password]
 
-# Cấu hình JWT
-JWT_SECRET=[Chuỗi_Bí_Mật_JWT_Của_Bạn]
+# JWT Configuration
+JWT_SECRET=[Your_JWT_Secret_String]
 
-# Cấu hình VNPay (cấu hình trong application.properties hoặc truyền qua biến)
-# vnpay.tmn-code=[Mã_TMN_Code]
-# vnpay.hash-secret=[Chuỗi_Hash_Secret]
+# VNPay Configuration (configured in application.properties or via env vars)
+# vnpay.tmn-code=[Your_TMN_Code]
+# vnpay.hash-secret=[Your_Hash_Secret]
 ```
 
-### Bước 3 — Khởi chạy ứng dụng
+### Step 3 — Run the Application
 
-Sử dụng Maven để chạy:
+Run the application using Maven:
 
 ```bash
 mvn spring-boot:run
 ```
 
-Sau khi chạy thành công, truy cập Swagger UI tại: `http://localhost:8080/swagger-ui.html` (Hoặc port do biến `${PORT}` quy định).
+Once successfully started, access Swagger UI at: `http://localhost:8080/swagger-ui.html` (Or the port specified by the `${PORT}` variable).
 
 ---
 
-## Cấu trúc thư mục (Packages)
+## Directory Structure (Packages)
 
-Toàn bộ logic được tổ chức rõ ràng theo chuẩn mô hình MVC và RESTful API:
+The entire business logic is clearly organized following the MVC and RESTful API standard:
 
 ```text
 src/main/java/Pharmacy/
-├── Config/          # Chứa cấu hình Security, JWT, CORS, Swagger, VNPay
-├── Controllers/     # Các REST API Endpoint cho Client, Admin & Health check
-├── Services/        # Chứa Business Logic (Auth, Order, Cart, Medicine...)
-├── Repositories/    # Data Access Layer (Kế thừa JpaRepository)
-├── Entities/        # Các bảng CSDL (Users, Orders, Cart, Medicine, Inventory...)
+├── Config/          # Security, JWT, CORS, Swagger, VNPay configs
+├── Controllers/     # REST API Endpoints for Client, Admin & Health check
+├── Services/        # Business Logic (Auth, Order, Cart, Medicine...)
+├── Repositories/    # Data Access Layer (Extends JpaRepository)
+├── Entities/        # Database Tables (Users, Orders, Cart, Medicine, Inventory...)
 ├── DTO/             # Data Transfer Objects (Request/Response payload)
 └── Exceptions/      # Global Exception Handler & Custom Exceptions
 ```
 
-> **Lưu ý**: Dự án có bao gồm các thư mục frontend/static (HTML/CSS/JS) nằm trong `src/main/resources/static` để phục vụ UI, nhưng phần Core API vẫn chạy hoàn toàn độc lập.
+> **Note**: The project includes frontend/static directories (HTML/CSS/JS) located in `src/main/resources/static` for serving the UI, but the Core API runs completely independently.
 
 ---
 
 ## Unit Testing
 
-Dự án có sẵn các unit test (sử dụng JUnit và Mockito) cho các service quan trọng:
+The project includes unit tests (using JUnit and Mockito) for critical services:
 - `AuthServiceTest`
 - `OrderServiceTest`
 - `PaymentServiceTest`
 
-Chạy test bằng lệnh:
+Run tests using:
 ```bash
 mvn test
 ```
