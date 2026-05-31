@@ -14,9 +14,9 @@ async function loadComponents(selector, url) {
 //Load header and footer
 async function loadLayout() {
     await Promise.all([
-        loadComponents("#header-placeholder", "html/components/header.html"),
-        loadComponents("#navbar-placeholder", "html/components/navbar.html"),
-        loadComponents("#footer-placeholder", "html/components/footer.html")
+        loadComponents("#header-placeholder", "../e-commerce/html/components/header.html"),
+        loadComponents("#navbar-placeholder", "../e-commerce/html/components/navbar.html"),
+        loadComponents("#footer-placeholder", "../e-commerce/html/components/footer.html")
     ]);
 }
 
